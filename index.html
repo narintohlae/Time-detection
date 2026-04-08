@@ -24,17 +24,20 @@
         .btn-in { flex: 1; background-color: #10b981; } 
         .btn-out { flex: 1; background-color: #ef4444; } 
         
-        /* ปรับปุ่มลางานให้เต็มหน้ากว้าง */
         .btn-group-sub { margin-bottom: 20px; }
         .btn-leave { width: 100%; background-color: #8b5cf6; padding: 12px; font-size: 0.9em; }
         
         .btn-action { background-color: #f3f4f6; color: #374151; padding: 10px; border-radius: 8px; font-size: 0.9em; margin-top: 10px; width: 100%; border: 1px solid #d1d5db; }
         .btn-logout { background-color: #fee2e2; color: #ef4444; padding: 10px; border-radius: 8px; font-size: 0.9em; margin-top: 10px; width: 100%; }
         
+        /* สไตล์สำหรับหน้า Dashboard & Admin */
         .dash-content { text-align: left; background: #f9fafb; padding: 15px; border-radius: 12px; font-size: 0.9em; min-height: 200px; max-height: 300px; overflow-y: auto; margin-bottom: 15px; }
         .dash-summary { display: flex; justify-content: space-between; background: #e0f2fe; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; color: #0369a1; }
         .dash-item { border-bottom: 1px dashed #e5e7eb; padding: 8px 0; }
         .dash-item:last-child { border-bottom: none; }
+        
+        /* สีปุ่มเฉพาะ Admin */
+        .btn-admin { background-color: #1f2937; color: white; }
     </style>
 </head>
 <body>
@@ -67,19 +70,30 @@
 
     <div class="app-container" id="dashboardScreen" style="display: none;">
         <h1>สรุปข้อมูลประจำวัน</h1>
-        <div class="dash-content" id="dashContent">
-            กำลังโหลดข้อมูล...
+        <div class="dash-content" id="dashContent">กำลังโหลดข้อมูล...</div>
+        <button class="btn-action" onclick="closeDashboard()">🔙 กลับ</button>
+    </div>
+
+    <div class="app-container" id="adminScreen" style="display: none;">
+        <h1 style="color: #1f2937;">👑 ระบบผู้ดูแลระบบ (Admin)</h1>
+        <div class="dash-content" style="text-align: center; color: #666;">
+            <p>ยินดีต้อนรับเข้าสู่ระบบจัดการหลังบ้าน</p>
+            <p style="font-size: 0.8em; color: #9ca3af;">(ฟีเจอร์จัดการจะถูกเพิ่มในส่วนนี้)</p>
         </div>
-        <button class="btn-action" onclick="closeDashboard()">🔙 กลับหน้าลงเวลา</button>
+        
+        <button class="btn-action btn-admin" onclick="alert('เปิดหน้าต่าง Google Sheets')">📁 เปิดฐานข้อมูล (Google Sheets)</button>
+        <button class="btn-logout" onclick="logout()">🚪 ออกจากระบบ</button>
     </div>
 
     <script>
-        // ใช้ URL และพิกัดเดิมของคุณ
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyXuioI9v6FsX3lXZXej1_NXb-Mi8JYC_8JKSQH_8laQSud39ThLGm6X_1j38MiMNPv/exec';
-        
         const OFFICE_LAT = 8.597226393849; 
         const OFFICE_LON = 99.92618619071712; 
         const ALLOWED_RADIUS = 100;
+
+        // 🔴 ตั้งค่ารหัสผ่าน Admin ตรงนี้
+        const ADMIN_USER = "admin";
+        const ADMIN_PIN = "123456";
 
         let currentUser = "";
         let currentPin = "";
@@ -95,7 +109,20 @@
         function login() {
             const id = document.getElementById('inputId').value.trim();
             const pin = document.getElementById('inputPin').value.trim();
-            if(id === "" || pin === "") { alert("กรุณากรอกข้อมูลให้ครบถ้วน"); return; }
+            
+            if(id === "" || pin === "") { 
+                alert("กรุณากรอกข้อมูลให้ครบถ้วน"); 
+                return; 
+            }
+
+            // --- ตรวจสอบสิทธิ์ Admin ---
+            if(id.toLowerCase() === ADMIN_USER && pin === ADMIN_PIN) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('adminScreen').style.display = 'block';
+                return;
+            }
+
+            // --- พนักงานทั่วไป ---
             currentUser = id; currentPin = pin;
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainScreen').style.display = 'block';
@@ -105,7 +132,11 @@
         function logout() {
             currentUser = ""; currentPin = "";
             document.getElementById('inputId').value = ""; document.getElementById('inputPin').value = "";
+            
+            // ซ่อนทุกหน้า แล้วเปิดหน้า Login
             document.getElementById('mainScreen').style.display = 'none';
+            document.getElementById('adminScreen').style.display = 'none';
+            document.getElementById('dashboardScreen').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'block';
         }
 
