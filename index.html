@@ -7,37 +7,41 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap');
         body { font-family: 'Sarabun', sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .app-container { background: white; padding: 30px 20px; border-radius: 16px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); width: 100%; max-width: 350px; text-align: center; }
+        .app-container { background: white; padding: 30px 20px; border-radius: 16px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); width: 100%; max-width: 350px; text-align: center; max-height: 95vh; overflow-y: auto;}
         h1 { font-size: 1.2em; color: #555; margin-top: 0; margin-bottom: 20px; }
         
         .login-box { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
         input { width: 90%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em; font-family: 'Sarabun'; text-align: center; margin: 0 auto; box-sizing: border-box; }
-        .btn-login { background-color: #2563eb; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; font-weight: bold; font-family: 'Sarabun'; width: 90%; margin: 0 auto; transition: background 0.2s; }
+        .btn-primary { background-color: #2563eb; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; font-weight: bold; font-family: 'Sarabun'; width: 100%; transition: background 0.2s; }
         
         #userGreeting { color: #2563eb; font-weight: bold; margin-bottom: 5px; }
         .clock { font-size: 3em; font-weight: bold; color: #222; margin: 15px 0; }
         
         .btn-group { display: flex; gap: 15px; margin-bottom: 15px; }
-        button { padding: 15px; border: none; border-radius: 12px; font-size: 1em; font-family: 'Sarabun', sans-serif; font-weight: bold; color: white; cursor: pointer; transition: transform 0.1s; }
-        button:active { transform: scale(0.95); }
+        button { padding: 15px; border: none; border-radius: 12px; font-size: 1em; font-family: 'Sarabun', sans-serif; font-weight: bold; cursor: pointer; }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-in { flex: 1; background-color: #10b981; } 
-        .btn-out { flex: 1; background-color: #ef4444; } 
-        
-        .btn-group-sub { margin-bottom: 20px; }
-        .btn-leave { width: 100%; background-color: #8b5cf6; padding: 12px; font-size: 0.9em; }
+        .btn-in { flex: 1; background-color: #10b981; color: white; } 
+        .btn-out { flex: 1; background-color: #ef4444; color: white; } 
+        .btn-leave { width: 100%; background-color: #8b5cf6; color: white; padding: 12px; font-size: 0.9em; margin-bottom: 20px;}
         
         .btn-action { background-color: #f3f4f6; color: #374151; padding: 10px; border-radius: 8px; font-size: 0.9em; margin-top: 10px; width: 100%; border: 1px solid #d1d5db; }
         .btn-logout { background-color: #fee2e2; color: #ef4444; padding: 10px; border-radius: 8px; font-size: 0.9em; margin-top: 10px; width: 100%; }
         
-        /* สไตล์สำหรับหน้า Dashboard & Admin */
-        .dash-content { text-align: left; background: #f9fafb; padding: 15px; border-radius: 12px; font-size: 0.9em; min-height: 200px; max-height: 300px; overflow-y: auto; margin-bottom: 15px; }
-        .dash-summary { display: flex; justify-content: space-between; background: #e0f2fe; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; color: #0369a1; }
-        .dash-item { border-bottom: 1px dashed #e5e7eb; padding: 8px 0; }
+        /* Dashboard & Admin UI */
+        .dash-content { text-align: left; background: #f9fafb; padding: 15px; border-radius: 12px; font-size: 0.9em; min-height: 200px; margin-bottom: 15px; }
+        .dash-item { border-bottom: 1px dashed #e5e7eb; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;}
         .dash-item:last-child { border-bottom: none; }
         
-        /* สีปุ่มเฉพาะ Admin */
-        .btn-admin { background-color: #1f2937; color: white; }
+        .admin-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 8px; font-size: 0.9em; background: #e5e7eb; border-radius: 8px; color: #374151;}
+        .tab-btn.active { background: #1f2937; color: white; }
+        
+        .date-picker { display: flex; gap: 10px; margin-bottom: 15px; }
+        .date-picker input { padding: 8px; font-size: 0.9em; }
+        .date-picker button { padding: 8px; background: #1f2937; color: white; width: 80px; font-size: 0.9em;}
+        
+        .mini-btn { padding: 4px 8px; font-size: 0.8em; border-radius: 6px; margin-left: 5px; background: #e5e7eb; color: #333; }
+        .mini-btn.del { background: #fee2e2; color: #ef4444; }
     </style>
 </head>
 <body>
@@ -47,82 +51,92 @@
         <div class="login-box">
             <input type="text" id="inputId" placeholder="รหัสพนักงาน (User)">
             <input type="password" id="inputPin" placeholder="รหัสผ่าน / PIN">
-            <button class="btn-login" onclick="login()">เข้าสู่ระบบ</button>
+            <button class="btn-primary" onclick="login()">เข้าสู่ระบบ</button>
         </div>
     </div>
 
     <div class="app-container" id="mainScreen" style="display: none;">
         <div id="userGreeting">รหัสพนักงาน: <span id="displayId"></span></div>
         <div class="clock" id="clockDisplay">00:00</div>
-        
         <div class="btn-group">
             <button class="btn-in" onclick="processRecord('เข้างาน', this, true)">เข้างาน</button>
             <button class="btn-out" onclick="processRecord('ออกงาน', this, true)">ออกงาน</button>
         </div>
-        
-        <div class="btn-group-sub">
-            <button class="btn-leave" onclick="processRecord('ลางาน', this, false)">📝 แจ้งลางาน</button>
-        </div>
-
+        <button class="btn-leave" onclick="processRecord('ลางาน', this, false)">📝 แจ้งลางาน</button>
         <button class="btn-action" onclick="openDashboard()">📊 ดูสรุปข้อมูลวันนี้</button>
         <button class="btn-logout" onclick="logout()">🚪 ออกจากระบบ</button>
     </div>
 
     <div class="app-container" id="dashboardScreen" style="display: none;">
-        <h1>สรุปข้อมูลประจำวัน</h1>
-        <div class="dash-content" id="dashContent">กำลังโหลดข้อมูล...</div>
-        <button class="btn-action" onclick="closeDashboard()">🔙 กลับ</button>
+        <h1>สรุปข้อมูลวันนี้</h1>
+        <div class="dash-content" id="dashContent"></div>
+        <button class="btn-action" onclick="closeScreens()">🔙 กลับ</button>
     </div>
 
     <div class="app-container" id="adminScreen" style="display: none;">
-        <h1 style="color: #1f2937;">👑 ระบบผู้ดูแลระบบ (Admin)</h1>
-        <div class="dash-content" style="text-align: center; color: #666;">
-            <p>ยินดีต้อนรับเข้าสู่ระบบจัดการหลังบ้าน</p>
-            <p style="font-size: 0.8em; color: #9ca3af;">(ฟีเจอร์จัดการจะถูกเพิ่มในส่วนนี้)</p>
-        </div>
+        <h1 style="color: #1f2937; margin-bottom: 10px;">👑 ผู้ดูแลระบบ</h1>
         
-        <button class="btn-action btn-admin" onclick="alert('เปิดหน้าต่าง Google Sheets')">📁 เปิดฐานข้อมูล (Google Sheets)</button>
+        <div class="admin-tabs">
+            <button class="tab-btn active" id="tabLogs" onclick="switchAdminTab('logs')">ประวัติลงเวลา</button>
+            <button class="tab-btn" id="tabUsers" onclick="switchAdminTab('users')">พนักงาน</button>
+        </div>
+
+        <div id="adminViewLogs">
+            <div class="date-picker">
+                <input type="date" id="adminSearchDate">
+                <button onclick="fetchAdminLogs()">ค้นหา</button>
+            </div>
+            <div class="dash-content" id="adminLogsContent" style="max-height: 250px; overflow-y: auto;">กำลังโหลด...</div>
+        </div>
+
+        <div id="adminViewUsers" style="display:none;">
+            <div style="background:#f3f4f6; padding:10px; border-radius:8px; margin-bottom:15px; display:flex; flex-direction:column; gap:8px;">
+                <input type="text" id="newEmpId" placeholder="รหัสพนักงาน (เช่น EMP01)" style="width:100%; padding:8px;">
+                <input type="text" id="newEmpName" placeholder="ชื่อ-นามสกุล" style="width:100%; padding:8px;">
+                <input type="text" id="newEmpPin" placeholder="รหัส PIN" style="width:100%; padding:8px;">
+                <button class="btn-primary" style="padding:8px;" onclick="addEmployee()">+ เพิ่มพนักงาน</button>
+            </div>
+            <div class="dash-content" id="adminUsersContent" style="max-height: 200px; overflow-y: auto;">กำลังโหลด...</div>
+        </div>
+
         <button class="btn-logout" onclick="logout()">🚪 ออกจากระบบ</button>
     </div>
 
     <script>
+        // 🔴 ใส่ URL ใหม่ตรงนี้
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyXuioI9v6FsX3lXZXej1_NXb-Mi8JYC_8JKSQH_8laQSud39ThLGm6X_1j38MiMNPv/exec';
         const OFFICE_LAT = 8.597226393849; 
         const OFFICE_LON = 99.92618619071712; 
         const ALLOWED_RADIUS = 100;
+        const ADMIN_USER = "admin"; const ADMIN_PIN = "123456";
 
-        // 🔴 ตั้งค่ารหัสผ่าน Admin ตรงนี้
-        const ADMIN_USER = "admin";
-        const ADMIN_PIN = "123456";
+        let currentUser = ""; let currentPin = "";
 
-        let currentUser = "";
-        let currentPin = "";
-
+        // --- Utils ---
         function getStandardDate() {
             const d = new Date();
-            const day = String(d.getDate()).padStart(2, '0');
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = d.getFullYear(); 
-            return `${day}/${month}/${year}`;
+            return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+        }
+        function formatHTMLDateToStandard(htmlDate) {
+            if(!htmlDate) return "";
+            const parts = htmlDate.split('-');
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
 
+        // --- Core App ---
         function login() {
             const id = document.getElementById('inputId').value.trim();
             const pin = document.getElementById('inputPin').value.trim();
-            
-            if(id === "" || pin === "") { 
-                alert("กรุณากรอกข้อมูลให้ครบถ้วน"); 
-                return; 
-            }
+            if(id === "" || pin === "") return alert("กรุณากรอกข้อมูลให้ครบ"); 
 
-            // --- ตรวจสอบสิทธิ์ Admin ---
             if(id.toLowerCase() === ADMIN_USER && pin === ADMIN_PIN) {
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('adminScreen').style.display = 'block';
+                document.getElementById('adminSearchDate').valueAsDate = new Date(); // ใส่วันที่วันนี้ให้ช่องค้นหา
+                fetchAdminLogs();
                 return;
             }
 
-            // --- พนักงานทั่วไป ---
             currentUser = id; currentPin = pin;
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainScreen').style.display = 'block';
@@ -132,12 +146,14 @@
         function logout() {
             currentUser = ""; currentPin = "";
             document.getElementById('inputId').value = ""; document.getElementById('inputPin').value = "";
-            
-            // ซ่อนทุกหน้า แล้วเปิดหน้า Login
+            closeScreens();
+            document.getElementById('loginScreen').style.display = 'block';
+        }
+
+        function closeScreens() {
             document.getElementById('mainScreen').style.display = 'none';
             document.getElementById('adminScreen').style.display = 'none';
             document.getElementById('dashboardScreen').style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'block';
         }
 
         setInterval(() => {
@@ -145,153 +161,150 @@
         }, 1000);
 
         function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; 
-            const φ1 = lat1 * Math.PI/180;
-            const φ2 = lat2 * Math.PI/180;
-            const Δφ = (lat2-lat1) * Math.PI/180;
-            const Δλ = (lon2-lon1) * Math.PI/180;
-            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c; 
+            const R = 6371e3; const φ1 = lat1 * Math.PI/180; const φ2 = lat2 * Math.PI/180;
+            const a = Math.sin((lat2-lat1)*Math.PI/360) * Math.sin((lat2-lat1)*Math.PI/360) + Math.cos(φ1) * Math.cos(φ2) * Math.sin((lon2-lon1)*Math.PI/360) * Math.sin((lon2-lon1)*Math.PI/360);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
         }
 
-        function processRecord(type, btnElement, requireGeofence) {
-            const todayStr = getStandardDate();
-            const actionKey = `log_${currentUser}_${todayStr}_${type}`;
-            
-            if(localStorage.getItem(actionKey)) {
-                alert(`คุณได้กด "${type}" ของวันนี้ไปแล้วครับ ไม่สามารถกดซ้ำได้`);
-                return; 
-            }
+        function postData(payload, successMsg, callback) {
+            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(() => { setTimeout(() => { if(successMsg) alert(successMsg); if(callback) callback(); }, 500); })
+            .catch(() => alert("เชื่อมต่อล้มเหลว"));
+        }
+
+        function processRecord(type, btn, requireGeofence) {
+            const actionKey = `log_${currentUser}_${getStandardDate()}_${type}`;
+            if(localStorage.getItem(actionKey)) return alert(`คุณกด ${type} วันนี้ไปแล้ว`);
 
             let remark = "";
             if(type === 'ลางาน') {
-                remark = prompt("ระบุเหตุผลการลางาน (เช่น ป่วย, ลากิจ):");
-                if(remark === null || remark.trim() === "") return; 
+                remark = prompt("เหตุผลการลา:");
+                if(!remark) return; 
             }
 
-            const originalText = btnElement.innerText;
-            btnElement.innerText = "กำลังตรวจพิกัด...";
-            btnElement.disabled = true;
+            const origText = btn.innerText; btn.innerText = "กำลังตรวจพิกัด..."; btn.disabled = true;
 
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const userLat = position.coords.latitude;
-                        const userLon = position.coords.longitude;
-                        
-                        if(requireGeofence) {
-                            const distance = getDistance(OFFICE_LAT, OFFICE_LON, userLat, userLon);
-                            if(distance > ALLOWED_RADIUS) {
-                                alert(`คุณอยู่นอกพื้นที่ออฟฟิศ! (ห่างออกไป ${Math.round(distance)} เมตร)`);
-                                btnElement.innerText = originalText;
-                                btnElement.disabled = false;
-                                return; 
-                            }
-                        }
-
-                        const locText = `${userLat.toFixed(5)}, ${userLon.toFixed(5)}`;
-                        saveData(type, locText, remark, btnElement, originalText, actionKey);
-                    },
-                    (error) => {
-                        alert("โปรดอนุญาตการเข้าถึงตำแหน่ง (GPS) ในการตั้งค่าเบราว์เซอร์");
-                        btnElement.innerText = originalText;
-                        btnElement.disabled = false;
-                    },
-                    { enableHighAccuracy: true } 
-                );
-            } else {
-                alert("อุปกรณ์ของคุณไม่รองรับ GPS");
-                btnElement.innerText = originalText;
-                btnElement.disabled = false;
-            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    if(requireGeofence && getDistance(OFFICE_LAT, OFFICE_LON, pos.coords.latitude, pos.coords.longitude) > ALLOWED_RADIUS) {
+                        alert("อยู่นอกพื้นที่ออฟฟิศ!"); btn.innerText = origText; btn.disabled = false; return;
+                    }
+                    const payload = { action: 'logTime', date: getStandardDate(), time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), type: type, location: `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`, empId: currentUser, pin: currentPin, remark: remark };
+                    
+                    btn.innerText = "กำลังบันทึก...";
+                    postData(payload, `บันทึก ${type} สำเร็จ`, () => {
+                        localStorage.setItem(actionKey, 'done'); btn.innerText = origText; btn.disabled = false; logout();
+                    });
+                },
+                () => { alert("กรุณาเปิด GPS"); btn.innerText = origText; btn.disabled = false; },
+                { enableHighAccuracy: true }
+            );
         }
 
-        function saveData(type, location, remark, btnElement, originalText, actionKey) {
-            btnElement.innerText = "กำลังบันทึก...";
-            const now = new Date();
-            const payload = { 
-                date: getStandardDate(),
-                time: now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), 
-                type: type, location: location, empId: currentUser, pin: currentPin, remark: remark 
-            };
-
-            fetch(SCRIPT_URL, {
-                method: 'POST', mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            }).then(() => {
-                localStorage.setItem(actionKey, 'done');
-                alert(`บันทึก [${type}] เรียบร้อยแล้ว`);
-                btnElement.innerText = originalText;
-                btnElement.disabled = false;
-                logout(); 
-            }).catch(() => {
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-                btnElement.innerText = originalText;
-                btnElement.disabled = false;
-            });
-        }
-
+        // --- Dashboard & Admin Features ---
         function openDashboard() {
-            document.getElementById('mainScreen').style.display = 'none';
-            document.getElementById('dashboardScreen').style.display = 'block';
-            const dashContent = document.getElementById('dashContent');
-            dashContent.innerHTML = "<div style='text-align:center; padding: 20px;'>กำลังโหลดข้อมูล...⏳</div>";
-
-            const todayStr = getStandardDate();
-
-            fetch(SCRIPT_URL)
-            .then(response => response.json())
-            .then(data => {
-                if(data.error) {
-                    dashContent.innerHTML = "เกิดข้อผิดพลาด: " + data.error;
-                    return;
-                }
-
-                let todayData = data.filter(d => d.date === todayStr);
-
-                if(todayData.length === 0) {
-                    dashContent.innerHTML = `<div style='text-align:center; padding: 20px; color: #888;'>ยังไม่มีข้อมูลการลงเวลาสำหรับวันนี้<br><small>(${todayStr})</small></div>`;
-                    return;
-                }
-
-                let countIn = todayData.filter(d => d.type === 'เข้างาน').length;
-                let countLeave = todayData.filter(d => d.type === 'ลางาน').length;
-
-                let html = `
-                    <div class="dash-summary">
-                        <span>✅ เข้างาน: ${countIn}</span>
-                        <span style="color:#ef4444;">❌ ลางาน: ${countLeave}</span>
-                    </div>
-                `;
-
-                todayData.forEach(item => {
-                    let color = '#555';
-                    if(item.type === 'เข้างาน') color = '#10b981';
-                    if(item.type === 'ออกงาน') color = '#ef4444';
-                    if(item.type === 'ลางาน') color = '#8b5cf6';
-
-                    html += `
-                        <div class="dash-item">
-                            <div>🆔 <b>${item.empId}</b> | <span style="color:${color}; font-weight:bold;">${item.type}</span></div>
-                            <div style="font-size: 0.8em; color: #666; margin-top: 3px;">
-                                ⏱️ ${item.time} น. ${item.remark && item.remark !== "-" ? `<br>📝 ${item.remark}` : ''}
-                            </div>
-                        </div>
-                    `;
+            closeScreens(); document.getElementById('dashboardScreen').style.display = 'block';
+            document.getElementById('dashContent').innerHTML = "⏳ โหลดข้อมูล...";
+            fetch(SCRIPT_URL + "?action=getLogs&date=" + getStandardDate())
+            .then(res => res.json()).then(data => {
+                if(data.length === 0) return document.getElementById('dashContent').innerHTML = "ไม่มีข้อมูลวันนี้";
+                let html = "";
+                data.forEach(item => {
+                    html += `<div class="dash-item"><div>🆔 <b>${item.empId}</b> <br> <small>${item.time} น. | <b>${item.type}</b></small></div></div>`;
                 });
-
-                dashContent.innerHTML = html;
-            })
-            .catch(error => {
-                dashContent.innerHTML = "<div style='text-align:center; padding: 20px; color: red;'>ไม่สามารถเชื่อมต่อฐานข้อมูลได้</div>";
+                document.getElementById('dashContent').innerHTML = html;
             });
         }
 
-        function closeDashboard() {
-            document.getElementById('dashboardScreen').style.display = 'none';
-            document.getElementById('mainScreen').style.display = 'block';
+        function switchAdminTab(tab) {
+            document.getElementById('tabLogs').classList.remove('active');
+            document.getElementById('tabUsers').classList.remove('active');
+            document.getElementById('adminViewLogs').style.display = 'none';
+            document.getElementById('adminViewUsers').style.display = 'none';
+            
+            if(tab === 'logs') {
+                document.getElementById('tabLogs').classList.add('active');
+                document.getElementById('adminViewLogs').style.display = 'block';
+                fetchAdminLogs();
+            } else {
+                document.getElementById('tabUsers').classList.add('active');
+                document.getElementById('adminViewUsers').style.display = 'block';
+                fetchAdminUsers();
+            }
+        }
+
+        // --- Admin: Logs ---
+        function fetchAdminLogs() {
+            const dateVal = document.getElementById('adminSearchDate').value;
+            const searchDate = formatHTMLDateToStandard(dateVal);
+            const content = document.getElementById('adminLogsContent');
+            content.innerHTML = "⏳ โหลดข้อมูล...";
+
+            fetch(SCRIPT_URL + `?action=getLogs&date=${searchDate}`)
+            .then(res => res.json()).then(data => {
+                if(data.length === 0) return content.innerHTML = "ไม่พบข้อมูลในวันที่เลือก";
+                let html = "";
+                data.forEach(item => {
+                    html += `
+                    <div class="dash-item">
+                        <div><b>${item.empId}</b> <span style="color:#666;">(${item.type})</span><br><small>⏱️ ${item.time} น.</small></div>
+                        <div>
+                            <button class="mini-btn" onclick="editLog(${item.rowIndex}, '${item.time}', '${item.type}')">✏️ แก้</button>
+                            <button class="mini-btn del" onclick="deleteLog(${item.rowIndex})">🗑️ ลบ</button>
+                        </div>
+                    </div>`;
+                });
+                content.innerHTML = html;
+            });
+        }
+
+        function deleteLog(rowIndex) {
+            if(confirm("แน่ใจหรือไม่ที่จะลบประวัตินี้?")) {
+                postData({ action: 'deleteLog', rowIndex: rowIndex }, "ลบประวัติแล้ว", fetchAdminLogs);
+            }
+        }
+
+        function editLog(rowIndex, oldTime, oldType) {
+            let newTime = prompt("แก้ไขเวลา (เช่น 08:30):", oldTime);
+            if(!newTime) return;
+            let newType = prompt("แก้ไขประเภท (เข้างาน, ออกงาน, ลางาน):", oldType);
+            if(!newType) return;
+            postData({ action: 'updateLog', rowIndex: rowIndex, time: newTime, type: newType }, "อัปเดตข้อมูลแล้ว", fetchAdminLogs);
+        }
+
+        // --- Admin: Users ---
+        function fetchAdminUsers() {
+            const content = document.getElementById('adminUsersContent');
+            content.innerHTML = "⏳ โหลดข้อมูล...";
+            fetch(SCRIPT_URL + "?action=getUsers")
+            .then(res => res.json()).then(data => {
+                if(data.length === 0) return content.innerHTML = "ยังไม่มีพนักงานในระบบ";
+                let html = "";
+                data.forEach(item => {
+                    html += `
+                    <div class="dash-item">
+                        <div><b>${item.empId}</b><br><small>👤 ${item.name}</small></div>
+                        <button class="mini-btn del" onclick="deleteUser(${item.rowIndex}, '${item.name}')">🗑️ ลบ</button>
+                    </div>`;
+                });
+                content.innerHTML = html;
+            });
+        }
+
+        function addEmployee() {
+            const id = document.getElementById('newEmpId').value.trim();
+            const name = document.getElementById('newEmpName').value.trim();
+            const pin = document.getElementById('newEmpPin').value.trim();
+            if(!id || !name || !pin) return alert("กรอกข้อมูลให้ครบถ้วน");
+
+            document.getElementById('newEmpId').value = ""; document.getElementById('newEmpName').value = ""; document.getElementById('newEmpPin').value = "";
+            postData({ action: 'addUser', empId: id, name: name, pin: pin }, "เพิ่มพนักงานเรียบร้อย", fetchAdminUsers);
+        }
+
+        function deleteUser(rowIndex, name) {
+            if(confirm(`ต้องการลบรายชื่อ: ${name} ออกจากระบบ?`)) {
+                postData({ action: 'deleteUser', rowIndex: rowIndex }, "ลบรายชื่อแล้ว", fetchAdminUsers);
+            }
         }
     </script>
 </body>
