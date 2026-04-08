@@ -2,158 +2,124 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-    <title>ZenTime 2026 | Professional Time Tracker</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบลงเวลามินิมอล</title>
+    <style>
+        /* ส่วนของการออกแบบความสวยงาม (CSS) */
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap');
+        
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background-color: #f4f7f6; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .app-container { 
+            background: white; 
+            padding: 30px 20px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05); 
+            width: 100%; 
+            max-width: 350px; 
+            text-align: center; 
+        }
+        h1 { font-size: 1.2em; color: #555; margin-top: 0; }
+        .clock { font-size: 3em; font-weight: bold; color: #222; margin: 20px 0; }
+        .btn-group { display: flex; gap: 15px; margin-bottom: 25px; }
+        button { 
+            flex: 1; 
+            padding: 15px; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 1em; 
+            font-family: 'Sarabun', sans-serif;
+            font-weight: bold; 
+            color: white; 
+            cursor: pointer; 
+            transition: transform 0.1s; 
+        }
+        button:active { transform: scale(0.95); }
+        .btn-in { background-color: #10b981; } /* สีเขียวมินิมอล */
+        .btn-out { background-color: #ef4444; } /* สีแดงมินิมอล */
+        
+        .log-container { text-align: left; background: #f9fafb; padding: 15px; border-radius: 12px; font-size: 0.9em; max-height: 200px; overflow-y: auto; }
+        .log-title { font-weight: bold; color: #666; margin-bottom: 10px; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .log-item { border-bottom: 1px dashed #e5e7eb; padding: 8px 0; display: flex; flex-direction: column; gap: 4px;}
+        .log-item:last-child { border-bottom: none; }
+        .loc { font-size: 0.8em; color: #888; }
+    </style>
 </head>
-<body class="dark-theme">
-    <div id="app">
-        <!-- Navigation Shell -->
-        <header class="main-header glass">
-            <div class="header-content">
-                <div class="logo-area">
-                    <div class="logo-icon"></div>
-                    <h1>ZenTime</h1>
-                </div>
-                <div class="user-profile" id="profile-trigger">
-                    <div class="user-info-text">
-                        <span class="u-name" id="display-name">นรินทร์</span>
-                        <span class="u-role" id="display-role">หัวหน้าทีมพัฒนา</span>
-                    </div>
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Narin" alt="User Profile" class="avatar">
-                </div>
-            </div>
-        </header>
+<body>
 
-        <main id="view-container">
-            <!-- Views will be injected here -->
-            <section id="home-view" class="view active">
-                <div class="hero-section">
-                    <p class="greeting">สวัสดีตอนบ่าย, นรินทร์</p>
-                    <h2 class="date-now" id="current-date">พุธ 8 เมษายน 2026</h2>
-                </div>
+    <div class="app-container">
+        <h1>ลงเวลาทำงาน</h1>
+        <div class="clock" id="clockDisplay">00:00</div>
+        
+        <div class="btn-group">
+            <button class="btn-in" onclick="handleTimeRecord('เข้างาน')">เข้างาน</button>
+            <button class="btn-out" onclick="handleTimeRecord('ออกงาน')">ออกงาน</button>
+        </div>
 
-                <div class="timer-card-wrapper">
-                    <div class="timer-card spatial-glass">
-                        <span class="status-indicator" id="timer-status-dot"></span>
-                        <div class="timer-display" id="main-timer">00:00:00</div>
-                        <p class="timer-label" id="timer-label">พร้อมสำหรับการเข้างาน</p>
-                        <button id="clock-btn" class="primary-btn clock-in">
-                            <span class="btn-icon"></span>
-                            <span class="btn-text">Clock In</span>
-                        </button>
-                    </div>
+        <div class="log-container">
+            <span class="log-title">ประวัติการลงเวลา (วันนี้)</span>
+            <div id="logList">
                 </div>
-
-                <div class="bento-grid">
-                    <div class="bento-item stat-card glass">
-                        <span class="stat-label">ชั่วโมงสัปดาห์นี้</span>
-                        <span class="stat-value" id="stat-weekly-hours">0.0</span>
-                        <div class="mini-chart-container">
-                            <canvas id="weeklyChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="bento-item stat-card glass">
-                        <span class="stat-label">ประสิทธิภาพ</span>
-                        <span class="stat-value">94%</span>
-                    </div>
-                    <div class="bento-item stat-card glass wide">
-                        <span class="stat-label">เข้างานล่าสุด</span>
-                        <div class="recent-list">
-                            <div class="recent-item">
-                                <span>จันทร์ 12 เม.ย.</span>
-                                <span>08:55 - 17:30</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="history-view" class="view">
-                <div class="section-header">
-                    <h2>ประวัติการเข้างาน</h2>
-                    <button id="export-btn" class="secondary-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                        </svg>
-                        <span>Export CSV</span>
-                    </button>
-                </div>
-                <div class="history-list" id="history-list">
-                    <!-- History items injected here -->
-                </div>
-            </section>
-            <section id="admin-view" class="view">
-                <div class="section-header">
-                    <h2>ภาพรวมทีม</h2>
-                </div>
-                <div class="admin-grid">
-                    <div class="stat-card glass full-width">
-                        <span class="stat-label">พนักงานที่เข้างานวันนี้</span>
-                        <span class="stat-value">12/15</span>
-                    </div>
-                    <div class="employee-list" id="employee-list">
-                        <!-- Employee items injected here -->
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <!-- Bottom Navigation (iPhone Style) -->
-        <nav class="bottom-nav glass">
-            <button class="nav-item active" data-view="home">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                </svg>
-                <span>หน้าหลัก</span>
-            </button>
-            <button class="nav-item" data-view="history">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
-                <span>ประวัติ</span>
-            </button>
-            <button class="nav-item" data-view="admin">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                </svg>
-                <span>แอดมิน</span>
-            </button>
-        </nav>
-    </div>
-
-    <!-- Modals -->
-    <div id="profile-modal" class="modal-overlay">
-        <div class="modal-content glass">
-            <div class="modal-header">
-                <h3>แก้ไขโปรไฟล์</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="input-group">
-                    <label>ชื่อ-นามสกุล</label>
-                    <input type="text" id="input-name" placeholder="ระบุชื่อของคุณ">
-                </div>
-                <div class="input-group">
-                    <label>ตำแหน่ง</label>
-                    <input type="text" id="input-role" placeholder="ระบุตำแหน่งงาน">
-                </div>
-                <button id="save-profile-btn" class="primary-btn">บันทึกข้อมูล</button>
-            </div>
         </div>
     </div>
 
-    <!-- Background Decoration -->
-    <div class="bg-blobs">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-    </div>
+    <script>
+        // ส่วนของการทำงาน (JavaScript)
+        
+        // 1. ทำให้เวลากระพริบและเดินตลอดเวลา
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('clockDisplay').innerText = timeString;
+        }
+        setInterval(updateTime, 1000);
+        updateTime(); // เรียกใช้งานทันทีตอนเปิดหน้าเว็บ
 
-    <script src="main.js" type="module"></script>
+        // 2. ฟังก์ชันเมื่อกดปุ่มเข้า-ออกงาน
+        function handleTimeRecord(type) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            
+            // เช็คว่ามือถือรองรับ GPS ไหม
+            if (navigator.geolocation) {
+                // ขอพิกัด GPS
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude.toFixed(5);
+                        const lon = position.coords.longitude.toFixed(5);
+                        addLogToScreen(type, timeString, `พิกัด: ${lat}, ${lon}`);
+                    },
+                    (error) => {
+                        addLogToScreen(type, timeString, "ไม่สามารถดึงพิกัด GPS ได้");
+                    }
+                );
+            } else {
+                addLogToScreen(type, timeString, "เบราว์เซอร์ไม่รองรับ GPS");
+            }
+        }
+
+        // 3. ฟังก์ชันนำข้อมูลมาแสดงบนหน้าจอ
+        function addLogToScreen(type, time, locationText) {
+            const logList = document.getElementById('logList');
+            const color = type === 'เข้างาน' ? '#10b981' : '#ef4444';
+            
+            const newLog = `
+                <div class="log-item">
+                    <div><strong style="color: ${color};">${type}</strong> เวลา ${time} น.</div>
+                    <div class="loc">📍 ${locationText}</div>
+                </div>
+            `;
+            
+            // แทรกประวัติใหม่ไว้บนสุด
+            logList.innerHTML = newLog + logList.innerHTML;
+        }
+    </script>
 </body>
 </html>
