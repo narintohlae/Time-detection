@@ -395,9 +395,13 @@
                 <div id="section-admin-employees" class="hide space-y-6">
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                         <h3 class="text-lg font-bold text-gray-800 mb-4">เพิ่มพนักงานใหม่</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <input type="text" id="new-emp-name" placeholder="ชื่อ-นามสกุล พนักงาน" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                             <input type="text" id="new-emp-pin" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="ตั้งรหัส PIN (6 หลัก)" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                            <input type="number" id="new-emp-daily-rate" placeholder="ค่าจ้างรายวัน (บาท)" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <input type="number" id="new-emp-ot-rate" placeholder="เรท OT/ชม. (บาท)" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                             <select id="new-emp-dept" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                                 <option value="">ไม่ระบุแผนก</option>
                             </select>
@@ -1199,6 +1203,10 @@
                 let totalDays = 0, lateDays = 0, totalWorkHrs = 0, totalOT = 0;
                 const shiftInfo = getEmployeeShiftDetails(userId);
                 const standardHours = shiftInfo.workHours;
+                
+                const empData = allEmployeesList.find(e => e.id === userId) || {};
+                const dailyRate = empData.dailyRate || 0;
+                const otRate = empData.otRate || 0;
 
                 Object.values(dailyData).forEach(day => {
                     if (day.in) {
@@ -1216,6 +1224,10 @@
                     }
                 });
 
+                const basePay = totalDays * dailyRate;
+                const otPay = totalOT * otRate;
+                const totalNet = basePay + otPay;
+
                 Swal.fire({
                     title: `รายงานของ ${name}`,
                     html: `
@@ -1224,7 +1236,11 @@
                             <p class="mb-2"><i class="fa-solid fa-briefcase text-blue-500 w-5"></i> <b>มาทำงานรวม:</b> <span class="text-emerald-600 font-bold text-lg">${totalDays}</span> วัน</p>
                             <p class="mb-2"><i class="fa-solid fa-clock text-blue-500 w-5"></i> <b>ชั่วโมงทำงานรวม:</b> ${totalWorkHrs.toFixed(2)} ชม.</p>
                             <p class="mb-2"><i class="fa-solid fa-fire text-orange-500 w-5"></i> <b>ล่วงเวลา (OT):</b> <span class="text-orange-600 font-bold">${totalOT.toFixed(2)} ชม.</span></p>
-                            <p class="mb-0"><i class="fa-solid fa-triangle-exclamation text-rose-500 w-5"></i> <b>มาสาย (หลัง ${shiftInfo.coreTime}):</b> <span class="${lateDays > 0 ? 'text-rose-600 font-bold' : ''}">${lateDays} วัน</span></p>
+                            <p class="mb-2"><i class="fa-solid fa-triangle-exclamation text-rose-500 w-5"></i> <b>มาสาย (หลัง ${shiftInfo.coreTime}):</b> <span class="${lateDays > 0 ? 'text-rose-600 font-bold' : ''}">${lateDays} วัน</span></p>
+                            <hr class="my-2 border-gray-200">
+                            <p class="mb-2"><i class="fa-solid fa-money-bill text-emerald-500 w-5"></i> <b>ค่าจ้างปกติ:</b> ฿${basePay.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+                            <p class="mb-2"><i class="fa-solid fa-money-bill-trend-up text-emerald-500 w-5"></i> <b>ค่าล่วงเวลา (OT):</b> ฿${otPay.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+                            <p class="mb-0 text-lg"><i class="fa-solid fa-sack-dollar text-emerald-500 w-5"></i> <b>รวมรายได้สุทธิ:</b> <span class="text-emerald-600 font-bold">฿${totalNet.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></p>
                         </div>
                     `,
                     showDenyButton: true, confirmButtonText: 'ปิด', denyButtonText: '<i class="fa-solid fa-print"></i> สั่งพิมพ์', denyButtonColor: '#4b5563'
@@ -1241,6 +1257,10 @@
                         printWindow.document.write(`<p><b>ชั่วโมงทำงานรวม:</b> ${totalWorkHrs.toFixed(2)} ชั่วโมง</p>`);
                         printWindow.document.write(`<p><b>ล่วงเวลา (OT):</b> ${totalOT.toFixed(2)} ชั่วโมง</p>`);
                         printWindow.document.write(`<p><b>มาสาย (หลัง ${shiftInfo.coreTime}):</b> ${lateDays} วัน</p>`);
+                        printWindow.document.write(`<hr>`);
+                        printWindow.document.write(`<p><b>ค่าจ้างปกติ (ฐาน ${dailyRate} บาท/วัน):</b> ฿${basePay.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>`);
+                        printWindow.document.write(`<p><b>ค่าล่วงเวลา (ฐาน ${otRate} บาท/ชม.):</b> ฿${otPay.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>`);
+                        printWindow.document.write(`<h3><b>รวมรายได้สุทธิ: ฿${totalNet.toLocaleString(undefined, {minimumFractionDigits: 2})}</b></h3>`);
                         printWindow.document.write('<hr><p style="text-align:right; font-size:12px; color:#888;">เอกสารออกโดยระบบ Time Tracker</p>');
                         printWindow.document.write('</div></body></html>');
                         printWindow.document.close(); printWindow.print();
@@ -1261,11 +1281,13 @@
 
             if (monthRaw) {
                 const [year, m] = monthRaw.split('-');
-                let csvContent = "data:text/csv;charset=utf-8,\uFEFFชื่อพนักงาน,แผนก,กะทำงาน,วันทำงานทั้งหมด,วันมาสาย,ชั่วโมงทำงานรวม,ชั่วโมง OT รวม\n";
+                let csvContent = "data:text/csv;charset=utf-8,\uFEFFชื่อพนักงาน,แผนก,กะทำงาน,ค่าจ้าง/วัน,เรท OT/ชม.,วันทำงานทั้งหมด,วันมาสาย,ชั่วโมงทำงานรวม,ชั่วโมง OT รวม,รวมค่าจ้างปกติ,รวมค่า OT,รวมเงินได้สุทธิ\n";
 
                 allEmployeesList.forEach(emp => {
                     const shiftInfo = getEmployeeShiftDetails(emp.id);
                     const standardHours = shiftInfo.workHours;
+                    const dailyRate = emp.dailyRate || 0;
+                    const otRate = emp.otRate || 0;
 
                     const userLogs = allLogsRaw.filter(l => {
                         if (l.userId !== emp.id || !l.timestamp) return false;
@@ -1299,7 +1321,11 @@
                         }
                     });
 
-                    csvContent += `"${emp.name}","${shiftInfo.deptName}","${shiftInfo.shiftName}","${totalDays}","${lateDays}","${totalWorkHrs.toFixed(2)}","${totalOT.toFixed(2)}"\n`;
+                    const basePay = totalDays * dailyRate;
+                    const otPay = totalOT * otRate;
+                    const totalNet = basePay + otPay;
+
+                    csvContent += `"${emp.name}","${shiftInfo.deptName}","${shiftInfo.shiftName}","${dailyRate}","${otRate}","${totalDays}","${lateDays}","${totalWorkHrs.toFixed(2)}","${totalOT.toFixed(2)}","${basePay.toFixed(2)}","${otPay.toFixed(2)}","${totalNet.toFixed(2)}"\n`;
                 });
 
                 const link = document.createElement("a"); link.href = encodeURI(csvContent); link.download = `Payroll_Summary_${m}_${year}.csv`; link.click();
@@ -1354,11 +1380,13 @@
             }
         });
 
-        // แอดมิน: แก้ไขข้อมูลพนักงาน
+        // แอดมิน: แก้ไขข้อมูลพนักงาน (ปรับโควตาได้)
         window.editEmployee = async (docId) => {
             const emp = allEmployeesList.find(e => e.id === docId);
             if(!emp) return;
             const quotas = emp.quotas || { 'ลาป่วย': 30, 'ลากิจ': 6, 'ลาพักร้อน': 6 };
+            const dailyRate = emp.dailyRate || 0;
+            const otRate = emp.otRate || 0;
             
             let deptOptions = '<option value="">ไม่ระบุแผนก</option>';
             if(systemSettings.departments) systemSettings.departments.forEach(d => deptOptions += `<option value="${d.id}" ${emp.departmentId == d.id ? 'selected' : ''}>${d.name}</option>`);
@@ -1372,6 +1400,10 @@
                     <div class="text-left space-y-3 mt-4">
                         <div><label class="text-sm text-gray-600">ชื่อ-นามสกุล</label><input id="swal-e-name" class="w-full p-2 border rounded outline-none" value="${emp.name}"></div>
                         <div><label class="text-sm text-gray-600">รหัส PIN</label><input id="swal-e-pin" class="w-full p-2 border rounded outline-none tracking-widest text-center" value="${emp.pin}" maxlength="6" inputmode="numeric" pattern="[0-9]*"></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="text-sm text-gray-600">ค่าจ้างรายวัน (บาท)</label><input id="swal-e-daily" type="number" class="w-full p-2 border rounded outline-none" value="${dailyRate}"></div>
+                            <div><label class="text-sm text-gray-600">เรท OT/ชม. (บาท)</label><input id="swal-e-ot" type="number" class="w-full p-2 border rounded outline-none" value="${otRate}"></div>
+                        </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div><label class="text-sm text-gray-600">แผนก</label><select id="swal-e-dept" class="w-full p-2 border rounded outline-none text-sm">${deptOptions}</select></div>
                             <div><label class="text-sm text-gray-600">กะเวลา</label><select id="swal-e-shift" class="w-full p-2 border rounded outline-none text-sm">${shiftOptions}</select></div>
@@ -1389,9 +1421,12 @@
                 preConfirm: () => {
                     const name = document.getElementById('swal-e-name').value.trim(), pin = document.getElementById('swal-e-pin').value.trim();
                     const deptId = document.getElementById('swal-e-dept').value, shiftId = document.getElementById('swal-e-shift').value;
+                    const dRate = parseFloat(document.getElementById('swal-e-daily').value) || 0;
+                    const oRate = parseFloat(document.getElementById('swal-e-ot').value) || 0;
                     if (!name || !pin || pin.length !== 6) { Swal.showValidationMessage('กรุณากรอกชื่อและรหัส PIN 6 หลักให้ครบถ้วน'); return false; }
                     return { 
                         name, pin, departmentId: deptId, shiftId: shiftId,
+                        dailyRate: dRate, otRate: oRate,
                         quotas: { 'ลาป่วย': parseFloat(document.getElementById('swal-q-sick').value) || 0, 'ลากิจ': parseFloat(document.getElementById('swal-q-personal').value) || 0, 'ลาพักร้อน': parseFloat(document.getElementById('swal-q-vacation').value) || 0, 'อื่นๆ': quotas['อื่นๆ'] || 0 }
                     };
                 }
@@ -1404,7 +1439,7 @@
                 }
                 Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 try {
-                    await updateDoc(doc(db, "employees", docId), { name: formValues.name, pin: formValues.pin, departmentId: formValues.departmentId, shiftId: formValues.shiftId, quotas: formValues.quotas });
+                    await updateDoc(doc(db, "employees", docId), { name: formValues.name, pin: formValues.pin, departmentId: formValues.departmentId, shiftId: formValues.shiftId, dailyRate: formValues.dailyRate, otRate: formValues.otRate, quotas: formValues.quotas });
                     Swal.fire({ icon: 'success', title: 'อัปเดตข้อมูลสำเร็จ', timer: 1500, showConfirmButton: false });
                 } catch (error) { Swal.fire('ผิดพลาด', error.message, 'error'); }
             }
@@ -1457,17 +1492,23 @@
         // แอดมิน: เพิ่มพนักงาน
         document.getElementById('btn-add-employee').addEventListener('click', async () => {
             const nameInput = document.getElementById('new-emp-name'), pinInput = document.getElementById('new-emp-pin');
+            const dailyRateInput = document.getElementById('new-emp-daily-rate'), otRateInput = document.getElementById('new-emp-ot-rate');
             const deptInput = document.getElementById('new-emp-dept'), shiftInput = document.getElementById('new-emp-shift');
+            
             const name = nameInput.value.trim(), pin = pinInput.value.trim();
+            const dailyRate = parseFloat(dailyRateInput?.value) || 0, otRate = parseFloat(otRateInput?.value) || 0;
+            
             if (!name || !pin || pin.length !== 6) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกชื่อ และตั้ง PIN 6 หลัก', 'warning');
             try {
                 const q = query(collection(db, "employees"), where("pin", "==", pin));
                 if (!(await getDocs(q)).empty) return Swal.fire('รหัส PIN ซ้ำ', 'รหัส PIN นี้ถูกใช้ไปแล้ว', 'error');
                 
                 const defaultQuotas = { 'ลาป่วย': 30, 'ลากิจ': 6, 'ลาพักร้อน': 6, 'อื่นๆ': 0 };
-                await addDoc(collection(db, "employees"), { name: name, pin: pin, departmentId: deptInput.value, shiftId: shiftInput.value, quotas: defaultQuotas });
+                await addDoc(collection(db, "employees"), { name: name, pin: pin, departmentId: deptInput.value, shiftId: shiftInput.value, dailyRate: dailyRate, otRate: otRate, quotas: defaultQuotas });
                 Swal.fire({ icon: 'success', title: 'เพิ่มพนักงานสำเร็จ', timer: 1500, showConfirmButton: false }); 
                 nameInput.value = ''; pinInput.value = ''; deptInput.value = ''; shiftInput.value = '';
+                if(dailyRateInput) dailyRateInput.value = '';
+                if(otRateInput) otRateInput.value = '';
             } catch (error) { Swal.fire('ผิดพลาด', error.message, 'error'); }
         });
 
