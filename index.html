@@ -198,6 +198,7 @@
                 <button id="tab-admin-timelogs" class="py-4 px-4 tab-inactive focus:outline-none transition"><i class="fa-solid fa-list-ul mr-2"></i>ประวัติเข้าออก</button>
                 <button id="tab-admin-leaves" class="py-4 px-4 tab-inactive focus:outline-none transition"><i class="fa-solid fa-file-signature mr-2"></i>คำขอลางาน <span id="leave-badge" class="hide bg-rose-500 text-white text-xs rounded-full px-2 py-0.5 ml-1">0</span></button>
                 <button id="tab-admin-employees" class="py-4 px-4 tab-inactive focus:outline-none transition"><i class="fa-solid fa-users-gear mr-2"></i>จัดการพนักงาน</button>
+                <button id="tab-admin-settings" class="py-4 px-4 tab-inactive focus:outline-none transition"><i class="fa-solid fa-gear mr-2"></i>ตั้งค่าระบบ</button>
             </div>
         </div>
 
@@ -244,7 +245,7 @@
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
                             <h3 class="font-bold text-gray-700">สรุปเวลาทำงาน & OT วันนี้</h3>
-                            <span class="text-xs text-gray-500">*เกณฑ์ OT คือ > 8 ชม.</span>
+                            <span class="text-xs text-gray-500">*อ้างอิงเวลาปกติตามตั้งค่าระบบ</span>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
@@ -267,11 +268,14 @@
 
                 <!-- Section: ประวัติเข้าออก (Raw Timelogs) -->
                 <div id="section-admin-timelogs" class="hide space-y-4">
-                    <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                        <h2 class="text-xl font-bold text-gray-800">รายการบันทึกเวลาล่าสุด</h2>
-                        <button id="btn-export-csv" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow flex items-center">
-                            <i class="fa-solid fa-file-excel mr-2"></i> Export
-                        </button>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <h2 class="text-xl font-bold text-gray-800">รายการบันทึกเวลา</h2>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <input type="month" id="filter-timelog-month" class="p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none flex-1" title="กรองดูตามเดือน">
+                            <button id="btn-export-csv" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow flex items-center">
+                                <i class="fa-solid fa-file-excel mr-2"></i> Export
+                            </button>
+                        </div>
                     </div>
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="overflow-x-auto">
@@ -348,6 +352,48 @@
                     </div>
                 </div>
 
+                <!-- Section: ตั้งค่าระบบ (Settings) -->
+                <div id="section-admin-settings" class="hide space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fa-solid fa-map-location-dot text-blue-500 mr-2"></i>ตั้งค่าพิกัดออฟฟิศ (Geofencing)</h3>
+                        <p class="text-sm text-gray-500 mb-4">พนักงานจะสามารถกดเข้า-ออกงานได้ก็ต่อเมื่ออยู่ในรัศมีที่กำหนดเท่านั้น (ปล่อยว่างถ้าไม่ต้องการจำกัดพื้นที่)</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">ละติจูด (Latitude)</label>
+                                <input type="number" id="setting-lat" step="any" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="เช่น 13.7563">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">ลองจิจูด (Longitude)</label>
+                                <input type="number" id="setting-lng" step="any" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="เช่น 100.5018">
+                            </div>
+                        </div>
+                        <div class="flex gap-2 mb-6">
+                            <div class="flex-1">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">รัศมีที่อนุญาต (เมตร)</label>
+                                <input type="number" id="setting-radius" value="100" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                            <div class="flex items-end">
+                                <button id="btn-get-current-location" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-3 rounded-lg font-medium transition shadow-sm h-[46px]">
+                                    <i class="fa-solid fa-location-crosshairs mr-1"></i> ดึงพิกัดปัจจุบัน
+                                </button>
+                            </div>
+                        </div>
+
+                        <hr class="my-6 border-gray-100">
+
+                        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fa-solid fa-clock text-blue-500 mr-2"></i>ตั้งค่าเวลาทำงาน</h3>
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ชั่วโมงทำงานปกติต่อวัน (ใช้เพื่อคำนวณ OT)</label>
+                            <input type="number" id="setting-workhours" value="8" step="0.5" class="w-full md:w-1/2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="ค่าเริ่มต้นคือ 8 ชั่วโมง">
+                        </div>
+
+                        <button id="btn-save-settings" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold shadow transition flex items-center justify-center">
+                            <i class="fa-solid fa-save mr-2"></i> บันทึกการตั้งค่า
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -356,7 +402,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, getDocs, onSnapshot, orderBy, serverTimestamp, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs, onSnapshot, orderBy, serverTimestamp, doc, deleteDoc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAgTWrI1G1t3GYVz4-SPM7btrsixSe0el8",
@@ -379,6 +425,11 @@
         let currentLng = null;
         let capturedPhotoData = null;
         let stream = null;
+        
+        // ตัวแปรสำหรับ Settings และ Filter
+        let systemSettings = { officeLat: null, officeLng: null, radius: 100, workHours: 8 };
+        let allLogsRaw = []; 
+        let allLogsForExport = [];
         
         // Listeners for cleanup
         let listeners = {
@@ -429,6 +480,29 @@
         document.getElementById('tab-admin-timelogs').addEventListener('click', () => switchTabs('tab-admin-timelogs', 'section-admin-timelogs', 'tab-admin-', 'section-admin-'));
         document.getElementById('tab-admin-leaves').addEventListener('click', () => switchTabs('tab-admin-leaves', 'section-admin-leaves', 'tab-admin-', 'section-admin-'));
         document.getElementById('tab-admin-employees').addEventListener('click', () => switchTabs('tab-admin-employees', 'section-admin-employees', 'tab-admin-', 'section-admin-'));
+        document.getElementById('tab-admin-settings').addEventListener('click', () => switchTabs('tab-admin-settings', 'section-admin-settings', 'tab-admin-', 'section-admin-'));
+
+        // โหลดตั้งค่าระบบจาก Firestore
+        async function loadSystemSettings() {
+            try {
+                const docSnap = await getDoc(doc(db, "settings", "general"));
+                if (docSnap.exists()) {
+                    systemSettings = { ...systemSettings, ...docSnap.data() };
+                }
+            } catch (e) {
+                console.error("Could not load settings", e);
+            }
+        }
+        
+        // สูตรคำนวณระยะทาง GPS (Haversine Formula) เป็นเมตร
+        function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; 
+            const dLat = (lat2-lat1) * (Math.PI/180);
+            const dLon = (lon2-lon1) * (Math.PI/180);
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * (Math.PI/180)) * Math.cos(lat2 * (Math.PI/180)) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
 
         // Main View Switcher
         function showView(viewName) {
@@ -446,11 +520,16 @@
                 
                 if (viewName === 'admin') {
                     userNameSpan.innerHTML = '<i class="fa-solid fa-crown text-yellow-300 mr-1"></i> ผู้ดูแลระบบ';
-                    loadAdminData(); // โหลดข้อมูลแอดมินทั้งหมด
+                    loadSystemSettings().then(() => {
+                        loadAdminData(); 
+                        populateSettingsForm();
+                    });
                 } else if (viewName === 'employee') {
                     userNameSpan.innerHTML = '<i class="fa-solid fa-user mr-1"></i> ' + currentEmployee.name;
-                    initLocation();
-                    loadEmployeeData(); // โหลดข้อมูลประวัติของพนักงานคนนี้
+                    loadSystemSettings().then(() => {
+                        initLocation();
+                        loadEmployeeData(); 
+                    });
                 }
             }
         }
@@ -552,8 +631,30 @@
                     (position) => {
                         currentLat = position.coords.latitude;
                         currentLng = position.coords.longitude;
-                        statusEl.className = "text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full";
-                        statusEl.innerHTML = '<i class="fa-solid fa-check-circle mr-1"></i>พบพิกัดแล้ว';
+                        
+                        let isInside = true;
+                        let distText = '';
+                        
+                        // ตรวจสอบระยะทางจากระบบตั้งค่า Geofencing
+                        if (systemSettings.officeLat && systemSettings.officeLng) {
+                            const dist = getDistanceFromLatLonInM(currentLat, currentLng, systemSettings.officeLat, systemSettings.officeLng);
+                            if (dist > systemSettings.radius) {
+                                isInside = false;
+                                distText = ` (เกินรัศมี: ห่าง ${Math.round(dist)} ม.)`;
+                            } else {
+                                distText = ` (ห่าง ${Math.round(dist)} ม.)`;
+                            }
+                        }
+
+                        if (isInside) {
+                            statusEl.className = "text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full";
+                            statusEl.innerHTML = `<i class="fa-solid fa-check-circle mr-1"></i>พิกัดถูกต้อง${distText}`;
+                        } else {
+                            statusEl.className = "text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded-full";
+                            statusEl.innerHTML = `<i class="fa-solid fa-xmark-circle mr-1"></i>อยู่นอกพื้นที่ทำงาน${distText}`;
+                            currentLat = null; // รีเซ็ตเพื่อไม่ให้กดบันทึกได้
+                        }
+
                         checkReadyState();
                     },
                     (error) => {
@@ -641,12 +742,10 @@
 
         // --- ส่วนประวัติส่วนตัวและลางาน ---
         function loadEmployeeData() {
-            // โหลดประวัติเข้าออกส่วนตัว
             const qLogs = query(collection(db, "timelogs"), where("userId", "==", currentEmployee.id));
             listeners.empTimelogs = onSnapshot(qLogs, (snapshot) => {
                 const logs = [];
                 snapshot.forEach(doc => logs.push({ id: doc.id, ...doc.data() }));
-                // เรียงข้อมูลแบบ Local
                 logs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 
                 const container = document.getElementById('emp-personal-history');
@@ -654,7 +753,6 @@
                     container.innerHTML = '<div class="text-center text-sm text-gray-400 py-4">ยังไม่มีประวัติการบันทึกเวลา</div>';
                 } else {
                     let html = '';
-                    // โชว์แค่ 10 รายการล่าสุด
                     logs.slice(0, 10).forEach(log => {
                         const timeStr = log.timestamp ? log.timestamp.toDate().toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '...';
                         const isCheckIn = log.type === 'in';
@@ -676,7 +774,6 @@
                 }
             });
 
-            // โหลดประวัติการลางานส่วนตัว
             const qLeaves = query(collection(db, "leave_requests"), where("userId", "==", currentEmployee.id));
             listeners.empLeaves = onSnapshot(qLeaves, (snapshot) => {
                 const leaves = [];
@@ -694,7 +791,6 @@
                         else if (req.status === 'approved') statusHtml = '<span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded">อนุมัติแล้ว</span>';
                         else statusHtml = '<span class="text-xs font-bold text-rose-600 bg-rose-100 px-2 py-1 rounded">ไม่อนุมัติ</span>';
 
-                        // แปลง format วันที่แบบง่าย yyyy-mm-dd -> dd/mm/yyyy
                         const formatDate = (dateStr) => {
                             if(!dateStr) return '';
                             const parts = dateStr.split('-');
@@ -717,16 +813,13 @@
             });
         }
 
-        // ส่งคำขอลางาน
         document.getElementById('btn-submit-leave').addEventListener('click', async () => {
             const type = document.getElementById('leave-type').value;
             const startDate = document.getElementById('leave-start').value;
             const endDate = document.getElementById('leave-end').value;
             const reason = document.getElementById('leave-reason').value.trim();
 
-            if (!startDate || !endDate || !reason) {
-                return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุวันที่และเหตุผลการลา', 'warning');
-            }
+            if (!startDate || !endDate || !reason) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุวันที่และเหตุผลการลา', 'warning');
 
             Swal.fire({ title: 'กำลังส่งคำขอ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             try {
@@ -741,7 +834,6 @@
                     timestamp: serverTimestamp()
                 });
                 Swal.fire('สำเร็จ', 'ส่งคำขอลางานเรียบร้อยแล้ว', 'success');
-                // clear form
                 document.getElementById('leave-start').value = '';
                 document.getElementById('leave-end').value = '';
                 document.getElementById('leave-reason').value = '';
@@ -753,26 +845,20 @@
         // ==========================================
         // 3. ระบบ Admin (Dashboard, OT, Leaves, Employees)
         // ==========================================
-        
-        let allLogsForExport = [];
 
         function loadAdminData() {
-            // วันที่สำหรับ Dashboard
             const today = new Date();
             document.getElementById('dash-date').textContent = today.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
             
-            // ขอบเขตเวลาของ "วันนี้"
             today.setHours(0, 0, 0, 0);
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
 
-            // 1. โหลดรายชื่อพนักงานทั้งหมด เพื่อใช้นับและเปรียบเทียบ
             const qEmp = query(collection(db, "employees"));
             listeners.adminEmployees = onSnapshot(qEmp, (empSnapshot) => {
                 const totalEmployees = empSnapshot.size;
                 document.getElementById('stat-total').textContent = totalEmployees;
 
-                // Render ตารางพนักงานไปเลย
                 const tbodyEmp = document.getElementById('employees-table-body');
                 let empHtml = '';
                 empSnapshot.forEach(doc => {
@@ -788,48 +874,20 @@
                 });
                 tbodyEmp.innerHTML = empHtml || '<tr><td colspan="3" class="text-center p-8 text-gray-400">ไม่มีพนักงาน</td></tr>';
 
-                // 2. โหลด Timelogs ทั้งหมด (แล้วค่อยประมวลผลแยก Dashboard กับ ตารางดิบ)
                 const qLogs = query(collection(db, "timelogs"));
                 listeners.adminTimelogs = onSnapshot(qLogs, (logSnapshot) => {
-                    allLogsForExport = [];
-                    const tbodyLogs = document.getElementById('admin-table-body');
                     const tbodySum = document.getElementById('dashboard-summary-body');
                     
                     const logs = [];
                     logSnapshot.forEach(doc => logs.push({ id: doc.id, ...doc.data() }));
+                    allLogsRaw = logs; 
                     
-                    // -- ส่วนจัดทำตารางดิบ (Raw Logs) เรียงล่าสุดขึ้นก่อน --
-                    logs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                    let logHtml = '';
-                    logs.forEach(data => {
-                        let exportTimeStr = ''; let timeStr = '...';
-                        if (data.timestamp) {
-                            const d = data.timestamp.toDate();
-                            timeStr = d.toLocaleString('th-TH', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
-                            exportTimeStr = d.toLocaleString('en-GB'); 
-                        }
-                        const isCheckIn = data.type === 'in';
-                        const typeBadge = isCheckIn ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">เข้างาน</span>' : '<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-xs font-bold">ออกงาน</span>';
-                        const empName = data.name || 'ไม่ทราบชื่อ';
-
-                        allLogsForExport.push({ Date_Time: exportTimeStr, Employee: empName, Type: isCheckIn?'เข้างาน':'ออกงาน', Lat: data.lat, Lng: data.lng });
-
-                        logHtml += `
-                            <tr class="hover:bg-gray-50 border-b">
-                                <td class="p-3 text-sm whitespace-nowrap">${timeStr}</td>
-                                <td class="p-3 text-sm font-medium text-gray-800">${empName}</td>
-                                <td class="p-3">${typeBadge}</td>
-                                <td class="p-3"><img src="${data.photoBase64}" class="w-10 h-10 rounded-lg object-cover border cursor-pointer hover:scale-[2] transition-transform origin-left" alt="Selfie"></td>
-                                <td class="p-3 text-xs"><a href="https://www.google.com/maps/search/?api=1&query=${data.lat},${data.lng}" target="_blank" class="text-blue-600 hover:underline"><i class="fa-solid fa-map-location-dot"></i> ดูแผนที่</a></td>
-                            </tr>`;
-                    });
-                    tbodyLogs.innerHTML = logHtml || '<tr><td colspan="5" class="p-8 text-center text-gray-400">ไม่มีข้อมูล</td></tr>';
-
-                    // -- ส่วนประมวลผล Dashboard ประจำวัน (เวลา & OT) --
-                    // กรองเฉพาะบันทึกของ "วันนี้"
+                    if (typeof renderTimelogsTable === 'function') {
+                        renderTimelogsTable(); 
+                    }
+                    
                     const todayLogs = logs.filter(log => log.timestamp && log.timestamp.toDate() >= today && log.timestamp.toDate() < tomorrow);
                     
-                    // จัดกลุ่มตามพนักงาน
                     const userDaily = {};
                     todayLogs.forEach(log => {
                         if (!userDaily[log.userId]) userDaily[log.userId] = { name: log.name, firstIn: null, lastOut: null };
@@ -845,7 +903,7 @@
                     let sumHtml = '';
 
                     Object.values(userDaily).forEach(u => {
-                        if (u.firstIn) presentCount++; // ถือว่ามาทำงานถ้ามีการกดเข้า
+                        if (u.firstIn) presentCount++; 
                         
                         let inStr = u.firstIn ? u.firstIn.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '-';
                         let outStr = u.lastOut ? u.lastOut.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '-';
@@ -853,14 +911,13 @@
                         let otHrsStr = '-';
 
                         if (u.firstIn && u.lastOut) {
-                            // คำนวณชั่วโมงทำงาน (มิลลิวินาที -> ชั่วโมง)
                             const diffMs = u.lastOut - u.firstIn;
                             const diffHrs = diffMs / (1000 * 60 * 60);
                             workHrsStr = diffHrs.toFixed(2) + ' ชม.';
                             
-                            // สมมติเกณฑ์ 8 ชม. คือเวลาปกติ ที่เหลือคือ OT
-                            if (diffHrs > 8) {
-                                otHrsStr = '<span class="font-bold text-orange-600">+' + (diffHrs - 8).toFixed(2) + '</span>';
+                            const standardHours = Number(systemSettings.workHours) || 8;
+                            if (diffHrs > standardHours) {
+                                otHrsStr = '<span class="font-bold text-orange-600">+' + (diffHrs - standardHours).toFixed(2) + '</span>';
                             } else {
                                 otHrsStr = '<span class="text-gray-400">0.00</span>';
                             }
@@ -879,14 +936,11 @@
                         `;
                     });
 
-                    // อัปเดตสถิติตัวเลข
                     document.getElementById('stat-present').textContent = presentCount;
-                    // ลบจำนวนคนลาออกไปจากยอดขาด เพื่อความแม่นยำ (คำนวณถัดไป)
                     let baseAbsent = totalEmployees - presentCount;
                     
                     tbodySum.innerHTML = sumHtml || '<tr><td colspan="5" class="p-8 text-center text-gray-400">ยังไม่มีใครเข้างานวันนี้</td></tr>';
 
-                    // 3. โหลด Leave Requests เพื่อจัดการ และสรุปยอดคนลาวันนี้
                     const qLeave = query(collection(db, "leave_requests"));
                     listeners.adminLeaves = onSnapshot(qLeave, (leaveSnapshot) => {
                         const tbodyLeaves = document.getElementById('admin-leaves-body');
@@ -898,13 +952,11 @@
                         let pendingCount = 0;
                         let leaveHtml = '';
 
-                        // วันที่ปัจจุบันรูปแบบ YYYY-MM-DD เพื่อเช็คการลา
                         const todayStr = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
 
                         leaves.forEach(req => {
                             if (req.status === 'pending') pendingCount++;
                             
-                            // เช็คว่าคนนี้ลาตรงกับ "วันนี้" หรือไม่ (และสถานะถูกอนุมัติ)
                             if (req.status === 'approved' && todayStr >= req.startDate && todayStr <= req.endDate) {
                                 leaveCountToday++;
                             }
@@ -946,13 +998,10 @@
                         
                         tbodyLeaves.innerHTML = leaveHtml || '<tr><td colspan="5" class="p-8 text-center text-gray-400">ไม่มีคำขอลางาน</td></tr>';
 
-                        // อัปเดตสถิติ
                         document.getElementById('stat-leave').textContent = leaveCountToday;
-                        // ขาดงานที่แท้จริง = คนที่ไม่ได้มา - คนที่ลาอนุมัติแล้ว
                         let finalAbsent = baseAbsent - leaveCountToday;
                         document.getElementById('stat-absent').textContent = finalAbsent < 0 ? 0 : finalAbsent;
 
-                        // แจ้งเตือนเมนู
                         const badge = document.getElementById('leave-badge');
                         if (pendingCount > 0) {
                             badge.textContent = pendingCount;
@@ -965,9 +1014,6 @@
             });
         }
 
-        // --- Functions เรียกจาก HTML โดยตรง ---
-        
-        // แอดมิน: อัปเดตสถานะการลางาน
         window.updateLeaveStatus = async (docId, newStatus) => {
             const actionText = newStatus === 'approved' ? 'อนุมัติ' : 'ไม่อนุมัติ';
             const result = await Swal.fire({
@@ -988,7 +1034,6 @@
             }
         };
 
-        // แอดมิน: เพิ่มพนักงาน
         document.getElementById('btn-add-employee').addEventListener('click', async () => {
             const nameInput = document.getElementById('new-emp-name');
             const pinInput = document.getElementById('new-emp-pin');
@@ -1007,7 +1052,6 @@
             } catch (error) { Swal.fire('ผิดพลาด', error.message, 'error'); }
         });
 
-        // แอดมิน: ลบพนักงาน
         window.deleteEmployee = (docId, name) => {
             Swal.fire({ title: `ลบพนักงาน ${name}?`, text: "ลบแล้วจะไม่สามารถใช้ PIN นี้ล็อกอินได้อีก", icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', confirmButtonText: 'ลบข้อมูล' })
             .then(async (result) => {
@@ -1018,15 +1062,98 @@
             });
         };
 
-        // แอดมิน: Export CSV
         document.getElementById('btn-export-csv').addEventListener('click', () => {
-            if (allLogsForExport.length === 0) return Swal.fire('ไม่มีข้อมูล', '', 'info');
+            if (allLogsForExport.length === 0) return Swal.fire('ไม่มีข้อมูล', 'ไม่มีข้อมูลในเดือนที่เลือก', 'info');
             let csvContent = "data:text/csv;charset=utf-8,\uFEFFDate_Time,Employee,Type,Latitude,Longitude\n";
             allLogsForExport.forEach(row => { csvContent += `${row.Date_Time},${row.Employee},${row.Type},${row.Lat},${row.Lng}\n`; });
             const link = document.createElement("a");
             link.href = encodeURI(csvContent);
             link.download = `timelog_export_${new Date().getTime()}.csv`;
             link.click();
+        });
+
+        function renderTimelogsTable() {
+            allLogsForExport = [];
+            const tbodyLogs = document.getElementById('admin-table-body');
+            const filterMonth = document.getElementById('filter-timelog-month').value; 
+            
+            let filteredLogs = [...allLogsRaw];
+            if (filterMonth) {
+                const [year, month] = filterMonth.split('-');
+                filteredLogs = filteredLogs.filter(log => {
+                    if (!log.timestamp) return false;
+                    const d = log.timestamp.toDate();
+                    return d.getFullYear() == year && (d.getMonth() + 1) == month;
+                });
+            }
+
+            filteredLogs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+            
+            let logHtml = '';
+            filteredLogs.forEach(data => {
+                let exportTimeStr = ''; let timeStr = '...';
+                if (data.timestamp) {
+                    const d = data.timestamp.toDate();
+                    timeStr = d.toLocaleString('th-TH', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+                    exportTimeStr = d.toLocaleString('en-GB'); 
+                }
+                const isCheckIn = data.type === 'in';
+                const typeBadge = isCheckIn ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">เข้างาน</span>' : '<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-xs font-bold">ออกงาน</span>';
+                const empName = data.name || 'ไม่ทราบชื่อ';
+
+                allLogsForExport.push({ Date_Time: exportTimeStr, Employee: empName, Type: isCheckIn?'เข้างาน':'ออกงาน', Lat: data.lat, Lng: data.lng });
+
+                logHtml += `
+                    <tr class="hover:bg-gray-50 border-b">
+                        <td class="p-3 text-sm whitespace-nowrap">${timeStr}</td>
+                        <td class="p-3 text-sm font-medium text-gray-800">${empName}</td>
+                        <td class="p-3">${typeBadge}</td>
+                        <td class="p-3"><img src="${data.photoBase64}" class="w-10 h-10 rounded-lg object-cover border cursor-pointer hover:scale-[2] transition-transform origin-left" alt="Selfie"></td>
+                        <td class="p-3 text-xs"><a href="https://www.google.com/maps/search/?api=1&query=${data.lat},${data.lng}" target="_blank" class="text-blue-600 hover:underline"><i class="fa-solid fa-map-location-dot"></i> ดูแผนที่</a></td>
+                    </tr>`;
+            });
+            tbodyLogs.innerHTML = logHtml || '<tr><td colspan="5" class="p-8 text-center text-gray-400">ไม่มีข้อมูลตามเงื่อนไข</td></tr>';
+        }
+
+        document.getElementById('filter-timelog-month').addEventListener('change', renderTimelogsTable);
+
+        function populateSettingsForm() {
+            document.getElementById('setting-lat').value = systemSettings.officeLat || '';
+            document.getElementById('setting-lng').value = systemSettings.officeLng || '';
+            document.getElementById('setting-radius').value = systemSettings.radius || 100;
+            document.getElementById('setting-workhours').value = systemSettings.workHours || 8;
+        }
+
+        document.getElementById('btn-get-current-location').addEventListener('click', () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    document.getElementById('setting-lat').value = pos.coords.latitude;
+                    document.getElementById('setting-lng').value = pos.coords.longitude;
+                    Swal.fire({ icon: 'success', title: 'ดึงพิกัดสำเร็จ', timer: 1000, showConfirmButton: false });
+                }, () => Swal.fire('ผิดพลาด', 'กรุณาอนุญาต Location ในเบราว์เซอร์', 'error'));
+            }
+        });
+
+        document.getElementById('btn-save-settings').addEventListener('click', async () => {
+            const lat = document.getElementById('setting-lat').value;
+            const lng = document.getElementById('setting-lng').value;
+            const radius = document.getElementById('setting-radius').value;
+            const workHours = document.getElementById('setting-workhours').value;
+
+            Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            try {
+                const newData = {
+                    officeLat: lat ? parseFloat(lat) : null,
+                    officeLng: lng ? parseFloat(lng) : null,
+                    radius: radius ? parseInt(radius) : 100,
+                    workHours: workHours ? parseFloat(workHours) : 8
+                };
+                await setDoc(doc(db, "settings", "general"), newData);
+                systemSettings = { ...systemSettings, ...newData }; 
+                Swal.fire({ icon: 'success', title: 'บันทึกตั้งค่าสำเร็จ', timer: 1500 });
+            } catch (error) {
+                Swal.fire('ผิดพลาด', error.message, 'error');
+            }
         });
 
     </script>
