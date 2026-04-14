@@ -995,26 +995,34 @@
         });
         window.addEventListener('offline', () => { document.getElementById('offline-banner').classList.remove('hide'); });
 
-        async function loadSystemSettings() {
-            if (!firebaseUser) return;
-            try {
-                const docSnap = await getDoc(getDbDoc("settings", "general"));
-                if (docSnap.exists()) {
-                    systemSettings = { ...systemSettings, ...docSnap.data() };
-                    if (docSnap.data().officeLat && (!systemSettings.branches || systemSettings.branches.length === 0)) {
-                        systemSettings.branches = [{ id: Date.now(), name: 'สำนักงานใหญ่', lat: docSnap.data().officeLat, lng: docSnap.data().officeLng, radius: docSnap.data().radius || 100 }];
-                    }
-                    if (!systemSettings.holidays) systemSettings.holidays = [];
-                    if (!systemSettings.departments) systemSettings.departments = [];
-                    if (!systemSettings.shifts) systemSettings.shifts = [];
-                    if (!systemSettings.otNormal) systemSettings.otNormal = 1.5;
-                    if (!systemSettings.otWeekend) systemSettings.otWeekend = 2;
-                    if (!systemSettings.otHoliday) systemSettings.otHoliday = 3;
-                    if (!systemSettings.ssoPercent) systemSettings.ssoPercent = 5;
-                    if (!systemSettings.ssoMax) systemSettings.ssoMax = 750;
-                }
-            } catch (e) { console.error("Could not load settings", e); }
+async function loadSystemSettings() {
+    if (!firebaseUser) return;
+    try {
+        const docSnap = await getDoc(getDbDoc("settings", "general"));
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            // รวมข้อมูลจาก DB เข้ากับค่าเริ่มต้น และจัดการเรื่อง Array ให้เรียบร้อย
+            systemSettings = { 
+                ...systemSettings, 
+                ...data,
+                branches: data.branches || [],
+                holidays: data.holidays || [],
+                departments: data.departments || [],
+                shifts: data.shifts || []
+            };
+            console.log("โหลดการตั้งค่าสำเร็จ:", systemSettings);
+        } else {
+            console.log("ไม่พบการตั้งค่าเดิมในระบบ ใช้ค่าเริ่มต้น");
         }
+
+        // หัวใจสำคัญ: เมื่อโหลดข้อมูลเสร็จแล้ว ให้เรียกฟังก์ชันเติมข้อมูลลงหน้าจอทันที
+        if (typeof populateSettingsForm === 'function') {
+            populateSettingsForm();
+        }
+    } catch (e) { 
+        console.error("ไม่สามารถโหลดการตั้งค่าได้:", e); 
+    }
+}
         
         function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
             const R = 6371e3; 
