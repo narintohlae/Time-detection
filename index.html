@@ -60,39 +60,7 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* --- ปรับขนาดและสัดส่วน SweetAlert2 (Modal) ให้กะทัดรัดขึ้น --- */
-        .swal2-popup { 
-            border-radius: 1.5rem !important; 
-            padding: 1.25rem 1rem !important; /* ลด Padding ขอบหน้าต่าง */
-            width: 85% !important; /* ให้ยืดหยุ่นบนหน้าจอมือถือ */
-            max-width: 340px !important; /* บังคับขนาดสูงสุดไม่ให้กว้างเกินไปบนจอใหญ่ */
-        }
-        .swal2-title { 
-            font-size: 1.15rem !important; /* ลดขนาดตัวอักษรหัวข้อ */
-            padding: 0 !important;
-            margin-bottom: 0 !important;
-        }
-        .swal2-html-container { 
-            font-size: 0.85rem !important; /* ลดขนาดตัวอักษรเนื้อหา */
-            margin: 0.5em 0 0 0 !important;
-            line-height: 1.5;
-        }
-        .swal2-icon { 
-            transform: scale(0.7); /* ย่อไอคอนลง 30% ไม่ให้แย่งซีนเนื้อหา */
-            margin: 0.5rem auto !important; 
-        }
-        .swal2-actions {
-            margin-top: 1.25rem !important; /* ลดระยะห่างระหว่างข้อความกับปุ่ม */
-            width: 100% !important;
-            gap: 0.5rem; /* ระยะห่างระหว่างปุ่ม */
-        }
-        .swal2-confirm, .swal2-cancel, .swal2-deny {
-            border-radius: 0.75rem !important; /* ปรับปุ่มให้โค้งมนเข้ากับดีไซน์ 2026 */
-            font-size: 0.85rem !important;
-            font-weight: 700 !important;
-            padding: 0.6rem 1.2rem !important;
-            margin: 0 !important; /* เคลียร์ margin เดิมของ SweetAlert */
-        }
+        .swal2-popup { border-radius: 1.5rem !important; padding: 2rem !important; }
         .digital-clock { font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
         
         /* Fluid Animations */
