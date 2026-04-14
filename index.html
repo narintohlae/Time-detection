@@ -127,7 +127,7 @@
                 <!-- Section: บันทึกเวลา -->
                 <div id="section-emp-time" class="space-y-6">
                     
-                    <!-- คำทักทายและนาฬิกา (อัปเกรดใหม่) -->
+                    <!-- คำทักทายและนาฬิกา -->
                     <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 text-white/10 text-8xl"><i class="fa-regular fa-clock"></i></div>
                         <p class="text-blue-100 text-sm font-medium mb-1" id="emp-greeting">สวัสดี,</p>
@@ -403,6 +403,10 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                         <h2 class="text-xl font-bold text-gray-800">รายการบันทึกเวลา</h2>
                         <div class="flex gap-2 w-full sm:w-auto flex-wrap justify-end">
+                            <div class="relative flex-1 min-w-[200px]">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-search text-gray-400"></i></div>
+                                <input type="text" id="search-timelog" placeholder="ค้นหาชื่อ หรือ หมายเหตุ..." class="w-full pl-10 p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
                             <select id="filter-timelog-emp" class="p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none flex-1 min-w-[140px]" title="กรองตามพนักงาน">
                                 <option value="">พนักงานทั้งหมด</option>
                             </select>
@@ -475,7 +479,10 @@
                         <h3 class="text-lg font-bold text-gray-800 mb-4">เพิ่มพนักงานใหม่</h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                             <input type="text" id="new-emp-name" placeholder="ชื่อ-นามสกุล พนักงาน" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            <input type="text" id="new-emp-pin" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="ตั้งรหัส PIN (6 หลัก)" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <div class="relative">
+                                <input type="text" id="new-emp-pin" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="ตั้งรหัส PIN (6 หลัก)" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none pr-12 font-mono tracking-widest">
+                                <button type="button" onclick="window.generateRandomPin('new-emp-pin')" class="absolute right-2 top-2.5 p-1.5 text-gray-400 hover:text-blue-600 transition" title="สุ่มรหัส PIN อัตโนมัติ"><i class="fa-solid fa-dice text-lg"></i></button>
+                            </div>
                             <input type="email" id="new-emp-email" placeholder="Email พนักงาน (สำหรับส่งสลิป)" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                             <select id="new-emp-role" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                                 <option value="staff">สิทธิ์: พนักงานทั่วไป</option>
@@ -507,9 +514,15 @@
 
                         <div class="flex justify-between items-center mb-4 border-t pt-6">
                             <h3 class="text-lg font-bold text-gray-800">รายชื่อพนักงานในระบบ</h3>
-                            <button id="btn-export-monthly-summary" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition flex items-center">
-                                <i class="fa-solid fa-file-excel mr-2"></i> สรุปเงินเดือน (CSV)
-                            </button>
+                            <div class="flex gap-2">
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-search text-gray-400"></i></div>
+                                    <input type="text" id="search-employee" placeholder="ค้นหาชื่อพนักงาน..." class="w-48 sm:w-64 pl-10 p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                </div>
+                                <button id="btn-export-monthly-summary" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition flex items-center whitespace-nowrap">
+                                    <i class="fa-solid fa-file-excel mr-2"></i> สรุปเงินเดือน (CSV)
+                                </button>
+                            </div>
                         </div>
                         <div class="overflow-x-auto border rounded-lg">
                             <table class="w-full text-left border-collapse">
@@ -629,7 +642,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, getDocs, onSnapshot, orderBy, serverTimestamp, Timestamp, doc, deleteDoc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs, onSnapshot, serverTimestamp, Timestamp, doc, deleteDoc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAgTWrI1G1t3GYVz4-SPM7btrsixSe0el8",
@@ -637,14 +650,14 @@
             projectId: "time-tracker-46283",
             storageBucket: "time-tracker-46283.firebasestorage.app",
             messagingSenderId: "882533547295",
-            appId: "1:882533547295:web:4b78bfc84322c58a50042a",
-            measurementId: "G-5DPBNCSWFW"
+            appId: "1:882533547295:web:4b78bfc84322c58a50042a"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // State Variables
         let currentAdmin = null;
         let currentEmployee = null; 
         let currentLat = null;
@@ -653,8 +666,8 @@
         let capturedPhotoData = null;
         let stream = null;
         let clockInterval = null; 
-        let workTimerInterval = null; // ตัวจับเวลาทำงานสด
-        let expectedAction = 'in'; // คำนวณว่าปุ่มถัดไปควรเป็น เข้า หรือ ออก
+        let workTimerInterval = null; 
+        let expectedAction = 'in'; 
         let lastInTime = null;
         
         let systemSettings = { branches: [], holidays: [], departments: [], shifts: [], workHours: 8, coreTime: "09:00", announcement: "", otNormal: 1.5, otWeekend: 2, otHoliday: 3, ssoPercent: 5, ssoMax: 750 };
@@ -667,12 +680,13 @@
         let currentPage = 1;
         const itemsPerPage = 50;
         
-        let listeners = { empSelf: null, empTimelogs: null, empLeaves: null, supLeaves: null, adminTimelogs: null, adminLeaves: null, adminEmployees: null, adminRosters: null, empRosters: null };
+        let listeners = { empSelf: null, empTimelogs: null, empLeaves: null, supLeaves: null, adminTimelogs: null, adminLeaves: null, adminEmployees: null, adminRosters: null };
 
         const views = { login: document.getElementById('view-login'), employee: document.getElementById('view-employee'), admin: document.getElementById('view-admin') };
         const navUserInfo = document.getElementById('user-info');
         const userNameSpan = document.getElementById('user-name');
 
+        // Navigation
         document.getElementById('toggle-to-admin').addEventListener('click', () => { document.getElementById('form-pin').classList.add('hide'); document.getElementById('form-admin').classList.remove('hide'); });
         document.getElementById('toggle-to-pin').addEventListener('click', () => { document.getElementById('form-admin').classList.add('hide'); document.getElementById('form-pin').classList.remove('hide'); });
 
@@ -693,415 +707,70 @@
         document.getElementById('tab-admin-employees').addEventListener('click', () => switchTabs('tab-admin-employees', 'section-admin-employees', 'tab-admin-', 'section-admin-'));
         document.getElementById('tab-admin-settings').addEventListener('click', () => switchTabs('tab-admin-settings', 'section-admin-settings', 'tab-admin-', 'section-admin-'));
 
-        // --- ระบบนาฬิกา Real-time สำหรับพนักงาน ---
-        function startRealtimeClock() {
-            if (clockInterval) clearInterval(clockInterval);
-            
-            const clockEl = document.getElementById('realtime-clock');
-            const dateEl = document.getElementById('realtime-date');
-            
-            const updateClock = () => {
-                const now = new Date();
-                const h = String(now.getHours()).padStart(2, '0');
-                const m = String(now.getMinutes()).padStart(2, '0');
-                const s = String(now.getSeconds()).padStart(2, '0');
-                
-                clockEl.innerHTML = `${h}:${m}<span class="text-2xl text-blue-200 ml-1 opacity-80">${s}</span>`;
-                
-                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                dateEl.innerText = now.toLocaleDateString('th-TH', options);
-            };
-            
-            updateClock();
-            clockInterval = setInterval(updateClock, 1000);
-        }
-
-        // --- คำนวณวันลาอัตโนมัติ และแจ้งเตือนโควตา ---
-        function calculateLeaveDays() {
-            const start = document.getElementById('leave-start').value;
-            const end = document.getElementById('leave-end').value;
-            const type = document.getElementById('leave-type').value;
-            const warnEl = document.getElementById('leave-warning');
-            
-            // จำกัดวันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่มต้น
-            if(start) {
-                document.getElementById('leave-end').min = start;
-                document.getElementById('leave-end').disabled = false;
-            }
-
-            if (start && end) {
-                const sDate = new Date(start);
-                const eDate = new Date(end);
-                if (eDate >= sDate) {
-                    const diffTime = Math.abs(eDate - sDate);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                    document.getElementById('leave-days').value = diffDays;
-                    
-                    // เช็คโควตา
-                    const currentQuotas = currentEmployee.quotas || { 'ลาป่วย': 30, 'ลากิจ': 6, 'ลาพักร้อน': 6, 'อื่นๆ': 0 };
-                    const q = currentQuotas[type] !== undefined ? currentQuotas[type] : 0;
-                    if (diffDays > q) {
-                        warnEl.classList.remove('hide');
-                        warnEl.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> โควตาไม่พอ! (คุณเหลือ ${type} ${q} วัน)`;
-                    } else {
-                        warnEl.classList.add('hide');
-                    }
-                } else {
-                    document.getElementById('leave-days').value = '';
-                    warnEl.classList.add('hide');
-                }
-            }
-        }
-        document.getElementById('leave-start').addEventListener('change', calculateLeaveDays);
-        document.getElementById('leave-end').addEventListener('change', calculateLeaveDays);
-        document.getElementById('leave-type').addEventListener('change', calculateLeaveDays);
-
-        // --- Offline Sync Logic ---
-        window.addEventListener('online', async () => {
-            document.getElementById('offline-banner').classList.add('hide');
-            const offlineLogs = JSON.parse(localStorage.getItem('offlineTimeLogs') || '[]');
-            if (offlineLogs.length > 0 && currentEmployee) {
-                Swal.fire({ title: 'กำลังซิงค์ข้อมูลออฟไลน์...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                try {
-                    for (const log of offlineLogs) {
-                        log.timestamp = Timestamp.fromDate(new Date(log.timestampStr));
-                        delete log.timestampStr;
-                        await addDoc(collection(db, "timelogs"), log);
-                    }
-                    localStorage.removeItem('offlineTimeLogs');
-                    Swal.fire({ icon: 'success', title: 'ซิงค์ข้อมูลออฟไลน์สำเร็จ!', timer: 1500 });
-                } catch(e) { console.error("Sync error", e); }
-            }
-        });
-        window.addEventListener('offline', () => { document.getElementById('offline-banner').classList.remove('hide'); });
-
-        async function loadSystemSettings() {
-            try {
-                const docSnap = await getDoc(doc(db, "settings", "general"));
-                if (docSnap.exists()) {
-                    systemSettings = { ...systemSettings, ...docSnap.data() };
-                    if (docSnap.data().officeLat && (!systemSettings.branches || systemSettings.branches.length === 0)) {
-                        systemSettings.branches = [{ id: Date.now(), name: 'สำนักงานใหญ่', lat: docSnap.data().officeLat, lng: docSnap.data().officeLng, radius: docSnap.data().radius || 100 }];
-                    }
-                    if (!systemSettings.holidays) systemSettings.holidays = [];
-                    if (!systemSettings.departments) systemSettings.departments = [];
-                    if (!systemSettings.shifts) systemSettings.shifts = [];
-                    if (!systemSettings.otNormal) systemSettings.otNormal = 1.5;
-                    if (!systemSettings.otWeekend) systemSettings.otWeekend = 2;
-                    if (!systemSettings.otHoliday) systemSettings.otHoliday = 3;
-                    if (!systemSettings.ssoPercent) systemSettings.ssoPercent = 5;
-                    if (!systemSettings.ssoMax) systemSettings.ssoMax = 750;
-                }
-            } catch (e) { console.error("Could not load settings", e); }
-        }
-        
-        function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; 
-            const dLat = (lat2-lat1) * (Math.PI/180);
-            const dLon = (lon2-lon1) * (Math.PI/180);
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * (Math.PI/180)) * Math.cos(lat2 * (Math.PI/180)) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
-        }
-
-        window.viewAttachment = (leaveId) => {
-            const req = allLeavesRaw.find(l => l.id === leaveId);
-            if(!req || !req.attachmentBase64) return;
-            
-            const data = req.attachmentBase64;
-            if (data.startsWith('data:application/pdf')) {
-                Swal.fire({
-                    title: 'เอกสารแนบ (PDF)',
-                    html: `<iframe src="${data}" class="w-full h-[60vh] rounded border" frameborder="0"></iframe>`,
-                    width: '80%',
-                    showCloseButton: true,
-                    showConfirmButton: false
-                });
-            } else {
-                Swal.fire({
-                    title: 'เอกสารแนบ (รูปภาพ)',
-                    imageUrl: data,
-                    imageAlt: 'Attachment',
-                    width: 'auto',
-                    imageWidth: '100%',
-                    showCloseButton: true,
-                    showConfirmButton: false
-                });
-            }
-        };
-
-        function detectFakeGPS(pos) {
-            const acc = pos.coords.accuracy;
-            const alt = pos.coords.altitude;
-            if (acc <= 5 && alt === null && !navigator.userAgent.match(/iPhone|iPad|iPod/i)) return true;
-            if (Math.abs(Date.now() - pos.timestamp) > 60000) return true;
-            return false;
-        }
-
-        function getEmployeeShiftDetails(empId, dateStr = null) {
-            let coreTime = systemSettings.coreTime || "09:00";
-            let workHours = Number(systemSettings.workHours) || 8;
-            let shiftName = "กะมาตรฐาน";
-            let deptName = "ไม่ระบุแผนก";
-
-            const emp = allEmployeesList.find(e => e.id === empId) || currentEmployee;
-            if (emp) {
-                if (emp.departmentId && systemSettings.departments) {
-                    const d = systemSettings.departments.find(x => x.id == emp.departmentId);
-                    if (d) deptName = d.name;
-                }
-                
-                let activeShiftId = emp.shiftId;
-                let isRosterOverride = false;
-
-                if (dateStr && allRosters.length > 0) {
-                    const override = allRosters.find(r => r.userId === empId && r.date === dateStr);
-                    if (override) {
-                        activeShiftId = override.shiftId;
-                        isRosterOverride = true;
-                    }
-                }
-
-                if (activeShiftId && systemSettings.shifts) {
-                    const s = systemSettings.shifts.find(x => x.id == activeShiftId);
-                    if (s) {
-                        coreTime = s.coreTime;
-                        workHours = Number(s.workHours);
-                        shiftName = s.name;
-                        if(isRosterOverride) shiftName += " (กะพิเศษ)";
-                    }
-                }
-            }
-            return { coreTime, workHours, shiftName, deptName };
-        }
-
-        function calculateEmployeePayroll(empId, year, monthStr, logsRaw = allLogsRaw) {
-            const emp = allEmployeesList.find(e => e.id === empId) || currentEmployee;
-            if(!emp) return null;
-
-            const userLeaves = allLeavesRaw.filter(l => l.userId === empId && l.status === 'approved');
-            const leaveMap = {}; 
-            
-            userLeaves.forEach(lv => {
-                let currDate = new Date(lv.startDate);
-                let endDate = new Date(lv.endDate);
-                let safety = 0;
-                while (currDate <= endDate && safety < 30) {
-                    const dStr = currDate.toISOString().split('T')[0];
-                    let lDays = (lv.startDate === lv.endDate) ? (lv.days || 1) : 1; 
-                    leaveMap[dStr] = (leaveMap[dStr] || 0) + lDays;
-                    currDate.setDate(currDate.getDate() + 1);
-                    safety++;
-                }
-            });
-
-            const userLogs = logsRaw.filter(l => {
-                if (l.userId !== empId || !l.timestamp) return false;
-                const d = l.timestamp.toDate(); 
-                return d.getFullYear() == year && (d.getMonth() + 1) == monthStr;
-            });
-
-            const dailyData = {};
-            userLogs.forEach(log => {
-                const dateStr = log.timestamp.toDate().toISOString().split('T')[0];
-                if (!dailyData[dateStr]) dailyData[dateStr] = { in: null, out: null };
-                const t = log.timestamp.toDate();
-                if (log.type === 'in') { if (!dailyData[dateStr].in || t < dailyData[dateStr].in) dailyData[dateStr].in = t; } 
-                else { if (!dailyData[dateStr].out || t > dailyData[dateStr].out) dailyData[dateStr].out = t; }
-            });
-
-            let totalWorkedDays = 0, totalPaidLeaveDays = 0;
-            let lateDays = 0, totalLateMinutes = 0, totalWorkHrs = 0;
-            let otNormalHrs = 0, otWeekendHrs = 0, otHolidayHrs = 0;
-            
-            const dailyRate = emp.dailyRate || 0;
-            const otRate = emp.otRate || 0;
-            const penaltyRate = emp.penaltyRate || 0;
-            const deductSso = emp.deductSso !== false; 
-
-            const daysInMonth = new Date(year, monthStr, 0).getDate();
-            
-            for (let i = 1; i <= daysInMonth; i++) {
-                const dateStr = `${year}-${String(monthStr).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                const dayLog = dailyData[dateStr];
-                const leaveDays = Math.min(1, leaveMap[dateStr] || 0); 
-                
-                totalPaidLeaveDays += leaveDays;
-
-                if (dayLog && dayLog.in) {
-                    const shiftInfo = getEmployeeShiftDetails(empId, dateStr);
-                    const dateObj = new Date(dayLog.in);
-                    
-                    const workedFraction = 1 - leaveDays;
-                    totalWorkedDays += workedFraction;
-
-                    if (shiftInfo.coreTime && leaveDays === 0) {
-                        const [cH, cM] = shiftInfo.coreTime.split(':');
-                        const coreDate = new Date(dayLog.in); coreDate.setHours(cH, cM, 0, 0);
-                        if (dayLog.in > coreDate) {
-                            lateDays++;
-                            totalLateMinutes += Math.max(0, Math.floor((dayLog.in - coreDate) / 60000));
-                        }
-                    }
-
-                    if (dayLog.out) {
-                        const hrs = (dayLog.out - dayLog.in) / (1000 * 60 * 60);
-                        totalWorkHrs += hrs;
-                        
-                        if (hrs > shiftInfo.workHours) {
-                            const otHrs = hrs - shiftInfo.workHours;
-                            
-                            const isHoliday = systemSettings.holidays && systemSettings.holidays.some(h => h.date === dateStr);
-                            const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
-
-                            if (isHoliday) otHolidayHrs += otHrs;
-                            else if (isWeekend) otWeekendHrs += otHrs;
-                            else otNormalHrs += otHrs;
-                        }
-                    }
-                }
-            }
-
-            const basePay = (totalWorkedDays + totalPaidLeaveDays) * dailyRate;
-            const otNormalPay = otNormalHrs * otRate * (systemSettings.otNormal || 1.5);
-            const otWeekendPay = otWeekendHrs * otRate * (systemSettings.otWeekend || 2);
-            const otHolidayPay = otHolidayHrs * otRate * (systemSettings.otHoliday || 3);
-            const totalOTPay = otNormalPay + otWeekendPay + otHolidayPay;
-            
-            const penaltyPay = totalLateMinutes * penaltyRate;
-            let ssoDeduction = 0;
-            if (deductSso) {
-                ssoDeduction = Math.min(basePay * ((systemSettings.ssoPercent || 5) / 100), (systemSettings.ssoMax || 750));
-            }
-
-            const totalNet = basePay + totalOTPay - penaltyPay - ssoDeduction;
-
-            return {
-                totalWorkedDays, totalPaidLeaveDays, lateDays, totalLateMinutes, totalWorkHrs, 
-                otNormalHrs, otWeekendHrs, otHolidayHrs,
-                basePay, otNormalPay, otWeekendPay, otHolidayPay, totalOTPay,
-                penaltyPay, ssoDeduction, totalNet,
-                dailyRate, otRate, penaltyRate
-            };
-        }
-
-        function showView(viewName) {
-            Object.values(views).forEach(v => v.classList.add('hide'));
-            views[viewName].classList.remove('hide');
-            Object.values(listeners).forEach(unsub => { if (unsub) unsub(); });
-            
-            if (viewName === 'login') {
-                navUserInfo.classList.add('hide');
-                if (clockInterval) clearInterval(clockInterval);
-                if (workTimerInterval) clearInterval(workTimerInterval);
-                stopCamera();
-            } else {
-                navUserInfo.classList.remove('hide');
-                if (viewName === 'admin') {
-                    userNameSpan.innerHTML = '<i class="fa-solid fa-crown text-yellow-300 mr-1"></i> ผู้ดูแลระบบ';
-                    if (clockInterval) clearInterval(clockInterval);
-                    if (workTimerInterval) clearInterval(workTimerInterval);
-                    loadSystemSettings().then(() => { loadAdminData(); populateSettingsForm(); });
-                } else if (viewName === 'employee') {
-                    const roleTxt = currentEmployee.role === 'supervisor' ? '<i class="fa-solid fa-user-tie mr-1 text-amber-300"></i> หัวหน้า' : '<i class="fa-solid fa-user mr-1"></i>';
-                    userNameSpan.innerHTML = roleTxt + ' ' + currentEmployee.name;
-                    
-                    const hr = new Date().getHours();
-                    let greet = 'สวัสดี,';
-                    if(hr < 12) greet = '☀️ อรุณสวัสดิ์,';
-                    else if(hr < 17) greet = '🌤️ สวัสดีตอนบ่าย,';
-                    else greet = '🌙 สวัสดีตอนเย็น,';
-                    
-                    document.getElementById('emp-greeting').innerText = greet;
-                    document.getElementById('emp-welcome-name').innerText = currentEmployee.name;
-                    
-                    startRealtimeClock();
-                    
-                    if (currentEmployee.role === 'supervisor') {
-                        document.getElementById('tab-emp-approve').classList.remove('hide');
-                    } else {
-                        document.getElementById('tab-emp-approve').classList.add('hide');
-                    }
-
-                    loadSystemSettings().then(() => { 
-                        initLocation(); 
-                        loadEmployeeData(); 
-                        
-                        if (systemSettings.announcement) {
-                            document.getElementById('emp-announcement-box').classList.remove('hide');
-                            document.getElementById('emp-announcement-text').textContent = systemSettings.announcement;
-                        } else {
-                            document.getElementById('emp-announcement-box').classList.add('hide');
-                        }
-                    });
-                }
-            }
-            
-            if (!navigator.onLine) document.getElementById('offline-banner').classList.remove('hide');
-        }
-
-        // --- Persistent Login Logic ---
-        onAuthStateChanged(auth, (user) => {
-            if (user) { currentAdmin = user; showView('admin'); } 
-            else {
-                currentAdmin = null;
-                const savedEmp = localStorage.getItem('currentEmployeeData') || sessionStorage.getItem('currentEmployeeData');
-                if (savedEmp) { currentEmployee = JSON.parse(savedEmp); showView('employee'); } 
-                else showView('login');
-            }
-        });
-
-        document.getElementById('btn-login-pin').addEventListener('click', async () => {
-            const pin = document.getElementById('login-pin').value;
-            const btn = document.getElementById('btn-login-pin');
-            if (!pin || pin.length !== 6) return Swal.fire({ icon: 'warning', title: 'รหัสไม่ถูกต้อง', text: 'กรุณากรอกรหัส PIN ให้ครบ 6 หลัก' });
-
-            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังตรวจสอบ...';
-            try {
-                const q = query(collection(db, "employees"), where("pin", "==", pin));
-                const querySnapshot = await getDocs(q);
-                if (!querySnapshot.empty) {
-                    currentEmployee = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() };
-                    
-                    if (document.getElementById('remember-me').checked) {
-                        localStorage.setItem('currentEmployeeData', JSON.stringify(currentEmployee));
-                    } else {
-                        sessionStorage.setItem('currentEmployeeData', JSON.stringify(currentEmployee));
-                    }
-                    
-                    Swal.fire({ icon: 'success', title: `ยินดีต้อนรับ`, text: currentEmployee.name, timer: 1500, showConfirmButton: false });
-                    document.getElementById('login-pin').value = '';
-                    showView('employee');
-                } else Swal.fire({ icon: 'error', title: 'ล้มเหลว', text: 'รหัส PIN ไม่ถูกต้อง' });
-            } catch (error) { Swal.fire({ icon: 'error', title: 'เชื่อมต่อฐานข้อมูลล้มเหลว', text: error.message }); } 
-            finally { btn.disabled = false; btn.innerHTML = 'เข้าสู่ระบบด้วย PIN'; }
-        });
-
-        document.getElementById('btn-login').addEventListener('click', async () => {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const btn = document.getElementById('btn-login');
-            if (!email || !password) return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกอีเมลและรหัสผ่าน' });
-
-            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังตรวจสอบ...';
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                Swal.fire({ icon: 'success', title: 'สำเร็จ', text: 'เข้าสู่ระบบเรียบร้อย', timer: 1500, showConfirmButton: false });
-            } catch (error) { Swal.fire({ icon: 'error', title: 'ล้มเหลว', text: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' }); } 
-            finally { btn.disabled = false; btn.innerHTML = 'เข้าสู่ระบบแอดมิน'; }
-        });
-
         document.getElementById('btn-logout').addEventListener('click', () => {
             Swal.fire({ title: 'ออกจากระบบ?', icon: 'question', showCancelButton: true, confirmButtonColor: '#e11d48', confirmButtonText: 'ใช่, ออกจากระบบ' })
             .then((result) => { 
                 if (result.isConfirmed) { 
-                    localStorage.removeItem('currentEmployeeData');
-                    sessionStorage.removeItem('currentEmployeeData'); 
-                    currentEmployee = null; 
-                    signOut(auth); 
-                    showView('login'); 
+                    localStorage.removeItem('currentEmployeeData'); sessionStorage.removeItem('currentEmployeeData'); 
+                    currentEmployee = null; signOut(auth); showView('login'); 
                 } 
             });
+        });
+
+        // --- ระบบกล้องและพิกัด (Camera & GPS) ---
+        function stopCamera() { 
+            if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; } 
+            const videoEl = document.getElementById('camera-feed');
+            if (videoEl) videoEl.srcObject = null;
+        }
+
+        async function startCamera() {
+            const videoEl = document.getElementById('camera-feed');
+            const imgEl = document.getElementById('captured-photo');
+            const btnStartCam = document.getElementById('btn-start-camera');
+            const btnSnap = document.getElementById('btn-snap');
+            const btnRetake = document.getElementById('btn-retake');
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+                videoEl.srcObject = stream; 
+                videoEl.classList.remove('hide'); 
+                document.getElementById('camera-placeholder').classList.add('hide');
+                imgEl.classList.add('hide'); 
+                btnStartCam.classList.add('hide'); 
+                btnSnap.classList.remove('hide'); 
+                btnRetake.classList.add('hide');
+                capturedPhotoData = null; 
+                checkReadyState();
+            } catch (err) { Swal.fire({ icon: 'error', title: 'ไม่พบกล้อง', text: 'กรุณาอนุญาตการเข้าถึงกล้อง' }); }
+        }
+
+        document.getElementById('btn-start-camera').addEventListener('click', startCamera);
+
+        document.getElementById('btn-snap').addEventListener('click', () => {
+            const videoEl = document.getElementById('camera-feed');
+            const imgEl = document.getElementById('captured-photo');
+            const canvasEl = document.getElementById('photo-canvas');
+            const btnSnap = document.getElementById('btn-snap');
+            const btnRetake = document.getElementById('btn-retake');
+
+            const targetWidth = 400, scale = targetWidth / videoEl.videoWidth, targetHeight = videoEl.videoHeight * scale;
+            canvasEl.width = targetWidth; canvasEl.height = targetHeight;
+            const ctx = canvasEl.getContext('2d'); ctx.translate(targetWidth, 0); ctx.scale(-1, 1);
+            ctx.drawImage(videoEl, 0, 0, targetWidth, targetHeight);
+            capturedPhotoData = canvasEl.toDataURL('image/jpeg', 0.7);
+            imgEl.src = capturedPhotoData; imgEl.classList.remove('hide'); videoEl.classList.add('hide');
+            btnSnap.classList.add('hide'); btnRetake.classList.remove('hide'); checkReadyState();
+        });
+
+        document.getElementById('btn-retake').addEventListener('click', () => {
+            const videoEl = document.getElementById('camera-feed');
+            const imgEl = document.getElementById('captured-photo');
+            const btnSnap = document.getElementById('btn-snap');
+            const btnRetake = document.getElementById('btn-retake');
+
+            imgEl.classList.add('hide'); videoEl.classList.remove('hide');
+            btnSnap.classList.remove('hide'); btnRetake.classList.add('hide');
+            capturedPhotoData = null; checkReadyState();
         });
 
         function initLocation() {
@@ -1110,7 +779,7 @@
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         if (detectFakeGPS(position)) {
-                            statusEl.className = "text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded-full";
+                            statusEl.className = "text-xs bg-rose-100 text-rose-700 px-2.5 py-1 rounded-full font-medium";
                             statusEl.innerHTML = `<i class="fa-solid fa-ban mr-1"></i>พบการใช้ Fake GPS`;
                             currentLat = null; currentLng = null;
                             checkReadyState();
@@ -1163,77 +832,350 @@
             }
         }
 
-        const videoEl = document.getElementById('camera-feed');
-        const imgEl = document.getElementById('captured-photo');
-        const canvasEl = document.getElementById('photo-canvas');
-        const btnStartCam = document.getElementById('btn-start-camera'), btnSnap = document.getElementById('btn-snap'), btnRetake = document.getElementById('btn-retake');
-
-        async function startCamera() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
-                videoEl.srcObject = stream; videoEl.classList.remove('hide'); document.getElementById('camera-placeholder').classList.add('hide');
-                imgEl.classList.add('hide'); btnStartCam.classList.add('hide'); btnSnap.classList.remove('hide'); btnRetake.classList.add('hide');
-                capturedPhotoData = null; checkReadyState();
-            } catch (err) { Swal.fire({ icon: 'error', title: 'ไม่พบกล้อง', text: 'กรุณาอนุญาตการเข้าถึงกล้อง' }); }
-        }
-        function stopCamera() { if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; } }
-
-        btnStartCam.addEventListener('click', startCamera);
-        btnSnap.addEventListener('click', () => {
-            const targetWidth = 400, scale = targetWidth / videoEl.videoWidth, targetHeight = videoEl.videoHeight * scale;
-            canvasEl.width = targetWidth; canvasEl.height = targetHeight;
-            const ctx = canvasEl.getContext('2d'); ctx.translate(targetWidth, 0); ctx.scale(-1, 1);
-            ctx.drawImage(videoEl, 0, 0, targetWidth, targetHeight);
-            capturedPhotoData = canvasEl.toDataURL('image/jpeg', 0.7);
-            imgEl.src = capturedPhotoData; imgEl.classList.remove('hide'); videoEl.classList.add('hide');
-            btnSnap.classList.add('hide'); btnRetake.classList.remove('hide'); checkReadyState();
-        });
-        btnRetake.addEventListener('click', () => {
-            imgEl.classList.add('hide'); videoEl.classList.remove('hide');
-            btnSnap.classList.remove('hide'); btnRetake.classList.add('hide');
-            capturedPhotoData = null; checkReadyState();
-        });
-
-        // --- Smart Buttons Logic ---
         function checkReadyState() {
             const ready = currentLat !== null && capturedPhotoData !== null;
             const btnIn = document.getElementById('btn-checkin');
             const btnOut = document.getElementById('btn-checkout');
 
-            // อนุญาตให้กดได้เฉพาะปุ่มที่ตรงกับ Action ถัดไป
             if (expectedAction === 'in') {
-                btnIn.disabled = !ready;
-                btnOut.disabled = true;
-                
-                // Visual Guides
-                btnIn.classList.add('btn-suggested-in');
-                btnIn.classList.remove('opacity-30', 'shadow-none', 'translate-y-0');
-                btnOut.classList.remove('btn-suggested-out');
-                btnOut.classList.add('opacity-30', 'shadow-none', 'translate-y-0');
+                btnIn.disabled = !ready; btnOut.disabled = true;
+                btnIn.classList.add('btn-suggested-in'); btnIn.classList.remove('opacity-30', 'shadow-none', 'translate-y-0');
+                btnOut.classList.remove('btn-suggested-out'); btnOut.classList.add('opacity-30', 'shadow-none', 'translate-y-0');
             } else {
-                btnIn.disabled = true;
-                btnOut.disabled = !ready;
-                
-                // Visual Guides
-                btnOut.classList.add('btn-suggested-out');
-                btnOut.classList.remove('opacity-30', 'shadow-none', 'translate-y-0');
-                btnIn.classList.remove('btn-suggested-in');
-                btnIn.classList.add('opacity-30', 'shadow-none', 'translate-y-0');
+                btnIn.disabled = true; btnOut.disabled = !ready;
+                btnOut.classList.add('btn-suggested-out'); btnOut.classList.remove('opacity-30', 'shadow-none', 'translate-y-0');
+                btnIn.classList.remove('btn-suggested-in'); btnIn.classList.add('opacity-30', 'shadow-none', 'translate-y-0');
             }
         }
 
+        // Core App Functions
+        window.generateRandomPin = (inputId) => {
+            let newPin;
+            let isUnique = false;
+            let safetyCount = 0;
+            while (!isUnique && safetyCount < 100) {
+                newPin = Math.floor(100000 + Math.random() * 900000).toString();
+                isUnique = !allEmployeesList.some(e => e.pin === newPin);
+                safetyCount++;
+            }
+            if(isUnique) {
+                document.getElementById(inputId).value = newPin;
+                document.getElementById(inputId).classList.add('ring-2', 'ring-green-400');
+                setTimeout(() => document.getElementById(inputId).classList.remove('ring-2', 'ring-green-400'), 500);
+            }
+        };
+
+        function calculateLeaveDays() {
+            const start = document.getElementById('leave-start').value;
+            const end = document.getElementById('leave-end').value;
+            const type = document.getElementById('leave-type').value;
+            const warnEl = document.getElementById('leave-warning');
+            
+            if(start) {
+                document.getElementById('leave-end').min = start;
+                document.getElementById('leave-end').disabled = false;
+            }
+
+            if (start && end) {
+                const sDate = new Date(start);
+                const eDate = new Date(end);
+                if (eDate >= sDate) {
+                    const diffTime = Math.abs(eDate - sDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    document.getElementById('leave-days').value = diffDays;
+                    const currentQuotas = currentEmployee.quotas || { 'ลาป่วย': 30, 'ลากิจ': 6, 'ลาพักร้อน': 6, 'อื่นๆ': 0 };
+                    const q = currentQuotas[type] !== undefined ? currentQuotas[type] : 0;
+                    if (diffDays > q) {
+                        warnEl.classList.remove('hide');
+                        warnEl.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> โควตาไม่พอ! (คุณเหลือ ${type} ${q} วัน)`;
+                    } else { warnEl.classList.add('hide'); }
+                } else {
+                    document.getElementById('leave-days').value = '';
+                    warnEl.classList.add('hide');
+                }
+            }
+        }
+        document.getElementById('leave-start').addEventListener('change', calculateLeaveDays);
+        document.getElementById('leave-end').addEventListener('change', calculateLeaveDays);
+        document.getElementById('leave-type').addEventListener('change', calculateLeaveDays);
+
+        window.addEventListener('online', async () => {
+            document.getElementById('offline-banner').classList.add('hide');
+            const offlineLogs = JSON.parse(localStorage.getItem('offlineTimeLogs') || '[]');
+            if (offlineLogs.length > 0 && currentEmployee) {
+                Swal.fire({ title: 'กำลังซิงค์ข้อมูลออฟไลน์...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                try {
+                    for (const log of offlineLogs) {
+                        log.timestamp = Timestamp.fromDate(new Date(log.timestampStr));
+                        delete log.timestampStr;
+                        await addDoc(collection(db, "timelogs"), log);
+                    }
+                    localStorage.removeItem('offlineTimeLogs');
+                    Swal.fire({ icon: 'success', title: 'ซิงค์ข้อมูลออฟไลน์สำเร็จ!', timer: 1500 });
+                } catch(e) { console.error("Sync error", e); }
+            }
+        });
+        window.addEventListener('offline', () => { document.getElementById('offline-banner').classList.remove('hide'); });
+
+        async function loadSystemSettings() {
+            try {
+                const docSnap = await getDoc(doc(db, "settings", "general"));
+                if (docSnap.exists()) {
+                    systemSettings = { ...systemSettings, ...docSnap.data() };
+                    if (docSnap.data().officeLat && (!systemSettings.branches || systemSettings.branches.length === 0)) {
+                        systemSettings.branches = [{ id: Date.now(), name: 'สำนักงานใหญ่', lat: docSnap.data().officeLat, lng: docSnap.data().officeLng, radius: docSnap.data().radius || 100 }];
+                    }
+                    if (!systemSettings.holidays) systemSettings.holidays = [];
+                    if (!systemSettings.departments) systemSettings.departments = [];
+                    if (!systemSettings.shifts) systemSettings.shifts = [];
+                    if (!systemSettings.otNormal) systemSettings.otNormal = 1.5;
+                    if (!systemSettings.otWeekend) systemSettings.otWeekend = 2;
+                    if (!systemSettings.otHoliday) systemSettings.otHoliday = 3;
+                    if (!systemSettings.ssoPercent) systemSettings.ssoPercent = 5;
+                    if (!systemSettings.ssoMax) systemSettings.ssoMax = 750;
+                }
+            } catch (e) { console.error("Could not load settings", e); }
+        }
+        
+        function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; 
+            const dLat = (lat2-lat1) * (Math.PI/180);
+            const dLon = (lon2-lon1) * (Math.PI/180);
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * (Math.PI/180)) * Math.cos(lat2 * (Math.PI/180)) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        window.viewAttachment = (leaveId) => {
+            const req = allLeavesRaw.find(l => l.id === leaveId);
+            if(!req || !req.attachmentBase64) return;
+            const data = req.attachmentBase64;
+            if (data.startsWith('data:application/pdf')) {
+                Swal.fire({ title: 'เอกสารแนบ (PDF)', html: `<iframe src="${data}" class="w-full h-[60vh] rounded border" frameborder="0"></iframe>`, width: '80%', showCloseButton: true, showConfirmButton: false });
+            } else {
+                Swal.fire({ title: 'เอกสารแนบ (รูปภาพ)', imageUrl: data, imageAlt: 'Attachment', width: 'auto', imageWidth: '100%', showCloseButton: true, showConfirmButton: false });
+            }
+        };
+
+        function detectFakeGPS(pos) {
+            const acc = pos.coords.accuracy;
+            const alt = pos.coords.altitude;
+            if (acc <= 5 && alt === null && !navigator.userAgent.match(/iPhone|iPad|iPod/i)) return true;
+            if (Math.abs(Date.now() - pos.timestamp) > 60000) return true;
+            return false;
+        }
+
+        function getEmployeeShiftDetails(empId, dateStr = null) {
+            let coreTime = systemSettings.coreTime || "09:00";
+            let workHours = Number(systemSettings.workHours) || 8;
+            let shiftName = "กะมาตรฐาน";
+            let deptName = "ไม่ระบุแผนก";
+            const emp = allEmployeesList.find(e => e.id === empId) || currentEmployee;
+            if (emp) {
+                if (emp.departmentId && systemSettings.departments) {
+                    const d = systemSettings.departments.find(x => x.id == emp.departmentId);
+                    if (d) deptName = d.name;
+                }
+                let activeShiftId = emp.shiftId;
+                let isRosterOverride = false;
+                if (dateStr && allRosters.length > 0) {
+                    const override = allRosters.find(r => r.userId === empId && r.date === dateStr);
+                    if (override) { activeShiftId = override.shiftId; isRosterOverride = true; }
+                }
+                if (activeShiftId && systemSettings.shifts) {
+                    const s = systemSettings.shifts.find(x => x.id == activeShiftId);
+                    if (s) {
+                        coreTime = s.coreTime; workHours = Number(s.workHours); shiftName = s.name;
+                        if(isRosterOverride) shiftName += " (กะพิเศษ)";
+                    }
+                }
+            }
+            return { coreTime, workHours, shiftName, deptName };
+        }
+
+        function calculateEmployeePayroll(empId, year, monthStr, logsRaw = allLogsRaw) {
+            const emp = allEmployeesList.find(e => e.id === empId) || currentEmployee;
+            if(!emp) return null;
+            const userLeaves = allLeavesRaw.filter(l => l.userId === empId && l.status === 'approved');
+            const leaveMap = {}; 
+            userLeaves.forEach(lv => {
+                let currDate = new Date(lv.startDate);
+                let endDate = new Date(lv.endDate);
+                let safety = 0;
+                while (currDate <= endDate && safety < 30) {
+                    const dStr = currDate.toISOString().split('T')[0];
+                    let lDays = (lv.startDate === lv.endDate) ? (lv.days || 1) : 1; 
+                    leaveMap[dStr] = (leaveMap[dStr] || 0) + lDays;
+                    currDate.setDate(currDate.getDate() + 1);
+                    safety++;
+                }
+            });
+
+            const userLogs = logsRaw.filter(l => {
+                if (l.userId !== empId || !l.timestamp) return false;
+                const d = l.timestamp.toDate(); 
+                return d.getFullYear() == year && (d.getMonth() + 1) == monthStr;
+            });
+            const dailyData = {};
+            userLogs.forEach(log => {
+                const dateStr = log.timestamp.toDate().toISOString().split('T')[0];
+                if (!dailyData[dateStr]) dailyData[dateStr] = { in: null, out: null };
+                const t = log.timestamp.toDate();
+                if (log.type === 'in') { if (!dailyData[dateStr].in || t < dailyData[dateStr].in) dailyData[dateStr].in = t; } 
+                else { if (!dailyData[dateStr].out || t > dailyData[dateStr].out) dailyData[dateStr].out = t; }
+            });
+
+            let totalWorkedDays = 0, totalPaidLeaveDays = 0, lateDays = 0, totalLateMinutes = 0, totalWorkHrs = 0;
+            let otNormalHrs = 0, otWeekendHrs = 0, otHolidayHrs = 0;
+            const dailyRate = emp.dailyRate || 0, otRate = emp.otRate || 0, penaltyRate = emp.penaltyRate || 0;
+            const deductSso = emp.deductSso !== false; 
+            const daysInMonth = new Date(year, monthStr, 0).getDate();
+            
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dateStr = `${year}-${String(monthStr).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const dayLog = dailyData[dateStr];
+                const leaveDays = Math.min(1, leaveMap[dateStr] || 0); 
+                totalPaidLeaveDays += leaveDays;
+                if (dayLog && dayLog.in) {
+                    const shiftInfo = getEmployeeShiftDetails(empId, dateStr);
+                    const dateObj = new Date(dayLog.in);
+                    const workedFraction = 1 - leaveDays;
+                    totalWorkedDays += workedFraction;
+                    if (shiftInfo.coreTime && leaveDays === 0) {
+                        const [cH, cM] = shiftInfo.coreTime.split(':');
+                        const coreDate = new Date(dayLog.in); coreDate.setHours(cH, cM, 0, 0);
+                        if (dayLog.in > coreDate) {
+                            lateDays++;
+                            totalLateMinutes += Math.max(0, Math.floor((dayLog.in - coreDate) / 60000));
+                        }
+                    }
+                    if (dayLog.out) {
+                        const hrs = (dayLog.out - dayLog.in) / (1000 * 60 * 60);
+                        totalWorkHrs += hrs;
+                        if (hrs > shiftInfo.workHours) {
+                            const otHrs = hrs - shiftInfo.workHours;
+                            const isHoliday = systemSettings.holidays && systemSettings.holidays.some(h => h.date === dateStr);
+                            const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+                            if (isHoliday) otHolidayHrs += otHrs;
+                            else if (isWeekend) otWeekendHrs += otHrs;
+                            else otNormalHrs += otHrs;
+                        }
+                    }
+                }
+            }
+
+            const basePay = (totalWorkedDays + totalPaidLeaveDays) * dailyRate;
+            const otNormalPay = otNormalHrs * otRate * (systemSettings.otNormal || 1.5);
+            const otWeekendPay = otWeekendHrs * otRate * (systemSettings.otWeekend || 2);
+            const otHolidayPay = otHolidayHrs * otRate * (systemSettings.otHoliday || 3);
+            const totalOTPay = otNormalPay + otWeekendPay + otHolidayPay;
+            const penaltyPay = totalLateMinutes * penaltyRate;
+            let ssoDeduction = 0;
+            if (deductSso) ssoDeduction = Math.min(basePay * ((systemSettings.ssoPercent || 5) / 100), (systemSettings.ssoMax || 750));
+            const totalNet = basePay + totalOTPay - penaltyPay - ssoDeduction;
+
+            return {
+                totalWorkedDays, totalPaidLeaveDays, lateDays, totalLateMinutes, totalWorkHrs, 
+                otNormalHrs, otWeekendHrs, otHolidayHrs, basePay, otNormalPay, otWeekendPay, otHolidayPay, totalOTPay,
+                penaltyPay, ssoDeduction, totalNet, dailyRate, otRate, penaltyRate
+            };
+        }
+
+        function showView(viewName) {
+            Object.values(views).forEach(v => v.classList.add('hide'));
+            views[viewName].classList.remove('hide');
+            Object.values(listeners).forEach(unsub => { if (unsub) unsub(); });
+            
+            if (viewName === 'login') {
+                navUserInfo.classList.add('hide');
+                if (clockInterval) clearInterval(clockInterval);
+                if (workTimerInterval) clearInterval(workTimerInterval);
+                stopCamera();
+            } else {
+                navUserInfo.classList.remove('hide');
+                if (viewName === 'admin') {
+                    userNameSpan.innerHTML = '<i class="fa-solid fa-crown text-yellow-300 mr-1"></i> ผู้ดูแลระบบ';
+                    if (clockInterval) clearInterval(clockInterval);
+                    if (workTimerInterval) clearInterval(workTimerInterval);
+                    loadSystemSettings().then(() => { loadAdminData(); populateSettingsForm(); });
+                } else if (viewName === 'employee') {
+                    const roleTxt = currentEmployee.role === 'supervisor' ? '<i class="fa-solid fa-user-tie mr-1 text-amber-300"></i> หัวหน้า' : '<i class="fa-solid fa-user mr-1"></i>';
+                    userNameSpan.innerHTML = roleTxt + ' ' + currentEmployee.name;
+                    
+                    const hr = new Date().getHours();
+                    let greet = 'สวัสดี,';
+                    if(hr < 12) greet = '☀️ อรุณสวัสดิ์,';
+                    else if(hr < 17) greet = '🌤️ สวัสดีตอนบ่าย,';
+                    else greet = '🌙 สวัสดีตอนเย็น,';
+                    
+                    document.getElementById('emp-greeting').innerText = greet;
+                    document.getElementById('emp-welcome-name').innerText = currentEmployee.name;
+                    
+                    startRealtimeClock();
+                    if (currentEmployee.role === 'supervisor') document.getElementById('tab-emp-approve').classList.remove('hide');
+                    else document.getElementById('tab-emp-approve').classList.add('hide');
+
+                    loadSystemSettings().then(() => { 
+                        initLocation(); 
+                        loadEmployeeData(); 
+                        if (systemSettings.announcement) {
+                            document.getElementById('emp-announcement-box').classList.remove('hide');
+                            document.getElementById('emp-announcement-text').textContent = systemSettings.announcement;
+                        } else document.getElementById('emp-announcement-box').classList.add('hide');
+                    });
+                }
+            }
+            if (!navigator.onLine) document.getElementById('offline-banner').classList.remove('hide');
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) { currentAdmin = user; showView('admin'); } 
+            else {
+                currentAdmin = null;
+                const savedEmp = localStorage.getItem('currentEmployeeData') || sessionStorage.getItem('currentEmployeeData');
+                if (savedEmp) { currentEmployee = JSON.parse(savedEmp); showView('employee'); } 
+                else showView('login');
+            }
+        });
+
+        document.getElementById('btn-login-pin').addEventListener('click', async () => {
+            const pin = document.getElementById('login-pin').value;
+            const btn = document.getElementById('btn-login-pin');
+            if (!pin || pin.length !== 6) return Swal.fire({ icon: 'warning', title: 'รหัสไม่ถูกต้อง', text: 'กรุณากรอกรหัส PIN ให้ครบ 6 หลัก' });
+
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังตรวจสอบ...';
+            try {
+                const q = query(collection(db, "employees"), where("pin", "==", pin));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    currentEmployee = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() };
+                    if (document.getElementById('remember-me').checked) localStorage.setItem('currentEmployeeData', JSON.stringify(currentEmployee));
+                    else sessionStorage.setItem('currentEmployeeData', JSON.stringify(currentEmployee));
+                    Swal.fire({ icon: 'success', title: `ยินดีต้อนรับ`, text: currentEmployee.name, timer: 1500, showConfirmButton: false });
+                    document.getElementById('login-pin').value = '';
+                    showView('employee');
+                } else Swal.fire({ icon: 'error', title: 'ล้มเหลว', text: 'รหัส PIN ไม่ถูกต้อง' });
+            } catch (error) { Swal.fire({ icon: 'error', title: 'เชื่อมต่อฐานข้อมูลล้มเหลว', text: error.message }); } 
+            finally { btn.disabled = false; btn.innerHTML = 'เข้าสู่ระบบด้วย PIN'; }
+        });
+
+        document.getElementById('btn-login').addEventListener('click', async () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('btn-login');
+            if (!email || !password) return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกอีเมลและรหัสผ่าน' });
+
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังตรวจสอบ...';
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                Swal.fire({ icon: 'success', title: 'สำเร็จ', text: 'เข้าสู่ระบบเรียบร้อย', timer: 1500, showConfirmButton: false });
+            } catch (error) { Swal.fire({ icon: 'error', title: 'ล้มเหลว', text: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' }); } 
+            finally { btn.disabled = false; btn.innerHTML = 'เข้าสู่ระบบแอดมิน'; }
+        });
+
         async function saveTimeLog(type) {
             const remark = document.getElementById('log-remark').value.trim();
-            const logData = {
-                userId: currentEmployee.id,
-                name: currentEmployee.name,
-                type: type,
-                lat: currentLat, lng: currentLng,
-                branchName: currentBranchName, 
-                photoBase64: capturedPhotoData,
-                remark: remark,
-                isManual: false 
-            };
+            const logData = { userId: currentEmployee.id, name: currentEmployee.name, type: type, lat: currentLat, lng: currentLng, branchName: currentBranchName, photoBase64: capturedPhotoData, remark: remark, isManual: false };
 
             if (!navigator.onLine) {
                 logData.timestampStr = new Date().toISOString(); 
@@ -1241,8 +1183,7 @@
                 offlineLogs.push(logData);
                 localStorage.setItem('offlineTimeLogs', JSON.stringify(offlineLogs));
                 Swal.fire({ icon: 'info', title: 'โหมดออฟไลน์', text: `บันทึกเวลา${type === 'in' ? 'เข้า' : 'ออก'}ลงในเครื่องแล้ว จะซิงค์เมื่อมีเน็ต`, timer: 2000 });
-                btnRetake.click(); document.getElementById('log-remark').value = '';
-                return;
+                document.getElementById('btn-retake').click(); document.getElementById('log-remark').value = ''; return;
             }
 
             Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -1250,8 +1191,7 @@
                 logData.timestamp = serverTimestamp();
                 await addDoc(collection(db, "timelogs"), logData);
                 Swal.fire({ icon: 'success', title: `บันทึกเวลา${type === 'in' ? 'เข้า' : 'ออก'}สำเร็จ!`, timer: 1500 });
-                btnRetake.click(); 
-                document.getElementById('log-remark').value = ''; 
+                document.getElementById('btn-retake').click(); document.getElementById('log-remark').value = ''; 
             } catch (error) { Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: error.message }); }
         }
         document.getElementById('btn-checkin').addEventListener('click', () => saveTimeLog('in'));
@@ -1279,17 +1219,7 @@
                         const formatDate = (dateStr) => { if(!dateStr) return ''; const p = dateStr.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; };
                         const attachmentStr = req.attachmentBase64 ? `<p class="text-xs text-blue-500 mt-1 cursor-pointer hover:underline" onclick="window.viewAttachment('${req.id}')"><i class="fa-solid fa-paperclip"></i> ดูเอกสารแนบ</p>` : '';
                         
-                        html += `
-                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-start">
-                                <div>
-                                    <p class="font-bold text-sm text-gray-700">${req.type} <span class="text-xs font-normal text-gray-500">(${req.days} วัน)</span></p>
-                                    <p class="text-xs text-gray-500">${formatDate(req.startDate)} - ${formatDate(req.endDate)}</p>
-                                    <p class="text-xs text-gray-400 mt-1">เหตุผล: ${req.reason}</p>
-                                    ${attachmentStr}
-                                </div>
-                                <div class="text-right">${statusHtml}</div>
-                            </div>
-                        `;
+                        html += `<div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-start"><div><p class="font-bold text-sm text-gray-700">${req.type} <span class="text-xs font-normal text-gray-500">(${req.days} วัน)</span></p><p class="text-xs text-gray-500">${formatDate(req.startDate)} - ${formatDate(req.endDate)}</p><p class="text-xs text-gray-400 mt-1">เหตุผล: ${req.reason}</p>${attachmentStr}</div><div class="text-right">${statusHtml}</div></div>`;
                     });
                     container.innerHTML = html;
                 }
@@ -1334,24 +1264,12 @@
                 listeners.supLeaves = onSnapshot(qSup, (snapshot) => {
                     const container = document.getElementById('sup-leave-list');
                     const leaves = []; snapshot.forEach(doc => leaves.push({ id: doc.id, ...doc.data() }));
-                    
                     if (leaves.length === 0) container.innerHTML = '<div class="text-center text-sm text-gray-400 py-4">ไม่มีคำขอที่รออนุมัติ</div>';
                     else {
                         let html = '';
                         leaves.forEach(req => {
                             const formatDate = (dateStr) => { if(!dateStr) return ''; const p = dateStr.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; };
-                            html += `
-                                <div class="bg-gray-50 p-3 rounded-lg border border-blue-200">
-                                    <p class="font-bold text-sm text-gray-800">${req.name}</p>
-                                    <p class="text-sm font-bold text-blue-600">${req.type} <span class="text-xs text-gray-500 font-normal">(${req.days} วัน)</span></p>
-                                    <p class="text-xs text-gray-500">${formatDate(req.startDate)} - ${formatDate(req.endDate)}</p>
-                                    <p class="text-xs text-gray-600 mt-1 bg-white p-2 rounded border">เหตุผล: ${req.reason}</p>
-                                    <div class="flex gap-2 mt-3">
-                                        <button onclick="window.supUpdateLeave('${req.id}', 'supervisor_approved')" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs py-2 rounded shadow font-bold"><i class="fa-solid fa-check mr-1"></i> อนุมัติ</button>
-                                        <button onclick="window.supUpdateLeave('${req.id}', 'rejected')" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white text-xs py-2 rounded shadow font-bold"><i class="fa-solid fa-xmark mr-1"></i> ปฏิเสธ</button>
-                                    </div>
-                                </div>
-                            `;
+                            html += `<div class="bg-gray-50 p-3 rounded-lg border border-blue-200"><p class="font-bold text-sm text-gray-800">${req.name}</p><p class="text-sm font-bold text-blue-600">${req.type} <span class="text-xs text-gray-500 font-normal">(${req.days} วัน)</span></p><p class="text-xs text-gray-500">${formatDate(req.startDate)} - ${formatDate(req.endDate)}</p><p class="text-xs text-gray-600 mt-1 bg-white p-2 rounded border">เหตุผล: ${req.reason}</p><div class="flex gap-2 mt-3"><button onclick="window.supUpdateLeave('${req.id}', 'supervisor_approved')" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs py-2 rounded shadow font-bold"><i class="fa-solid fa-check mr-1"></i> อนุมัติ</button><button onclick="window.supUpdateLeave('${req.id}', 'rejected')" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white text-xs py-2 rounded shadow font-bold"><i class="fa-solid fa-xmark mr-1"></i> ปฏิเสธ</button></div></div>`;
                         });
                         container.innerHTML = html;
                     }
@@ -1363,13 +1281,10 @@
             if(!currentEmployee) return;
             const logs = [...allLogsRaw];
             logs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-            
             const now = new Date();
-            const currYear = now.getFullYear();
-            const currMonth = now.getMonth();
+            const currYear = now.getFullYear(), currMonth = now.getMonth();
             const todayStrTh = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
             const todayIso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
-            
             document.getElementById('emp-month-label').textContent = now.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' });
 
             const todayShift = getEmployeeShiftDetails(currentEmployee.id, todayIso);
@@ -1377,28 +1292,22 @@
             document.getElementById('emp-target-time').innerHTML = todayShift.coreTime;
 
             const todayLogs = logs.filter(l => l.timestamp && l.timestamp.toDate().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) === todayStrTh);
-
             const statusEl = document.getElementById('emp-current-status');
             
-            // ลอจิกตัดสินใจว่าปุ่มไหนควรสว่าง (Smart Buttons)
             if(todayLogs.length > 0) {
                 const lastLog = todayLogs[0]; 
                 if(lastLog.type === 'in') {
                     statusEl.innerHTML = '<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> เข้างานแล้ว</span>';
-                    expectedAction = 'out';
-                    lastInTime = lastLog.timestamp.toDate();
+                    expectedAction = 'out'; lastInTime = lastLog.timestamp.toDate();
                 } else {
                     statusEl.innerHTML = '<span class="text-rose-600 font-bold"><i class="fa-solid fa-door-open mr-1"></i> ออกงานแล้ว</span>';
-                    expectedAction = 'in'; // ออกแล้วเผื่อกลับมาเข้าใหม่
-                    lastInTime = null;
+                    expectedAction = 'in'; lastInTime = null;
                 }
             } else {
                 statusEl.innerHTML = '<span class="text-gray-400">ยังไม่ได้บันทึกเวลา</span>';
-                expectedAction = 'in';
-                lastInTime = null;
+                expectedAction = 'in'; lastInTime = null;
             }
 
-            // จัดการตัวจับเวลา Live
             if(workTimerInterval) clearInterval(workTimerInterval);
             const timerContainer = document.getElementById('working-timer-container');
             const timerSpan = document.getElementById('working-timer');
@@ -1412,14 +1321,11 @@
                     const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
                     timerSpan.innerText = `${h}:${m}:${s}`;
                 }, 1000);
-            } else {
-                timerContainer.classList.add('hide');
-            }
+            } else { timerContainer.classList.add('hide'); }
             
-            checkReadyState(); // อัปเดต UI ของปุ่มทันที
+            checkReadyState(); 
 
             const payroll = calculateEmployeePayroll(currentEmployee.id, currYear, currMonth+1, logs);
-
             document.getElementById('emp-stat-days').innerHTML = `${payroll ? (payroll.totalWorkedDays + payroll.totalPaidLeaveDays) : 0}<span class="text-xs font-normal text-emerald-600 ml-1">วัน</span>`;
             document.getElementById('emp-stat-late').innerHTML = `${payroll ? payroll.lateDays : 0}<span class="text-xs font-normal text-rose-600 ml-1">ครั้ง</span>`;
             document.getElementById('emp-stat-ot').innerHTML = `${payroll ? (payroll.otNormalHrs + payroll.otWeekendHrs + payroll.otHolidayHrs).toFixed(1) : 0}<span class="text-xs font-normal text-orange-600 ml-1">ชม.</span>`;
@@ -1434,31 +1340,14 @@
                     const remarkStr = log.remark ? `<p class="text-xs text-blue-500 mt-1"><i class="fa-regular fa-comment-dots"></i> ${log.remark}</p>` : '';
                     const manualBadge = log.isManual ? `<span class="text-[10px] bg-gray-200 text-gray-600 px-1 rounded ml-2">แอดมินเพิ่ม</span>` : '';
                     const branchBadge = log.branchName ? `<span class="text-[10px] bg-indigo-100 text-indigo-600 px-1 rounded ml-1">${log.branchName}</span>` : '';
-                    
-                    html += `
-                        <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100">
-                            <div class="flex items-start">
-                                <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3 mt-1 ${isCheckIn ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
-                                    <i class="fa-solid ${isCheckIn ? 'fa-arrow-right-to-bracket' : 'fa-arrow-right-from-bracket'}"></i>
-                                </div>
-                                <div>
-                                    <p class="font-bold text-sm text-gray-700">${isCheckIn ? 'เข้างาน' : 'ออกงาน'} ${manualBadge} ${branchBadge}</p>
-                                    <p class="text-xs text-gray-500">${timeStr}</p>
-                                    ${remarkStr}
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                    html += `<div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-start"><div><p class="font-bold text-sm text-gray-700">${isCheckIn ? 'เข้างาน' : 'ออกงาน'} ${manualBadge} ${branchBadge}</p><p class="text-xs text-gray-500">${timeStr}</p>${remarkStr}</div></div>`;
                 });
                 container.innerHTML = html;
             }
         }
 
         window.supUpdateLeave = async (docId, status) => {
-            try {
-                await updateDoc(doc(db, "leave_requests", docId), { status: status, notified: false });
-                Swal.fire({ icon: 'success', title: 'อัปเดตสำเร็จ', timer: 1000, showConfirmButton: false });
-            } catch(e) { Swal.fire('ผิดพลาด', e.message, 'error'); }
+            try { await updateDoc(doc(db, "leave_requests", docId), { status: status, notified: false }); Swal.fire({ icon: 'success', title: 'อัปเดตสำเร็จ', timer: 1000, showConfirmButton: false }); } catch(e) { Swal.fire('ผิดพลาด', e.message, 'error'); }
         };
 
         document.getElementById('btn-submit-leave').addEventListener('click', async () => {
@@ -1467,27 +1356,19 @@
             if (!startDate || !endDate || !reason || days <= 0) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุวันที่ จำนวนวัน และเหตุผล', 'warning');
 
             const currentQuotas = currentEmployee.quotas || { 'ลาป่วย': 30, 'ลากิจ': 6, 'ลาพักร้อน': 6, 'อื่นๆ': 0 };
-            if (currentQuotas[type] !== undefined && days > currentQuotas[type]) {
-                return Swal.fire('โควตาไม่พอ', `คุณมีสิทธิ์ ${type} เหลือเพียง ${currentQuotas[type]} วัน`, 'error');
-            }
+            if (currentQuotas[type] !== undefined && days > currentQuotas[type]) return Swal.fire('โควตาไม่พอ', `คุณมีสิทธิ์ ${type} เหลือเพียง ${currentQuotas[type]} วัน`, 'error');
 
             const fileInput = document.getElementById('leave-attachment');
             let attachmentBase64 = null;
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
                 if (file.size > 800 * 1024) return Swal.fire('ไฟล์ใหญ่เกินไป', 'ขนาดไฟล์ต้องไม่เกิน 800KB', 'warning');
-                const reader = new FileReader();
-                attachmentBase64 = await new Promise((resolve) => { reader.onload = (e) => resolve(e.target.result); reader.readAsDataURL(file); });
+                attachmentBase64 = await new Promise((resolve) => { const reader = new FileReader(); reader.onload = (e) => resolve(e.target.result); reader.readAsDataURL(file); });
             }
 
             Swal.fire({ title: 'กำลังส่งคำขอ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             try {
-                await addDoc(collection(db, "leave_requests"), { 
-                    userId: currentEmployee.id, name: currentEmployee.name, 
-                    departmentId: currentEmployee.departmentId, 
-                    type: type, days: days, startDate: startDate, endDate: endDate, reason: reason, 
-                    attachmentBase64: attachmentBase64, status: 'pending', notified: false, timestamp: serverTimestamp() 
-                });
+                await addDoc(collection(db, "leave_requests"), { userId: currentEmployee.id, name: currentEmployee.name, departmentId: currentEmployee.departmentId, type: type, days: days, startDate: startDate, endDate: endDate, reason: reason, attachmentBase64: attachmentBase64, status: 'pending', notified: false, timestamp: serverTimestamp() });
                 Swal.fire('สำเร็จ', 'ส่งคำขอลางานเรียบร้อยแล้ว', 'success');
                 document.getElementById('leave-start').value = ''; document.getElementById('leave-end').value = ''; document.getElementById('leave-reason').value = ''; document.getElementById('leave-days').value = ''; document.getElementById('leave-attachment').value = '';
             } catch (error) { Swal.fire('ผิดพลาด', error.message, 'error'); }
@@ -1507,8 +1388,7 @@
                 const foundHoliday = systemSettings.holidays.find(h => h.date === todayIso);
                 if (foundHoliday) {
                     isHolidayToday = true; holidayName = foundHoliday.name;
-                    document.getElementById('dash-holiday-badge').classList.remove('hide');
-                    document.getElementById('dash-holiday-name').textContent = holidayName;
+                    document.getElementById('dash-holiday-badge').classList.remove('hide'); document.getElementById('dash-holiday-name').textContent = holidayName;
                 } else document.getElementById('dash-holiday-badge').classList.add('hide');
             } else document.getElementById('dash-holiday-badge').classList.add('hide');
 
@@ -1529,7 +1409,6 @@
                     if (req.status === 'approved' && todayIso >= req.startDate && todayIso <= req.endDate) leaveCountToday++;
 
                     const reqDate = req.timestamp ? req.timestamp.toDate().toLocaleDateString('th-TH') : '';
-                    
                     let statusBadge = '';
                     if (req.status === 'pending') statusBadge = '<span class="text-xs font-bold text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full">รอหัวหน้าตรวจสอบ</span>';
                     else if (req.status === 'supervisor_approved') statusBadge = '<span class="text-xs font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">รอ HR อนุมัติ</span>';
@@ -1537,26 +1416,22 @@
                     else statusBadge = '<span class="text-xs font-bold text-rose-600 bg-rose-100 px-3 py-1 rounded-full">ไม่อนุมัติ</span>';
                     
                     const attachmentStr = req.attachmentBase64 ? `<p class="text-xs text-blue-500 mt-1 cursor-pointer hover:underline" onclick="window.viewAttachment('${req.id}')"><i class="fa-solid fa-paperclip"></i> ดูเอกสารแนบ</p>` : '';
+                    
+                    const emp = allEmployeesList.find(e => e.id === req.userId);
+                    let quotaText = '<span class="text-gray-400 text-[10px]">ไม่พบข้อมูลโควตา</span>';
+                    if (emp && emp.quotas) {
+                        const left = emp.quotas[req.type] !== undefined ? emp.quotas[req.type] : 0;
+                        quotaText = `<span class="text-[10px] text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">โควตาเหลือ: ${left} วัน</span>`;
+                    }
 
                     let actionBtns = '';
                     if (req.status === 'pending' || req.status === 'supervisor_approved') {
-                        actionBtns = `
-                            <div class="flex gap-1 justify-center items-center">
-                                <button onclick="window.updateLeaveStatus('${req.id}', 'approved')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-2 py-1 rounded shadow" title="อนุมัติ"><i class="fa-solid fa-check"></i></button>
-                                <button onclick="window.updateLeaveStatus('${req.id}', 'rejected')" class="bg-rose-500 hover:bg-rose-600 text-white text-xs px-2 py-1 rounded shadow" title="ไม่อนุมัติ"><i class="fa-solid fa-xmark"></i></button>
-                                <button onclick="window.deleteLeave('${req.id}')" class="bg-gray-200 hover:bg-gray-300 text-gray-600 text-xs px-2 py-1 rounded shadow ml-1" title="ลบรายการ"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        `;
+                        actionBtns = `<div class="flex gap-1 justify-center items-center"><button onclick="window.updateLeaveStatus('${req.id}', 'approved')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-2 py-1 rounded shadow" title="อนุมัติ"><i class="fa-solid fa-check"></i></button><button onclick="window.updateLeaveStatus('${req.id}', 'rejected')" class="bg-rose-500 hover:bg-rose-600 text-white text-xs px-2 py-1 rounded shadow" title="ไม่อนุมัติ"><i class="fa-solid fa-xmark"></i></button><button onclick="window.deleteLeave('${req.id}')" class="bg-gray-200 hover:bg-gray-300 text-gray-600 text-xs px-2 py-1 rounded shadow ml-1" title="ลบรายการ"><i class="fa-solid fa-trash"></i></button></div>`;
                     } else {
-                        actionBtns = `
-                            <div class="flex gap-1 justify-center items-center">
-                                <span class="text-xs text-gray-400 mr-2">-</span>
-                                <button onclick="window.deleteLeave('${req.id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-500 text-xs px-2 py-1 rounded shadow" title="ลบรายการ"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        `;
+                        actionBtns = `<div class="flex gap-1 justify-center items-center"><span class="text-xs text-gray-400 mr-2">-</span><button onclick="window.deleteLeave('${req.id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-500 text-xs px-2 py-1 rounded shadow" title="ลบรายการ"><i class="fa-solid fa-trash"></i></button></div>`;
                     }
 
-                    leaveHtml += `<tr class="hover:bg-gray-50 border-b"><td class="p-3 text-sm text-gray-500">${reqDate}</td><td class="p-3 font-medium text-gray-800">${req.name}</td><td class="p-3"><p class="text-sm font-bold text-blue-600">${req.type} <span class="text-xs text-gray-500 font-normal">(${req.days} วัน)</span></p><p class="text-xs text-gray-500">ช่วงเวลา: ${req.startDate} ถึง ${req.endDate}</p><p class="text-xs text-gray-600 mt-1">เหตุผล: ${req.reason}</p>${attachmentStr}</td><td class="p-3 text-center">${statusBadge}</td><td class="p-3 text-center">${actionBtns}</td></tr>`;
+                    leaveHtml += `<tr class="hover:bg-gray-50 border-b"><td class="p-3 text-sm text-gray-500">${reqDate}</td><td class="p-3 font-medium text-gray-800">${req.name}</td><td class="p-3"><p class="text-sm font-bold text-blue-600">${req.type} <span class="text-xs text-gray-500 font-normal">(${req.days} วัน)</span></p><div class="mt-1">${quotaText}</div><p class="text-xs text-gray-500 mt-1">ช่วงเวลา: ${req.startDate} ถึง ${req.endDate}</p><p class="text-xs text-gray-600 mt-1">เหตุผล: ${req.reason}</p>${attachmentStr}</td><td class="p-3 text-center">${statusBadge}</td><td class="p-3 text-center">${actionBtns}</td></tr>`;
                 });
                 
                 document.getElementById('admin-leaves-body').innerHTML = leaveHtml || '<tr><td colspan="5" class="p-8 text-center text-gray-400">ไม่มีคำขอลางาน</td></tr>';
@@ -1570,40 +1445,15 @@
             const qEmp = query(collection(db, "employees"));
             listeners.adminEmployees = onSnapshot(qEmp, (empSnapshot) => {
                 document.getElementById('stat-total').textContent = empSnapshot.size;
-                
                 allEmployeesList = []; 
+                empSnapshot.forEach(doc => { allEmployeesList.push({ id: doc.id, ...doc.data() }); });
+                
+                renderEmployeesTable(todayIso);
+
                 let empFilterHtml = '<option value="">พนักงานทั้งหมด</option>';
-                
-                const tbodyEmp = document.getElementById('employees-table-body');
-                let empHtml = '';
-                empSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    allEmployeesList.push({ id: doc.id, ...data }); 
-                    empFilterHtml += `<option value="${doc.id}">${data.name}</option>`;
-                    
-                    const shiftDetails = getEmployeeShiftDetails(doc.id, todayIso);
-                    const roleTxt = data.role === 'supervisor' ? '<span class="text-amber-600 font-bold"><i class="fa-solid fa-user-tie"></i> หัวหน้า</span>' : '<span class="text-gray-500">พนักงาน</span>';
-                    const deptShiftHtml = `<p class="text-xs mb-1">${roleTxt}</p><p class="text-xs font-bold text-gray-700">${shiftDetails.deptName}</p><p class="text-[10px] text-gray-500">${shiftDetails.shiftName}</p>`;
-                    
-                    empHtml += `
-                        <tr class="hover:bg-gray-50 border-b">
-                            <td class="p-4 text-sm font-medium text-gray-800">${data.name}</td>
-                            <td class="p-4">${deptShiftHtml}</td>
-                            <td class="p-4 text-sm tracking-widest font-mono text-blue-600 font-bold text-center">${data.pin}</td>
-                            <td class="p-4 text-center whitespace-nowrap">
-                                <button onclick="window.manageRoster('${doc.id}', '${data.name}')" class="text-purple-500 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-2 rounded-lg transition text-xs font-bold mr-1" title="จัดกะรายวัน"><i class="fa-solid fa-calendar-day"></i></button>
-                                <button onclick="window.viewEmployeeReport('${doc.id}', '${data.name}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-xs font-bold mr-1" title="ดูรายงาน"><i class="fa-solid fa-chart-simple"></i></button>
-                                <button onclick="window.editEmployee('${doc.id}')" class="text-amber-500 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-2 rounded-lg transition text-xs font-bold mr-1" title="แก้ไขข้อมูล"><i class="fa-solid fa-pen"></i></button>
-                                <button onclick="window.deleteEmployee('${doc.id}', '${data.name}')" class="text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-2 rounded-lg transition text-xs" title="ลบพนักงาน"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>`;
-                });
-                tbodyEmp.innerHTML = empHtml || '<tr><td colspan="4" class="text-center p-8 text-gray-400">ไม่มีพนักงาน</td></tr>';
-                
+                allEmployeesList.forEach(emp => { empFilterHtml += `<option value="${emp.id}">${emp.name}</option>`; });
                 const empSelect = document.getElementById('filter-timelog-emp');
-                const currSelected = empSelect.value;
-                empSelect.innerHTML = empFilterHtml;
-                empSelect.value = currSelected; 
+                if (empSelect) { empSelect.innerHTML = empFilterHtml; }
 
                 let newDeptOpts = '<option value="">ไม่ระบุแผนก</option>';
                 if(systemSettings.departments) systemSettings.departments.forEach(d => newDeptOpts += `<option value="${d.id}">${d.name}</option>`);
@@ -1615,13 +1465,48 @@
 
                 const qLogs = query(collection(db, "timelogs"));
                 listeners.adminTimelogs = onSnapshot(qLogs, (logSnapshot) => {
-                    const logs = []; logSnapshot.forEach(doc => logs.push({ id: doc.id, ...doc.data() }));
-                    allLogsRaw = logs; 
-                    if (typeof renderTimelogsTable === 'function') renderTimelogsTable(); 
+                    allLogsRaw = []; logSnapshot.forEach(doc => allLogsRaw.push({ id: doc.id, ...doc.data() }));
+                    renderTimelogsTable(); 
                     processAdminDashboardData(today, tomorrow, isHolidayToday);
                 });
             });
         }
+        
+        function renderEmployeesTable(todayIsoStr) {
+            const tbodyEmp = document.getElementById('employees-table-body');
+            const searchEl = document.getElementById('search-employee');
+            const searchTerm = searchEl ? searchEl.value.toLowerCase() : '';
+            let empHtml = '';
+            
+            let filteredEmps = allEmployeesList;
+            if (searchTerm) filteredEmps = filteredEmps.filter(e => e.name.toLowerCase().includes(searchTerm) || e.pin.includes(searchTerm));
+
+            filteredEmps.forEach(data => {
+                const shiftDetails = getEmployeeShiftDetails(data.id, todayIsoStr);
+                const roleTxt = data.role === 'supervisor' ? '<span class="text-amber-600 font-bold"><i class="fa-solid fa-user-tie"></i> หัวหน้า</span>' : '<span class="text-gray-500">พนักงาน</span>';
+                const deptShiftHtml = `<p class="text-xs mb-1">${roleTxt}</p><p class="text-xs font-bold text-gray-700">${shiftDetails.deptName}</p><p class="text-[10px] text-gray-500">${shiftDetails.shiftName}</p>`;
+                
+                empHtml += `
+                    <tr class="hover:bg-gray-50 border-b">
+                        <td class="p-4 text-sm font-medium text-gray-800">${data.name}</td>
+                        <td class="p-4">${deptShiftHtml}</td>
+                        <td class="p-4 text-sm tracking-widest font-mono text-blue-600 font-bold text-center">${data.pin}</td>
+                        <td class="p-4 text-center whitespace-nowrap">
+                            <button onclick="window.manageRoster('${data.id}', '${data.name}')" class="text-purple-500 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-2 rounded-lg transition text-xs font-bold mr-1" title="จัดกะรายวัน"><i class="fa-solid fa-calendar-day"></i></button>
+                            <button onclick="window.viewEmployeeReport('${data.id}', '${data.name}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-xs font-bold mr-1" title="ดูรายงาน"><i class="fa-solid fa-chart-simple"></i></button>
+                            <button onclick="window.editEmployee('${data.id}')" class="text-amber-500 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-2 rounded-lg transition text-xs font-bold mr-1" title="แก้ไขข้อมูล"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="window.deleteEmployee('${data.id}', '${data.name}')" class="text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-2 rounded-lg transition text-xs" title="ลบพนักงาน"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            });
+            if(tbodyEmp) tbodyEmp.innerHTML = empHtml || '<tr><td colspan="4" class="text-center p-8 text-gray-400">ไม่พบข้อมูลพนักงานที่ค้นหา</td></tr>';
+        }
+        
+        const searchEmpInput = document.getElementById('search-employee');
+        if(searchEmpInput) searchEmpInput.addEventListener('input', () => {
+            const todayIso = new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split("T")[0];
+            renderEmployeesTable(todayIso);
+        });
 
         function processAdminDashboardData(today, tomorrow, isHolidayToday) {
             const todayLogs = allLogsRaw.filter(log => log.timestamp && log.timestamp.toDate() >= today && log.timestamp.toDate() < tomorrow);
@@ -1671,14 +1556,14 @@
                 sumHtml += `<tr class="hover:bg-gray-50 border-b text-sm"><td class="p-4 font-medium text-gray-800">${u.name}</td><td class="p-4">${deptShiftCol}</td><td class="p-4 text-emerald-600">${inStr}${lateBadge}</td><td class="p-4 text-rose-600">${outStr}</td><td class="p-4">${workHrsStr}</td><td class="p-4">${otHrsStr}</td></tr>`;
             });
 
-            document.getElementById('stat-present').textContent = presentCount;
-            document.getElementById('dashboard-summary-body').innerHTML = sumHtml || '<tr><td colspan="6" class="p-8 text-center text-gray-400">ยังไม่มีใครเข้างานวันนี้</td></tr>';
+            if(document.getElementById('stat-present')) document.getElementById('stat-present').textContent = presentCount;
+            if(document.getElementById('dashboard-summary-body')) document.getElementById('dashboard-summary-body').innerHTML = sumHtml || '<tr><td colspan="6" class="p-8 text-center text-gray-400">ยังไม่มีใครเข้างานวันนี้</td></tr>';
 
             const totalEmp = allEmployeesList.length;
             const leaveCountToday = Number(document.getElementById('stat-leave').textContent) || 0;
             let finalAbsent = totalEmp - presentCount - leaveCountToday;
             if (isHolidayToday) finalAbsent = 0; 
-            document.getElementById('stat-absent').textContent = finalAbsent < 0 ? 0 : finalAbsent;
+            if(document.getElementById('stat-absent')) document.getElementById('stat-absent').textContent = finalAbsent < 0 ? 0 : finalAbsent;
 
             drawDashboardChart(presentCount, lateCountToday, leaveCountToday, finalAbsent);
         }
@@ -1687,18 +1572,10 @@
             if(window.myDashChart) window.myDashChart.destroy();
             const ctx = document.getElementById('dashChart');
             if(!ctx) return;
-            
             const onTimeCount = presentCount - lateCountToday;
             window.myDashChart = new Chart(ctx.getContext('2d'), {
                 type: 'doughnut',
-                data: {
-                    labels: ['ตรงเวลา', 'สาย', 'ลา', 'ขาด'],
-                    datasets: [{
-                        data: [onTimeCount < 0 ? 0 : onTimeCount, lateCountToday, leaveCountToday, finalAbsent < 0 ? 0 : finalAbsent],
-                        backgroundColor: ['#10b981', '#f59e0b', '#eab308', '#f43f5e'],
-                        borderWidth: 0, hoverOffset: 4
-                    }]
-                },
+                data: { labels: ['ตรงเวลา', 'สาย', 'ลา', 'ขาด'], datasets: [{ data: [onTimeCount < 0 ? 0 : onTimeCount, lateCountToday, leaveCountToday, finalAbsent < 0 ? 0 : finalAbsent], backgroundColor: ['#10b981', '#f59e0b', '#eab308', '#f43f5e'], borderWidth: 0, hoverOffset: 4 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: "'Segoe UI', sans-serif" } } } }, cutout: '65%' }
             });
         }
@@ -1709,12 +1586,7 @@
 
             const { value: formValues } = await Swal.fire({
                 title: `จัดกะรายวัน: ${empName}`,
-                html: `
-                    <div class="text-left space-y-3 mt-4">
-                        <div><label class="text-sm text-gray-600">วันที่ต้องการเปลี่ยนกะ</label><input type="date" id="swal-r-date" class="w-full p-2 border rounded outline-none"></div>
-                        <div><label class="text-sm text-gray-600">เลือกกะการทำงานพิเศษ</label><select id="swal-r-shift" class="w-full p-2 border rounded outline-none text-sm">${shiftOptions}</select></div>
-                    </div>
-                `,
+                html: `<div class="text-left space-y-3 mt-4"><div><label class="text-sm text-gray-600">วันที่ต้องการเปลี่ยนกะ</label><input type="date" id="swal-r-date" class="w-full p-2 border rounded outline-none"></div><div><label class="text-sm text-gray-600">เลือกกะการทำงานพิเศษ</label><select id="swal-r-shift" class="w-full p-2 border rounded outline-none text-sm">${shiftOptions}</select></div></div>`,
                 showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ยกเลิก',
                 preConfirm: () => {
                     const date = document.getElementById('swal-r-date').value;
@@ -1729,16 +1601,12 @@
                 try {
                     const q = query(collection(db, "rosters"), where("userId", "==", empId), where("date", "==", formValues.date));
                     const snap = await getDocs(q);
-                    
                     if (formValues.shiftId === "") {
                         snap.forEach(d => deleteDoc(doc(db, "rosters", d.id)));
                         Swal.fire('สำเร็จ', 'ยกเลิกกะพิเศษเรียบร้อย', 'success');
                     } else {
-                        if (!snap.empty) {
-                            await updateDoc(doc(db, "rosters", snap.docs[0].id), { shiftId: formValues.shiftId });
-                        } else {
-                            await addDoc(collection(db, "rosters"), { userId: empId, date: formValues.date, shiftId: formValues.shiftId });
-                        }
+                        if (!snap.empty) await updateDoc(doc(db, "rosters", snap.docs[0].id), { shiftId: formValues.shiftId });
+                        else await addDoc(collection(db, "rosters"), { userId: empId, date: formValues.date, shiftId: formValues.shiftId });
                         Swal.fire('สำเร็จ', 'บันทึกกะรายวันเรียบร้อย', 'success');
                     }
                 } catch(e) { Swal.fire('ผิดพลาด', e.message, 'error'); }
@@ -1758,7 +1626,6 @@
                 const [year, m] = monthRaw.split('-');
                 const pr = calculateEmployeePayroll(userId, year, m);
                 if(!pr) return Swal.fire('ผิดพลาด', 'ไม่พบข้อมูลพนักงาน', 'error');
-
                 const empData = allEmployeesList.find(e => e.id === userId) || {};
                 const currentShiftInfo = getEmployeeShiftDetails(userId);
 
@@ -1770,7 +1637,6 @@
                                 <div><i class="fa-solid fa-calendar text-blue-500 w-4"></i> <b>ประจำเดือน:</b> ${m}/${year}</div>
                                 <div><i class="fa-solid fa-building text-blue-500 w-4"></i> <b>แผนก:</b> ${currentShiftInfo.deptName}</div>
                             </div>
-                            
                             <div class="grid grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <p class="text-gray-500 text-xs font-bold mb-1">สถิติการทำงาน</p>
@@ -1785,26 +1651,19 @@
                                     <p>นักขัตฤกษ์ (x${systemSettings.otHoliday}): <b>${pr.otHolidayHrs.toFixed(1)} ชม.</b></p>
                                 </div>
                             </div>
-                            
                             <hr class="my-2 border-gray-200">
-                            
                             <p class="text-gray-500 text-xs font-bold mb-2">รายละเอียดรายได้และรายการหัก</p>
                             <div class="flex justify-between mb-1"><p><i class="fa-solid fa-money-bill text-emerald-500 w-4"></i> ค่าจ้างปกติ (ฐาน ฿${empData.dailyRate||0}/วัน)</p><p>฿${pr.basePay.toLocaleString(undefined, {minimumFractionDigits: 2})}</p></div>
                             <div class="flex justify-between mb-1"><p><i class="fa-solid fa-money-bill-trend-up text-emerald-500 w-4"></i> ค่าล่วงเวลารวม (ฐาน ฿${empData.otRate||0}/ชม.)</p><p>฿${pr.totalOTPay.toLocaleString(undefined, {minimumFractionDigits: 2})}</p></div>
                             <div class="flex justify-between mb-1 text-rose-600"><p><i class="fa-solid fa-money-bill-transfer w-4"></i> หักมาสาย (นาทีละ ฿${empData.penaltyRate||0})</p><p>- ฿${pr.penaltyPay.toLocaleString(undefined, {minimumFractionDigits: 2})}</p></div>
                             <div class="flex justify-between mb-3 text-rose-600"><p><i class="fa-solid fa-shield-halved w-4"></i> หักประกันสังคม (${empData.deductSso !== false ? systemSettings.ssoPercent+'%' : 'ไม่หัก'})</p><p>- ฿${pr.ssoDeduction.toLocaleString(undefined, {minimumFractionDigits: 2})}</p></div>
-                            
                             <div class="bg-emerald-100 p-3 rounded-lg flex justify-between items-center text-lg">
                                 <p><i class="fa-solid fa-sack-dollar text-emerald-600 w-5"></i> <b>รวมรับสุทธิ (Net Pay)</b></p>
                                 <span class="text-emerald-700 font-bold">฿${pr.totalNet.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                             </div>
                         </div>
                     `,
-                    width: '600px',
-                    showDenyButton: true, showCancelButton: true,
-                    confirmButtonText: 'ปิด', 
-                    denyButtonText: '<i class="fa-solid fa-print"></i> พิมพ์', denyButtonColor: '#4b5563',
-                    cancelButtonText: '<i class="fa-solid fa-envelope"></i> ส่ง Email', cancelButtonColor: '#3b82f6'
+                    width: '600px', showDenyButton: true, showCancelButton: true, confirmButtonText: 'ปิด', denyButtonText: '<i class="fa-solid fa-print"></i> พิมพ์', denyButtonColor: '#4b5563', cancelButtonText: '<i class="fa-solid fa-envelope"></i> ส่ง Email', cancelButtonColor: '#3b82f6'
                 }).then((result) => {
                     if (result.isDenied) {
                         const printWindow = window.open('', '', 'height=800,width=800');
@@ -1814,212 +1673,40 @@
                         printWindow.document.write(`<h2>สลิปเงินเดือน (Payslip)</h2>`);
                         printWindow.document.write(`<div class="flex"><p><b>ชื่อพนักงาน:</b> ${name}</p><p><b>ประจำเดือน:</b> ${m}/${year}</p></div>`);
                         printWindow.document.write(`<div class="flex"><p><b>แผนก:</b> ${currentShiftInfo.deptName}</p><p><b>วันที่ออกเอกสาร:</b> ${new Date().toLocaleDateString('th-TH')}</p></div>`);
-                        
                         printWindow.document.write(`<table><tr><th>รายการรายได้ (Earnings)</th><th style="text-align:right">จำนวนเงิน (บาท)</th></tr>`);
                         printWindow.document.write(`<tr><td>ค่าจ้างปกติ (${pr.totalWorkedDays} ทำงานจริง + ${pr.totalPaidLeaveDays} วันลาได้เงิน)</td><td style="text-align:right">${pr.basePay.toLocaleString(undefined, {minimumFractionDigits: 2})}</td></tr>`);
                         if(pr.otNormalHrs>0) printWindow.document.write(`<tr><td>OT ปกติ x${systemSettings.otNormal} (${pr.otNormalHrs.toFixed(1)} ชม.)</td><td style="text-align:right">${pr.otNormalPay.toLocaleString(undefined, {minimumFractionDigits: 2})}</td></tr>`);
                         if(pr.otWeekendHrs>0) printWindow.document.write(`<tr><td>OT วันหยุด x${systemSettings.otWeekend} (${pr.otWeekendHrs.toFixed(1)} ชม.)</td><td style="text-align:right">${pr.otWeekendPay.toLocaleString(undefined, {minimumFractionDigits: 2})}</td></tr>`);
                         if(pr.otHolidayHrs>0) printWindow.document.write(`<tr><td>OT นักขัตฤกษ์ x${systemSettings.otHoliday} (${pr.otHolidayHrs.toFixed(1)} ชม.)</td><td style="text-align:right">${pr.otHolidayPay.toLocaleString(undefined, {minimumFractionDigits: 2})}</td></tr>`);
-                        
                         printWindow.document.write(`<tr><th>รายการหัก (Deductions)</th><th style="text-align:right"></th></tr>`);
                         if(pr.penaltyPay>0) printWindow.document.write(`<tr><td>หักมาสาย (${pr.totalLateMinutes} นาที)</td><td style="text-align:right">- ${pr.penaltyPay.toLocaleString(undefined, {minimumFractionDigits: 2})}</td></tr>`);
                         if(pr.ssoDeduction>0) printWindow.document.write(`<tr><td>หักประกันสังคม</td><td style="text-align:right">- ${pr.ssoDeduction.toLocaleString(undefined, {minimumFractionDigits: 2})}</td></tr>`);
-                        
                         printWindow.document.write(`<tr><th><h3>รวมรับสุทธิ (Net Pay)</h3></th><th style="text-align:right"><h3>${pr.totalNet.toLocaleString(undefined, {minimumFractionDigits: 2})}</h3></th></tr></table>`);
                         printWindow.document.write('<p style="text-align:center; font-size:12px; margin-top:40px;">เอกสารนี้สร้างโดยระบบอัตโนมัติ</p>');
                         printWindow.document.write('</div></body></html>');
                         printWindow.document.close(); printWindow.print();
                     } else if (result.dismiss === Swal.DismissReason.cancel) {
                         if (!empData.email) return Swal.fire('ไม่พบ Email', 'พนักงานคนนี้ยังไม่ได้ระบุที่อยู่อีเมลในระบบ', 'warning');
-                        
                         Swal.fire({ title: 'กำลังเตรียมส่ง Email...', didOpen: () => Swal.showLoading(), timer: 1500 }).then(() => {
                             const subject = encodeURIComponent(`สลิปเงินเดือน ประจำเดือน ${m}/${year} - ${name}`);
                             const body = encodeURIComponent(`สวัสดี ${name},\n\nนี่คือรายละเอียดสลิปเงินเดือนของคุณประจำเดือน ${m}/${year}\n\nค่าจ้างปกติ: ฿${pr.basePay.toLocaleString()}\nค่าล่วงเวลารวม (OT): ฿${pr.totalOTPay.toLocaleString()}\nหักมาสาย: -฿${pr.penaltyPay.toLocaleString()}\nหักประกันสังคม: -฿${pr.ssoDeduction.toLocaleString()}\n\nยอดเงินรับสุทธิ (Net Pay): ฿${pr.totalNet.toLocaleString()}\n\nขอบคุณที่ทำงานอย่างหนัก\nจาก ฝ่ายบุคคล`);
                             window.location.href = `mailto:${empData.email}?subject=${subject}&body=${body}`;
-                            
-                            setTimeout(() => {
-                                Swal.fire({ icon: 'success', title: 'สร้างแบบร่าง Email สำเร็จ', text: 'ระบบได้ส่งข้อมูลไปยังแอป Email ของคุณแล้ว กรุณากดส่งจากแอปของคุณอีกครั้ง' });
-                            }, 500);
+                            setTimeout(() => { Swal.fire({ icon: 'success', title: 'สร้างแบบร่าง Email สำเร็จ', text: 'ระบบได้ส่งข้อมูลไปยังแอป Email ของคุณแล้ว กรุณากดส่งจากแอปของคุณอีกครั้ง' }); }, 500);
                         });
                     }
                 });
             }
         };
 
-        document.getElementById('btn-export-monthly-summary').addEventListener('click', async () => {
-            const currentMonthStr = new Date().toISOString().slice(0, 7); 
-            const { value: monthRaw } = await Swal.fire({
-                title: `โหลดสรุปข้อมูลพนักงานทั้งหมด`,
-                html: `<p class="mb-2 text-sm text-gray-600">เลือกเดือนที่ต้องการส่งทำเงินเดือน</p><input type="month" id="swal-payroll-month" value="${currentMonthStr}" class="w-[80%] p-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-center">`,
-                showCancelButton: true, confirmButtonText: 'ดาวน์โหลด CSV', cancelButtonText: 'ยกเลิก',
-                preConfirm: () => document.getElementById('swal-payroll-month').value
-            });
-
-            if (monthRaw) {
-                const [year, m] = monthRaw.split('-');
-                let csvContent = "data:text/csv;charset=utf-8,\uFEFFชื่อพนักงาน,แผนก,กะทำงานเริ่มต้น,ค่าจ้าง/วัน,เรท OT/ชม.,วันทำงานจริง,วันลาที่ได้เงิน,วันมาสาย,สายสะสม(นาที),ชั่วโมงทำงานรวม,OTปกติ(ชม),OTวันหยุด(ชม),OTนักขัตฤกษ์(ชม),รวมค่าจ้างปกติ,รวมค่า OT,หักสายรวม,หักประกันสังคม,รวมเงินได้สุทธิ\n";
-
-                allEmployeesList.forEach(emp => {
-                    const pr = calculateEmployeePayroll(emp.id, year, m, allLogsRaw);
-                    if (pr) {
-                        const defaultShiftInfo = getEmployeeShiftDetails(emp.id); 
-                        csvContent += `"${emp.name}","${defaultShiftInfo.deptName}","${defaultShiftInfo.shiftName}","${pr.dailyRate}","${pr.otRate}","${pr.totalWorkedDays}","${pr.totalPaidLeaveDays}","${pr.lateDays}","${pr.totalLateMinutes}","${pr.totalWorkHrs.toFixed(2)}","${pr.otNormalHrs.toFixed(2)}","${pr.otWeekendHrs.toFixed(2)}","${pr.otHolidayHrs.toFixed(2)}","${pr.basePay.toFixed(2)}","${pr.totalOTPay.toFixed(2)}","${pr.penaltyPay.toFixed(2)}","${pr.ssoDeduction.toFixed(2)}","${pr.totalNet.toFixed(2)}"\n`;
-                    }
-                });
-
-                const link = document.createElement("a"); link.href = encodeURI(csvContent); link.download = `Payroll_Summary_${m}_${year}.csv`; link.click();
-            }
-        });
-
-        document.getElementById('btn-add-manual-log').addEventListener('click', async () => {
-            if(allEmployeesList.length === 0) return Swal.fire('ไม่พบพนักงาน', 'กรุณาเพิ่มรายชื่อพนักงานเข้าระบบก่อน', 'warning');
-            
-            let empOptions = '';
-            allEmployeesList.forEach(e => { empOptions += `<option value="${e.id}">${e.name}</option>`; });
-            let branchOptions = '<option value="">(ไม่ระบุสาขา)</option>';
-            if(systemSettings.branches) { systemSettings.branches.forEach(b => { branchOptions += `<option value="${b.name}">${b.name}</option>`; }); }
-
-            const { value: formValues } = await Swal.fire({
-                title: 'เพิ่มเวลาย้อนหลัง',
-                html: `
-                    <div class="text-left space-y-3 mt-4">
-                        <div><label class="text-sm text-gray-600">พนักงาน</label><select id="swal-m-emp" class="w-full p-2 border rounded outline-none">${empOptions}</select></div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div><label class="text-sm text-gray-600">ประเภท</label><select id="swal-m-type" class="w-full p-2 border rounded outline-none"><option value="in">เข้างาน</option><option value="out">ออกงาน</option></select></div>
-                            <div><label class="text-sm text-gray-600">สาขา</label><select id="swal-m-branch" class="w-full p-2 border rounded outline-none">${branchOptions}</select></div>
-                        </div>
-                        <div class="flex gap-2">
-                            <div class="flex-1"><label class="text-sm text-gray-600">วันที่</label><input type="date" id="swal-m-date" class="w-full p-2 border rounded outline-none"></div>
-                            <div class="flex-1"><label class="text-sm text-gray-600">เวลา</label><input type="time" id="swal-m-time" class="w-full p-2 border rounded outline-none"></div>
-                        </div>
-                        <div><label class="text-sm text-gray-600">หมายเหตุ</label><input type="text" id="swal-m-remark" placeholder="เช่น แอดมินเพิ่มให้ (ลืมกด)" class="w-full p-2 border rounded outline-none"></div>
-                    </div>
-                `,
-                focusConfirm: false, showCancelButton: true, confirmButtonText: 'บันทึกรายการ', cancelButtonText: 'ยกเลิก',
-                preConfirm: () => {
-                    const empId = document.getElementById('swal-m-emp').value, type = document.getElementById('swal-m-type').value, date = document.getElementById('swal-m-date').value, time = document.getElementById('swal-m-time').value, remark = document.getElementById('swal-m-remark').value, branchName = document.getElementById('swal-m-branch').value;
-                    if (!date || !time) { Swal.showValidationMessage('กรุณาเลือกวันที่และเวลา'); return false; }
-                    return { empId, type, date, time, remark, branchName };
-                }
-            });
-
-            if (formValues) {
-                Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                try {
-                    const selectedEmp = allEmployeesList.find(e => e.id === formValues.empId);
-                    const timestamp = Timestamp.fromDate(new Date(`${formValues.date}T${formValues.time}:00`));
-                    
-                    await addDoc(collection(db, "timelogs"), {
-                        userId: selectedEmp.id, name: selectedEmp.name, type: formValues.type, timestamp: timestamp,
-                        lat: null, lng: null, branchName: formValues.branchName || null, photoBase64: null, remark: formValues.remark || 'เพิ่มข้อมูลย้อนหลัง', isManual: true
-                    });
-                    Swal.fire({ icon: 'success', title: 'บันทึกเวลาสำเร็จ!', timer: 1500, showConfirmButton: false });
-                } catch (error) { Swal.fire('ผิดพลาด', error.message, 'error'); }
-            }
-        });
-
-        window.editEmployee = async (docId) => {
-            const emp = allEmployeesList.find(e => e.id === docId);
-            if(!emp) return;
-            const quotas = emp.quotas || { 'ลาป่วย': 30, 'ลากิจ': 6, 'ลาพักร้อน': 6 };
-            const dailyRate = emp.dailyRate || 0;
-            const otRate = emp.otRate || 0;
-            const penaltyRate = emp.penaltyRate || 0;
-            const email = emp.email || '';
-            const deductSso = emp.deductSso !== false;
-            
-            let deptOptions = '<option value="">ไม่ระบุแผนก</option>';
-            if(systemSettings.departments) systemSettings.departments.forEach(d => deptOptions += `<option value="${d.id}" ${emp.departmentId == d.id ? 'selected' : ''}>${d.name}</option>`);
-
-            let shiftOptions = '<option value="">กะเวลามาตรฐาน</option>';
-            if(systemSettings.shifts) systemSettings.shifts.forEach(s => shiftOptions += `<option value="${s.id}" ${emp.shiftId == s.id ? 'selected' : ''}>${s.name}</option>`);
-
-            const { value: formValues } = await Swal.fire({
-                title: 'แก้ไขข้อมูลพนักงาน',
-                html: `
-                    <div class="text-left space-y-3 mt-4 h-96 overflow-y-auto pr-2">
-                        <div><label class="text-sm text-gray-600">ชื่อ-นามสกุล</label><input id="swal-e-name" class="w-full p-2 border rounded outline-none" value="${emp.name}"></div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div><label class="text-sm text-gray-600">รหัส PIN</label><input id="swal-e-pin" class="w-full p-2 border rounded outline-none tracking-widest text-center" value="${emp.pin}" maxlength="6" inputmode="numeric" pattern="[0-9]*"></div>
-                            <div><label class="text-sm text-gray-600">Email (ส่งสลิป)</label><input id="swal-e-email" type="email" class="w-full p-2 border rounded outline-none text-sm" value="${email}"></div>
-                        </div>
-                        
-                        <hr class="my-2 border-gray-200">
-                        <p class="text-sm font-bold text-gray-700">ตำแหน่ง / แผนก / ค่าจ้าง</p>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div><label class="text-sm text-gray-600">สิทธิ์ผู้ใช้งาน</label>
-                                <select id="swal-e-role" class="w-full p-2 border rounded outline-none text-sm">
-                                    <option value="staff" ${emp.role === 'staff' || !emp.role ? 'selected' : ''}>พนักงานทั่วไป</option>
-                                    <option value="supervisor" ${emp.role === 'supervisor' ? 'selected' : ''}>หัวหน้าแผนก</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 mt-2">
-                            <div><label class="text-sm text-gray-600">แผนก</label><select id="swal-e-dept" class="w-full p-2 border rounded outline-none text-sm">${deptOptions}</select></div>
-                            <div><label class="text-sm text-gray-600">กะเวลา</label><select id="swal-e-shift" class="w-full p-2 border rounded outline-none text-sm">${shiftOptions}</select></div>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2 mt-2">
-                            <div><label class="text-xs text-gray-600">ค่าจ้าง/วัน(฿)</label><input id="swal-e-daily" type="number" class="w-full p-2 border rounded outline-none" value="${dailyRate}"></div>
-                            <div><label class="text-xs text-gray-600">เรท OT/ชม.(฿)</label><input id="swal-e-ot" type="number" class="w-full p-2 border rounded outline-none" value="${otRate}"></div>
-                            <div><label class="text-xs text-gray-600">หักสาย/นาที(฿)</label><input id="swal-e-penalty" type="number" class="w-full p-2 border rounded outline-none" value="${penaltyRate}"></div>
-                        </div>
-                        <div class="mt-2">
-                            <label class="flex items-center text-sm text-gray-700 cursor-pointer">
-                                <input type="checkbox" id="swal-e-sso" ${deductSso ? 'checked' : ''} class="mr-2 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                คำนวณหักประกันสังคม (SSO)
-                            </label>
-                        </div>
-
-                        <hr class="my-2 border-gray-200">
-                        <p class="text-sm font-bold text-gray-700">โควตาวันลา (วัน)</p>
-                        <div class="grid grid-cols-3 gap-2">
-                            <div><label class="text-xs text-gray-500">ลาป่วย</label><input id="swal-q-sick" type="number" step="0.5" class="w-full p-2 border rounded" value="${quotas['ลาป่วย']||0}"></div>
-                            <div><label class="text-xs text-gray-500">ลากิจ</label><input id="swal-q-personal" type="number" step="0.5" class="w-full p-2 border rounded" value="${quotas['ลากิจ']||0}"></div>
-                            <div><label class="text-xs text-gray-500">พักร้อน</label><input id="swal-q-vacation" type="number" step="0.5" class="w-full p-2 border rounded" value="${quotas['ลาพักร้อน']||0}"></div>
-                        </div>
-                    </div>
-                `,
-                focusConfirm: false, showCancelButton: true, confirmButtonText: 'บันทึกการเปลี่ยนแปลง', cancelButtonText: 'ยกเลิก',
-                preConfirm: () => {
-                    const name = document.getElementById('swal-e-name').value.trim(), pin = document.getElementById('swal-e-pin').value.trim();
-                    const email = document.getElementById('swal-e-email').value.trim();
-                    const role = document.getElementById('swal-e-role').value;
-                    const deptId = document.getElementById('swal-e-dept').value, shiftId = document.getElementById('swal-e-shift').value;
-                    const dRate = parseFloat(document.getElementById('swal-e-daily').value) || 0;
-                    const oRate = parseFloat(document.getElementById('swal-e-ot').value) || 0;
-                    const pRate = parseFloat(document.getElementById('swal-e-penalty').value) || 0;
-                    const sso = document.getElementById('swal-e-sso').checked;
-                    if (!name || !pin || pin.length !== 6) { Swal.showValidationMessage('กรุณากรอกชื่อและรหัส PIN 6 หลักให้ครบถ้วน'); return false; }
-                    return { 
-                        name, pin, email, role, departmentId: deptId, shiftId: shiftId,
-                        dailyRate: dRate, otRate: oRate, penaltyRate: pRate, deductSso: sso,
-                        quotas: { 'ลาป่วย': parseFloat(document.getElementById('swal-q-sick').value) || 0, 'ลากิจ': parseFloat(document.getElementById('swal-q-personal').value) || 0, 'ลาพักร้อน': parseFloat(document.getElementById('swal-q-vacation').value) || 0, 'อื่นๆ': quotas['อื่นๆ'] || 0 }
-                    };
-                }
-            });
-
-            if (formValues) {
-                if (formValues.pin !== emp.pin) {
-                    const q = query(collection(db, "employees"), where("pin", "==", formValues.pin));
-                    if (!(await getDocs(q)).empty) return Swal.fire('รหัส PIN ซ้ำ', 'รหัส PIN นี้มีพนักงานคนอื่นใช้แล้ว', 'error');
-                }
-                Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                try {
-                    await updateDoc(doc(db, "employees", docId), { 
-                        name: formValues.name, pin: formValues.pin, email: formValues.email, role: formValues.role,
-                        departmentId: formValues.departmentId, shiftId: formValues.shiftId, 
-                        dailyRate: formValues.dailyRate, otRate: formValues.otRate, penaltyRate: formValues.penaltyRate, deductSso: formValues.deductSso, quotas: formValues.quotas 
-                    });
-                    Swal.fire({ icon: 'success', title: 'อัปเดตข้อมูลสำเร็จ', timer: 1500, showConfirmButton: false });
-                } catch (error) { Swal.fire('ผิดพลาด', error.message, 'error'); }
-            }
-        };
-
-        // --- ระบบ Pagination (แบ่งหน้าแสดงผล) ---
+        // --- ระบบ Pagination สำหรับ Timelogs ---
         function renderTimelogsTable() {
             const tbodyLogs = document.getElementById('admin-table-body');
-            const filterMonth = document.getElementById('filter-timelog-month').value; 
-            const filterEmp = document.getElementById('filter-timelog-emp').value; 
+            const filterMonthEl = document.getElementById('filter-timelog-month');
+            const filterMonth = filterMonthEl ? filterMonthEl.value : ''; 
+            const filterEmpEl = document.getElementById('filter-timelog-emp');
+            const filterEmp = filterEmpEl ? filterEmpEl.value : ''; 
+            const searchLogInput = document.getElementById('search-timelog');
+            const searchTerm = searchLogInput ? searchLogInput.value.toLowerCase() : '';
             
             let filteredLogs = [...allLogsRaw];
             
@@ -2031,6 +1718,12 @@
                 });
             }
             if (filterEmp) { filteredLogs = filteredLogs.filter(log => log.userId === filterEmp); }
+            if (searchTerm) {
+                filteredLogs = filteredLogs.filter(log => 
+                    (log.name && log.name.toLowerCase().includes(searchTerm)) || 
+                    (log.remark && log.remark.toLowerCase().includes(searchTerm))
+                );
+            }
             
             filteredLogs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
             
@@ -2061,48 +1754,58 @@
                 }
                 const isCheckIn = data.type === 'in', empName = data.name || 'ไม่ทราบชื่อ';
                 const typeBadge = isCheckIn ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">เข้างาน</span>' : '<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-xs font-bold">ออกงาน</span>';
-                
                 const remarkBadge = data.remark ? `<div class="mt-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded inline-block"><i class="fa-regular fa-comment-dots"></i> ${data.remark}</div>` : '';
                 const photoHtml = data.isManual ? '<span class="text-[10px] text-gray-500 bg-gray-100 px-2 py-1 rounded border">แอดมินเพิ่ม</span>' : `<img src="${data.photoBase64}" class="w-10 h-10 rounded-lg object-cover border cursor-pointer hover:scale-[2] transition-transform origin-left" alt="Selfie">`;
                 const branchBadge = data.branchName ? `<div class="text-xs font-bold text-indigo-600 mb-1">${data.branchName}</div>` : '';
                 const gpsHtml = data.isManual || !data.lat ? '<span class="text-xs text-gray-400">-</span>' : `<a href="https://www.google.com/maps/search/?api=1&query=${data.lat},${data.lng}" target="_blank" class="text-blue-600 hover:underline"><i class="fa-solid fa-map-location-dot"></i> ดูแผนที่</a>`;
 
-                logHtml += `
-                    <tr class="hover:bg-gray-50 border-b">
-                        <td class="p-3 text-sm whitespace-nowrap">${timeStr}</td>
-                        <td class="p-3 text-sm font-medium text-gray-800">${empName}</td>
-                        <td class="p-3">${typeBadge}<br>${remarkBadge}</td>
-                        <td class="p-3">${photoHtml}</td>
-                        <td class="p-3 text-xs">${branchBadge}${gpsHtml}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="window.deleteTimelog('${data.id}')" class="text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded transition text-xs shadow-sm" title="ลบรายการนี้"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>`;
+                logHtml += `<tr class="hover:bg-gray-50 border-b"><td class="p-3 text-sm whitespace-nowrap">${timeStr}</td><td class="p-3 text-sm font-medium text-gray-800">${empName}</td><td class="p-3">${typeBadge}<br>${remarkBadge}</td><td class="p-3">${photoHtml}</td><td class="p-3 text-xs">${branchBadge}${gpsHtml}</td><td class="p-3 text-center"><button onclick="window.deleteTimelog('${data.id}')" class="text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded transition text-xs shadow-sm" title="ลบรายการนี้"><i class="fa-solid fa-trash"></i></button></td></tr>`;
             });
-            tbodyLogs.innerHTML = logHtml || '<tr><td colspan="6" class="p-8 text-center text-gray-400">ไม่มีข้อมูลตามเงื่อนไข</td></tr>';
+            if (tbodyLogs) tbodyLogs.innerHTML = logHtml || '<tr><td colspan="6" class="p-8 text-center text-gray-400">ไม่มีข้อมูลตามเงื่อนไข</td></tr>';
 
-            document.getElementById('pagination-info').innerText = `แสดง ${totalItems > 0 ? startIndex + 1 : 0}-${Math.min(endIndex, totalItems)} จาก ${totalItems} รายการ (หน้า ${currentPage}/${totalPages})`;
-            document.getElementById('btn-prev-page').disabled = currentPage === 1;
-            document.getElementById('btn-next-page').disabled = currentPage === totalPages || totalPages === 0;
+            const pageInfo = document.getElementById('pagination-info');
+            if (pageInfo) pageInfo.innerText = `แสดง ${totalItems > 0 ? (startIndex + 1) : 0}-${Math.min(endIndex, totalItems)} จาก ${totalItems} รายการ (หน้า ${currentPage}/${totalPages})`;
+            
+            const btnPrev = document.getElementById('btn-prev-page');
+            const btnNext = document.getElementById('btn-next-page');
+            if (btnPrev) btnPrev.disabled = currentPage <= 1;
+            if (btnNext) btnNext.disabled = currentPage >= totalPages || totalPages === 0;
         }
 
-        document.getElementById('filter-timelog-month').addEventListener('change', () => { currentPage = 1; renderTimelogsTable(); });
-        document.getElementById('filter-timelog-emp').addEventListener('change', () => { currentPage = 1; renderTimelogsTable(); });
+        const filterMonthEl = document.getElementById('filter-timelog-month');
+        if (filterMonthEl) filterMonthEl.addEventListener('change', () => { currentPage = 1; renderTimelogsTable(); });
         
-        document.getElementById('btn-prev-page').addEventListener('click', () => {
-            if (currentPage > 1) { currentPage--; renderTimelogsTable(); }
-        });
-        document.getElementById('btn-next-page').addEventListener('click', () => {
-            currentPage++; renderTimelogsTable(); 
-        });
+        const filterEmpEl = document.getElementById('filter-timelog-emp');
+        if (filterEmpEl) filterEmpEl.addEventListener('change', () => { currentPage = 1; renderTimelogsTable(); });
+        
+        const searchLogInput = document.getElementById('search-timelog');
+        if (searchLogInput) searchLogInput.addEventListener('input', () => { currentPage = 1; renderTimelogsTable(); });
 
-        document.getElementById('btn-export-csv').addEventListener('click', () => {
-            if (allLogsForExport.length === 0) return Swal.fire('ไม่มีข้อมูล', 'ไม่มีข้อมูลตามเงื่อนไขที่เลือก', 'info');
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFFDate_Time,Employee,Type,Remark,Branch,Latitude,Longitude\n";
-            allLogsForExport.forEach(row => { csvContent += `"${row.Date_Time}","${row.Employee}","${row.Type}","${row.Remark}","${row.Branch}","${row.Lat}","${row.Lng}"\n`; });
-            const link = document.createElement("a"); link.href = encodeURI(csvContent); link.download = `timelog_export_${new Date().getTime()}.csv`; link.click();
-        });
+        const btnPrev = document.getElementById('btn-prev-page');
+        if (btnPrev) {
+            btnPrev.addEventListener('click', () => {
+                if (currentPage > 1) { currentPage--; renderTimelogsTable(); }
+            });
+        }
 
+        const btnNext = document.getElementById('btn-next-page');
+        if (btnNext) {
+            btnNext.addEventListener('click', () => {
+                currentPage++; renderTimelogsTable(); 
+            });
+        }
+
+        const btnExportCsv = document.getElementById('btn-export-csv');
+        if (btnExportCsv) {
+            btnExportCsv.addEventListener('click', () => {
+                if (allLogsForExport.length === 0) return Swal.fire('ไม่มีข้อมูล', 'ไม่มีข้อมูลตามเงื่อนไขที่เลือก', 'info');
+                let csvContent = "data:text/csv;charset=utf-8,\uFEFFDate_Time,Employee,Type,Remark,Branch,Latitude,Longitude\n";
+                allLogsForExport.forEach(row => { csvContent += `"${row.Date_Time}","${row.Employee}","${row.Type}","${row.Remark}","${row.Branch}","${row.Lat}","${row.Lng}"\n`; });
+                const link = document.createElement("a"); link.href = encodeURI(csvContent); link.download = `timelog_export_${new Date().getTime()}.csv`; link.click();
+            });
+        }
+
+        // --- Department & Settings Logic ---
         function renderDepartmentsList() {
             const container = document.getElementById('depts-list');
             if (!systemSettings.departments || systemSettings.departments.length === 0) {
@@ -2115,10 +1818,13 @@
             container.innerHTML = html;
         }
         window.removeDept = (idx) => { systemSettings.departments.splice(idx, 1); renderDepartmentsList(); };
-        document.getElementById('btn-add-dept').addEventListener('click', () => {
-            if (!systemSettings.departments) systemSettings.departments = [];
-            systemSettings.departments.push({ id: Date.now(), name: 'แผนกใหม่' }); renderDepartmentsList();
-        });
+        const btnAddDept = document.getElementById('btn-add-dept');
+        if (btnAddDept) {
+            btnAddDept.addEventListener('click', () => {
+                if (!systemSettings.departments) systemSettings.departments = [];
+                systemSettings.departments.push({ id: Date.now(), name: 'แผนกใหม่' }); renderDepartmentsList();
+            });
+        }
 
         function renderShiftsList() {
             const container = document.getElementById('shifts-list');
@@ -2132,10 +1838,13 @@
             container.innerHTML = html;
         }
         window.removeShift = (idx) => { systemSettings.shifts.splice(idx, 1); renderShiftsList(); };
-        document.getElementById('btn-add-shift').addEventListener('click', () => {
-            if (!systemSettings.shifts) systemSettings.shifts = [];
-            systemSettings.shifts.push({ id: Date.now(), name: 'กะใหม่', coreTime: '08:00', workHours: 8 }); renderShiftsList();
-        });
+        const btnAddShift = document.getElementById('btn-add-shift');
+        if (btnAddShift) {
+            btnAddShift.addEventListener('click', () => {
+                if (!systemSettings.shifts) systemSettings.shifts = [];
+                systemSettings.shifts.push({ id: Date.now(), name: 'กะใหม่', coreTime: '08:00', workHours: 8 }); renderShiftsList();
+            });
+        }
 
         function renderBranchesList() {
             const container = document.getElementById('branches-list');
@@ -2149,10 +1858,13 @@
             container.innerHTML = html;
         }
         window.removeBranch = (idx) => { systemSettings.branches.splice(idx, 1); renderBranchesList(); };
-        document.getElementById('btn-add-branch').addEventListener('click', () => {
-            if (!systemSettings.branches) systemSettings.branches = [];
-            systemSettings.branches.push({ id: Date.now(), name: 'สาขาใหม่', lat: '', lng: '', radius: 100 }); renderBranchesList();
-        });
+        const btnAddBranch = document.getElementById('btn-add-branch');
+        if (btnAddBranch) {
+            btnAddBranch.addEventListener('click', () => {
+                if (!systemSettings.branches) systemSettings.branches = [];
+                systemSettings.branches.push({ id: Date.now(), name: 'สาขาใหม่', lat: '', lng: '', radius: 100 }); renderBranchesList();
+            });
+        }
 
         function renderHolidaysList() {
             const container = document.getElementById('holidays-list');
@@ -2167,10 +1879,13 @@
             container.innerHTML = html;
         }
         window.removeHoliday = (idx) => { systemSettings.holidays.splice(idx, 1); renderHolidaysList(); };
-        document.getElementById('btn-add-holiday').addEventListener('click', () => {
-            if (!systemSettings.holidays) systemSettings.holidays = [];
-            systemSettings.holidays.push({ date: '', name: '' }); renderHolidaysList();
-        });
+        const btnAddHoliday = document.getElementById('btn-add-holiday');
+        if (btnAddHoliday) {
+            btnAddHoliday.addEventListener('click', () => {
+                if (!systemSettings.holidays) systemSettings.holidays = [];
+                systemSettings.holidays.push({ date: '', name: '' }); renderHolidaysList();
+            });
+        }
 
         function populateSettingsForm() {
             document.getElementById('setting-announcement').value = systemSettings.announcement || '';
@@ -2186,37 +1901,38 @@
             renderDepartmentsList(); renderShiftsList(); renderBranchesList(); renderHolidaysList();
         }
 
-        document.getElementById('btn-save-settings').addEventListener('click', async () => {
-            const announcement = document.getElementById('setting-announcement').value.trim();
-            const workHours = document.getElementById('setting-workhours').value;
-            const coreTime = document.getElementById('setting-coretime').value;
-            
-            const otNormal = parseFloat(document.getElementById('setting-ot-normal').value) || 1.5;
-            const otWeekend = parseFloat(document.getElementById('setting-ot-weekend').value) || 2;
-            const otHoliday = parseFloat(document.getElementById('setting-ot-holiday').value) || 3;
-            const ssoPercent = parseFloat(document.getElementById('setting-sso-percent').value) || 5;
-            const ssoMax = parseFloat(document.getElementById('setting-sso-max').value) || 750;
-            
-            let updatedDepts = []; if (systemSettings.departments) { systemSettings.departments.forEach((d, idx) => { const name = document.getElementById(`dept-name-${idx}`).value; if(name) updatedDepts.push({ id: d.id, name: name }); }); }
-            let updatedShifts = []; if (systemSettings.shifts) { systemSettings.shifts.forEach((s, idx) => { const name = document.getElementById(`shift-name-${idx}`).value; const ctime = document.getElementById(`shift-coretime-${idx}`).value; const whours = document.getElementById(`shift-workhours-${idx}`).value; if(name && ctime && whours) updatedShifts.push({ id: s.id, name: name, coreTime: ctime, workHours: parseFloat(whours) }); }); }
-            let updatedBranches = []; if (systemSettings.branches) { systemSettings.branches.forEach((b, idx) => { const name = document.getElementById(`branch-name-${idx}`).value; const lat = document.getElementById(`branch-lat-${idx}`).value; const lng = document.getElementById(`branch-lng-${idx}`).value; const rad = document.getElementById(`branch-rad-${idx}`).value; if(name && lat && lng) updatedBranches.push({ id: b.id, name: name, lat: parseFloat(lat), lng: parseFloat(lng), radius: parseInt(rad) }); }); }
-            let updatedHolidays = []; if (systemSettings.holidays) { systemSettings.holidays.forEach((h, idx) => { const hdate = document.getElementById(`hol-date-${idx}`).value; const hname = document.getElementById(`hol-name-${idx}`).value; if(hdate && hname) updatedHolidays.push({ date: hdate, name: hname }); }); }
+        const btnSaveSettings = document.getElementById('btn-save-settings');
+        if (btnSaveSettings) {
+            btnSaveSettings.addEventListener('click', async () => {
+                const announcement = document.getElementById('setting-announcement').value.trim();
+                const workHours = document.getElementById('setting-workhours').value;
+                const coreTime = document.getElementById('setting-coretime').value;
+                
+                const otNormal = parseFloat(document.getElementById('setting-ot-normal').value) || 1.5;
+                const otWeekend = parseFloat(document.getElementById('setting-ot-weekend').value) || 2;
+                const otHoliday = parseFloat(document.getElementById('setting-ot-holiday').value) || 3;
+                const ssoPercent = parseFloat(document.getElementById('setting-sso-percent').value) || 5;
+                const ssoMax = parseFloat(document.getElementById('setting-sso-max').value) || 750;
+                
+                let updatedDepts = []; if (systemSettings.departments) { systemSettings.departments.forEach((d, idx) => { const name = document.getElementById(`dept-name-${idx}`).value; if(name) updatedDepts.push({ id: d.id, name: name }); }); }
+                let updatedShifts = []; if (systemSettings.shifts) { systemSettings.shifts.forEach((s, idx) => { const name = document.getElementById(`shift-name-${idx}`).value; const ctime = document.getElementById(`shift-coretime-${idx}`).value; const whours = document.getElementById(`shift-workhours-${idx}`).value; if(name && ctime && whours) updatedShifts.push({ id: s.id, name: name, coreTime: ctime, workHours: parseFloat(whours) }); }); }
+                let updatedBranches = []; if (systemSettings.branches) { systemSettings.branches.forEach((b, idx) => { const name = document.getElementById(`branch-name-${idx}`).value; const lat = document.getElementById(`branch-lat-${idx}`).value; const lng = document.getElementById(`branch-lng-${idx}`).value; const rad = document.getElementById(`branch-rad-${idx}`).value; if(name && lat && lng) updatedBranches.push({ id: b.id, name: name, lat: parseFloat(lat), lng: parseFloat(lng), radius: parseInt(rad) }); }); }
+                let updatedHolidays = []; if (systemSettings.holidays) { systemSettings.holidays.forEach((h, idx) => { const hdate = document.getElementById(`hol-date-${idx}`).value; const hname = document.getElementById(`hol-name-${idx}`).value; if(hdate && hname) updatedHolidays.push({ date: hdate, name: hname }); }); }
 
-            Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            try {
-                const newData = { 
-                    announcement: announcement, departments: updatedDepts, shifts: updatedShifts, branches: updatedBranches, holidays: updatedHolidays, 
-                    workHours: workHours ? parseFloat(workHours) : 8, coreTime: coreTime || "09:00",
-                    otNormal: otNormal, otWeekend: otWeekend, otHoliday: otHoliday, ssoPercent: ssoPercent, ssoMax: ssoMax
-                };
-                await setDoc(doc(db, "settings", "general"), newData);
-                systemSettings = { ...systemSettings, ...newData }; 
-                renderDepartmentsList(); renderShiftsList(); renderBranchesList(); renderHolidaysList();
-                Swal.fire({ icon: 'success', title: 'บันทึกตั้งค่าสำเร็จ', timer: 1500 });
-            } catch (error) { Swal.fire('ผิดพลาด', error.message, 'error'); }
-        });
-
-        if (!navigator.onLine) document.getElementById('offline-banner').classList.remove('hide');
+                Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                try {
+                    const newData = { 
+                        announcement: announcement, departments: updatedDepts, shifts: updatedShifts, branches: updatedBranches, holidays: updatedHolidays, 
+                        workHours: workHours ? parseFloat(workHours) : 8, coreTime: coreTime || "09:00",
+                        otNormal: otNormal, otWeekend: otWeekend, otHoliday: otHoliday, ssoPercent: ssoPercent, ssoMax: ssoMax
+                    };
+                    await setDoc(doc(db, "settings", "general"), newData);
+                    systemSettings = { ...systemSettings, ...newData }; 
+                    renderDepartmentsList(); renderShiftsList(); renderBranchesList(); renderHolidaysList();
+                    Swal.fire({ icon: 'success', title: 'บันทึกตั้งค่าสำเร็จ', timer: 1500 });
+                } catch (error) { Swal.fire('ผิดพลาด', error.message, 'error'); }
+            });
+        }
 
     </script>
 </body>
