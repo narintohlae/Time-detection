@@ -1169,7 +1169,7 @@ async function loadSystemSettings() {
         }
 function populateSettingsForm() {
     if (!systemSettings) return;
-    
+
     document.getElementById('setting-announcement').value = systemSettings.announcement || '';
     document.getElementById('setting-ot-normal').value = systemSettings.otNormal || 1.5;
     document.getElementById('setting-ot-weekend').value = systemSettings.otWeekend || 2;
@@ -1178,8 +1178,11 @@ function populateSettingsForm() {
     document.getElementById('setting-sso-max').value = systemSettings.ssoMax || 750;
     document.getElementById('setting-workhours').value = systemSettings.workHours || 8;
     document.getElementById('setting-coretime').value = systemSettings.coreTime || "09:00";
-    
-    // หมายเหตุ: โค้ดนี้จะดึงค่าจากฐานข้อมูลมาแสดงในกล่อง Input ในหน้าตั้งค่าแอดมิน
+
+    // เรียกฟังก์ชันเพื่อนำข้อมูล แผนก, กะ, สาขา และวันหยุด มาวาดลงบนหน้าจอ
+    if (typeof window.renderSettingsLists === 'function') {
+        window.renderSettingsLists();
+    }
 }
         function showView(viewName) {
             Object.values(views).forEach(v => v.classList.add('hide'));
@@ -2158,23 +2161,6 @@ document.getElementById('search-timelog')?.addEventListener('input', renderTimel
 // ==========================================
 // ส่วนของการจัดการหน้าตั้งค่าระบบ (Settings)
 // ==========================================
-
-// 1. อัปเดตฟังก์ชัน populateSettingsForm ให้เรียกการวาดรายการต่างๆ ด้วย
-window.populateSettingsForm = function() {
-    if (!systemSettings) return;
-    
-    document.getElementById('setting-announcement').value = systemSettings.announcement || '';
-    document.getElementById('setting-ot-normal').value = systemSettings.otNormal || 1.5;
-    document.getElementById('setting-ot-weekend').value = systemSettings.otWeekend || 2;
-    document.getElementById('setting-ot-holiday').value = systemSettings.otHoliday || 3;
-    document.getElementById('setting-sso-percent').value = systemSettings.ssoPercent || 5;
-    document.getElementById('setting-sso-max').value = systemSettings.ssoMax || 750;
-    document.getElementById('setting-workhours').value = systemSettings.workHours || 8;
-    document.getElementById('setting-coretime').value = systemSettings.coreTime || "09:00";
-    
-    window.renderSettingsLists();
-};
-
 // 2. ฟังก์ชันวาดรายการ แผนก, กะ, สาขา, วันหยุด ลงในหน้าจอ
 window.renderSettingsLists = function() {
     // แผนก
