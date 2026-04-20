@@ -637,7 +637,7 @@
             } 
         }
 
-        let currentUserId = null, currentRole = null, pinTargetRole = null, pinTargetEmpId = null, enteredPin = "", clockInterval;
+        let currentUserId = null, currentRole = null, pinTargetRole = null, pinTargetEmpId = null, enteredPin = "", clockInterval, syncInterval;
         function getLocalISODate(d = new Date()) { const date = new Date(d); date.setMinutes(date.getMinutes() - date.getTimezoneOffset()); return date.toISOString().split('T')[0]; }
         function formatDate(dateStr) { return new Date(dateStr).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }); }
         function formatMoney(num) { return Number(num).toLocaleString('th-TH', {minimumFractionDigits: 0, maximumFractionDigits: 2}); }
@@ -737,6 +737,8 @@
                 } else { 
                     switchOwnerTab('dashboard'); initOwnerScreen(); showScreen('screen-owner'); 
                 } 
+                // เริ่มดึงข้อมูลเบื้องหลังอัตโนมัติทุกๆ 15 วินาที
+                syncInterval = setInterval(syncDataSilently, 15000);
                 showToast('เข้าสู่ระบบสำเร็จ', 'success'); 
             } else { 
                 document.getElementById('pin-dots').classList.add('shake'); 
@@ -745,7 +747,56 @@
                 setTimeout(()=>{ document.getElementById('pin-dots').classList.remove('shake'); enteredPin=""; updatePinDots(); },400); 
             } 
         }
-        function logout() { currentRole=null; currentUserId=null; clearInterval(clockInterval); showScreen('screen-role'); showToast('ออกจากระบบเรียบร้อย', 'info'); }
+        function logout() { currentRole=null; currentUserId=null; clearInterval(clockInterval); clearInterval(syncInterval); showScreen('screen-role'); showToast('ออกจากระบบเรียบร้อย', 'info'); }
+
+        // --- ฟังก์ชันดึงข้อมูลแบบ Real-time (ซ่อนการทำงานเบื้องหลัง) ---
+        async function syncDataSilently() {
+            if (!GAS_URL || !GAS_URL.startsWith("http")) return;
+            try {
+                const response = await fetch(GAS_URL);
+                const data = await response.json();
+                
+                let hasChanges = false;
+                // ตรวจสอบว่ามีข้อมูลใหม่ที่ต่างจากในเครื่องหรือไม่
+                if (data.tt_emps_v10 && localStorage.getItem('tt_emps_v10') !== data.tt_emps_v10) {
+                    employees = JSON.parse(data.tt_emps_v10); hasChanges = true;
+                }
+                if (data.tt_logs_v10 && localStorage.getItem('tt_logs_v10') !== data.tt_logs_v10) {
+                    timeLogs = JSON.parse(data.tt_logs_v10); hasChanges = true;
+                }
+                if (data.tt_reqs_v10 && localStorage.getItem('tt_reqs_v10') !== data.tt_reqs_v10) {
+                    requests = JSON.parse(data.tt_reqs_v10); hasChanges = true;
+                }
+                if (data.tt_slips_v10 && localStorage.getItem('tt_slips_v10') !== data.tt_slips_v10) {
+                    paySlips = JSON.parse(data.tt_slips_v10); hasChanges = true;
+                }
+
+                // ถ้าพบว่ามีข้อมูลเปลี่ยน ให้อัปเดตตัวแปรและวาดหน้าจอใหม่ทันที
+                if (hasChanges) {
+                    saveLocalData();
+                    refreshCurrentUI();
+                }
+            } catch (error) {
+                console.log("Silent sync failed, will retry later.");
+            }
+        }
+
+        function refreshCurrentUI() {
+            if (currentRole === 'employee') {
+                renderEmployeeTimeHistory();
+                updateTodayHours();
+                updatePunchButtonState();
+                renderEmployeeRequestHistory();
+                renderEmployeePaySlips();
+            } else if (currentRole === 'owner') {
+                renderOwnerDashboard();
+                renderOwnerEmployeeList();
+                renderOwnerInboxList();
+                updateOwnerBadge();
+                renderOwnerPayroll();
+            }
+        }
+        // ----------------------------------------------------
 
         function switchEmpTab(tab) {
             ['emp-tab-time', 'emp-tab-leave', 'emp-tab-payroll'].forEach(id=>document.getElementById(id).classList.add('hidden'));
