@@ -80,7 +80,7 @@
 
     <div class="w-full max-w-md h-full bg-[#f4f4f5] relative overflow-hidden flex flex-col shadow-2xl neo-border border-y-0 sm:border-y-3">
         
-        <!-- ================= หน้าจอโหลดข้อมูล (เพิ่มใหม่) ================= -->
+        <!-- ================= หน้าจอโหลดข้อมูล ================= -->
         <div id="loading-overlay" class="absolute inset-0 z-[100] bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center hidden transition-opacity">
             <i class="fa-solid fa-circle-notch fa-spin text-5xl text-[#111827] mb-4"></i>
             <h2 class="text-xl font-extrabold text-[#111827]">กำลังซิงค์ข้อมูล...</h2>
@@ -398,7 +398,7 @@
             </div>
         </div>
 
-        <!-- Toast Notification (Updated) -->
+        <!-- Toast Notification -->
         <div id="toast" class="absolute top-[env(safe-area-inset-top,20px)] left-1/2 transform -translate-x-1/2 px-6 py-4 rounded-xl font-bold shadow-2xl neo-border z-[100] hidden flex items-center gap-3 w-auto max-w-[90%] transition-all">
             <i id="toast-icon" class="mt-0.5 shrink-0"></i>
             <span id="toast-msg" class="break-words text-sm leading-snug"></span>
@@ -416,8 +416,7 @@
         const MASTER_OWNER_PIN = "9999";
         
         // --- ตั้งค่า Google Sheets API ---
-        // นำ Web App URL ที่ได้จาก Google Apps Script มาใส่ที่นี่
-        const GAS_URL = "YOUR_WEB_APP_URL_HERE"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxMWYYmGC57tJJLHHm3uUpY1COndFrjUIjCxzyal9FXyG-XfKpsUfIlnhW3E_AsuOL_/exec"; 
         
         let employees = [], timeLogs = [], requests = [], paySlips = []; 
 
@@ -430,7 +429,6 @@
         async function loadData() {
             showLoading(true);
             try {
-                // ถ้ายังไม่ได้ใส่ URL หรือใช้ค่าเริ่มต้น ให้โหลดจากเครื่องตามปกติ
                 if (!GAS_URL || !GAS_URL.startsWith("http")) {
                     loadLocalData();
                     return;
@@ -445,18 +443,17 @@
                     timeLogs = data.tt_logs_v10 ? JSON.parse(data.tt_logs_v10) : [];
                     requests = data.tt_reqs_v10 ? JSON.parse(data.tt_reqs_v10) : [];
                     paySlips = data.tt_slips_v10 ? JSON.parse(data.tt_slips_v10) : [];
-                    saveLocalData(); // Backup ไว้ในเครื่องด้วยเพื่อให้โหลดไวในครั้งถัดไป
+                    saveLocalData(); // Backup
                 } else {
-                    // ถ้ายังไม่มีข้อมูลใน Sheet (รันครั้งแรก)
                     initDefaultData();
                 }
             } catch (error) {
                 console.error("Cloud load error:", error);
-                showToast("เชื่อมต่อฐานข้อมูลล้มเหลว ใช้ข้อมูลสำรองในเครื่อง", "warning");
+                showToast("ใช้ข้อมูลสำรองในเครื่อง (Offline Mode)", "info");
                 loadLocalData();
             } finally {
                 showLoading(false);
-                showScreen('screen-role'); // แสดงหน้าจอหลังจากโหลดเสร็จแล้ว
+                showScreen('screen-role'); 
             }
         }
 
@@ -488,7 +485,7 @@
         }
 
         async function saveData() { 
-            saveLocalData(); // บันทึกลงเครื่องทันทีเพื่อให้แอปทำงานไวและออฟไลน์ได้ระดับนึง
+            saveLocalData(); // บันทึกลงเครื่องทันที
 
             if (!GAS_URL || !GAS_URL.startsWith("http")) return;
 
@@ -500,28 +497,26 @@
             };
 
             try {
-                // อัปเดตข้อมูลขึ้น Google Sheets แบบ Background (ไม่ต้องรอก็ได้)
+                // อัปเดตข้อมูลขึ้น Google Sheets โดยใช้ mode: 'no-cors' ป้องกันการโดนบล็อก
                 fetch(GAS_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     body: JSON.stringify(payload),
-                    // ใช้ text/plain เลี่ยงปัญหา CORS Preflight ใน Apps Script
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
-                }).then(res => res.json()).then(res => {
-                    if(res.status !== "success") console.error("Cloud Save Warning:", res);
-                });
+                }).then(() => {
+                    console.log("Data sync request sent");
+                }).catch(err => console.error(err));
             } catch (error) {
                 console.error("Cloud Save Failed:", error);
             }
         }
         
-        // Smart Mock Data Creation based on current date
         function createMockLogsForPayroll() { 
             const now = new Date(); 
             const y = now.getFullYear(); 
             const m = now.getMonth(); 
-            // Generate mock logs for the current month up to yesterday
             let maxDay = now.getDate() > 15 ? 15 : now.getDate() - 1;
-            if(maxDay < 1) maxDay = 1; // Fallback
+            if(maxDay < 1) maxDay = 1; 
             for(let d=1; d <= maxDay; d++) { 
                 const date = new Date(y, m, d); 
                 if(date.getDay() !== 0) { 
@@ -539,7 +534,6 @@
         function formatMoney(num) { return Number(num).toLocaleString('th-TH', {minimumFractionDigits: 0, maximumFractionDigits: 2}); }
         function generateAvatar(name) { return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}&backgroundColor=${['b6e3f4','ffdfbf','c0aede','fef08a','a7f3d0'][Math.floor(Math.random()*5)]}`; }
         
-        // ================= NOTIFICATION SYSTEM =================
         function showToast(message, type = 'success') { 
             const toast = document.getElementById('toast'); 
             const msg = document.getElementById('toast-msg');
@@ -557,7 +551,7 @@
             } else if (type === 'info') {
                 toast.classList.add('bg-blue-50', 'text-blue-700', 'border-blue-500');
                 icon.className = "fa-solid fa-circle-info text-blue-500 text-xl";
-            } else { // success
+            } else {
                 toast.classList.add('bg-[#111827]', 'text-white');
                 icon.className = "fa-solid fa-circle-check text-[#4ade80] text-xl";
             }
@@ -566,7 +560,6 @@
             setTimeout(() => { toast.classList.remove('toast-enter'); toast.classList.add('hidden'); }, 3000); 
         }
 
-        // Centralized Confirm Modal
         function showConfirm(title, message, type = 'warning', confirmBtnText = 'ยืนยัน', onConfirmCallback) {
             document.getElementById('confirm-title').innerText = title;
             document.getElementById('confirm-msg').innerHTML = message;
@@ -579,7 +572,7 @@
                 iconBg.className = "w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-red-500";
                 icon.className = "fa-solid fa-trash text-3xl text-red-500";
                 btnAction.className = "flex-1 bg-[#f87171] text-white font-bold py-3 rounded-xl neo-border neo-shadow-sm active:scale-95";
-            } else { // warning
+            } else {
                 iconBg.className = "w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-yellow-500";
                 icon.className = "fa-solid fa-triangle-exclamation text-3xl text-yellow-500";
                 btnAction.className = "flex-1 bg-[#ffde59] text-[#111827] font-bold py-3 rounded-xl neo-border neo-shadow-sm active:scale-95";
@@ -600,7 +593,6 @@
             empNameToDelete = null;
             reqIdToCancel = null; 
         }
-        // ===============================================================
 
         function showScreen(screenId) { ['screen-role', 'screen-select-emp', 'screen-pin', 'screen-employee', 'screen-owner'].forEach(id => { const el=document.getElementById(id); if(id==='screen-select-emp') el.classList.add('translate-x-full'); else if(id==='screen-pin') el.classList.add('translate-y-full'); else el.classList.add('hidden'); }); const target=document.getElementById(screenId); target.classList.remove('hidden'); if(screenId==='screen-select-emp' || screenId==='screen-pin') setTimeout(()=>target.classList.remove('translate-x-full', 'translate-y-full'), 10); }
 
@@ -620,7 +612,6 @@
             return isWork;
         }
 
-        // Login
         function gotoSelectEmployee() { if(employees.length===0) return showToast('ไม่พบข้อมูลพนักงานในระบบ', 'warning'); document.getElementById('emp-selection-list').innerHTML = employees.map(emp => `<button onclick="openPinPad('employee', ${emp.id})" class="w-full bg-white p-4 rounded-xl neo-border neo-shadow-sm flex items-center gap-4 text-left active:scale-[0.98] transition-transform"><img src="${emp.avatar}" class="w-14 h-14 rounded-full bg-gray-100 shrink-0"><div class="flex-1 min-w-0"><h4 class="font-extrabold text-[#111827] text-xl truncate">${emp.name}</h4><p class="text-sm text-gray-500 truncate">${emp.position}</p></div><i class="fa-solid fa-chevron-right shrink-0 text-gray-400"></i></button>`).join(''); showScreen('screen-select-emp'); }
         function backToRole() { showScreen('screen-role'); }
         function openPinPad(role, empId = null) { pinTargetRole=role; pinTargetEmpId=empId; enteredPin=""; updatePinDots(); if (role === 'owner') { document.getElementById('pin-title').innerText="รหัสเจ้าของ"; document.getElementById('pin-subtitle').innerText="เข้าสู่ระบบจัดการ"; document.getElementById('pin-icon').classList.remove('hidden'); document.getElementById('pin-avatar').classList.add('hidden'); } else { const emp=employees.find(e=>e.id===empId); document.getElementById('pin-title').innerText="รหัสพนักงาน"; document.getElementById('pin-subtitle').innerText=emp.name; document.getElementById('pin-avatar').src=emp.avatar; document.getElementById('pin-avatar').classList.remove('hidden'); document.getElementById('pin-icon').classList.add('hidden'); } showScreen('screen-pin'); }
@@ -641,13 +632,12 @@
             } else { 
                 document.getElementById('pin-dots').classList.add('shake'); 
                 showToast('รหัส PIN ไม่ถูกต้อง', 'error'); 
-                if(navigator.vibrate) navigator.vibrate([100, 50, 100]); // Vibrate on wrong pin
+                if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 setTimeout(()=>{ document.getElementById('pin-dots').classList.remove('shake'); enteredPin=""; updatePinDots(); },400); 
             } 
         }
         function logout() { currentRole=null; currentUserId=null; clearInterval(clockInterval); showScreen('screen-role'); showToast('ออกจากระบบเรียบร้อย', 'info'); }
 
-        // Employee
         function switchEmpTab(tab) {
             ['emp-tab-time', 'emp-tab-leave', 'emp-tab-payroll'].forEach(id=>document.getElementById(id).classList.add('hidden'));
             ['nav-emp-time', 'nav-emp-leave', 'nav-emp-payroll'].forEach(id=>document.getElementById(id).className="flex-1 flex flex-col items-center justify-center text-gray-400 border-r-3 border-[#111827] py-2");
@@ -660,14 +650,13 @@
         
         function updateClock() { 
             document.getElementById('current-time').innerText=new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); 
-            if(currentRole === 'employee') updateTodayHours(); // Update working hours dynamically
+            if(currentRole === 'employee') updateTodayHours();
         }
         function updateDate() { 
             document.getElementById('current-date').innerText=new Date().toLocaleDateString('th-TH', { weekday: 'long', month: 'long', day: 'numeric' }); 
             document.getElementById('owner-date').innerText=new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }); 
         }
 
-        // New Feature: Calculate working hours today dynamically
         function updateTodayHours() {
             const todayStr = new Date().toDateString();
             const logs = timeLogs.filter(l => l.empId === currentUserId && new Date(l.timestamp).toDateString() === todayStr).sort((a,b) => a.timestamp - b.timestamp);
@@ -677,7 +666,7 @@
                 if(l.type === 'in' && !inTime) inTime = l.timestamp;
                 else if(l.type === 'out' && inTime) { totalMs += (l.timestamp - inTime); inTime = null; }
             });
-            if(inTime) totalMs += (Date.now() - inTime); // Currently working
+            if(inTime) totalMs += (Date.now() - inTime);
             
             const hrs = Math.floor(totalMs / 3600000);
             const mins = Math.floor((totalMs % 3600000) / 60000);
@@ -824,7 +813,6 @@
 
         function renderEmployeePaySlips() { const c = document.getElementById('emp-payslip-list'); const mySlips = paySlips.filter(p => p.empId === currentUserId).sort((a,b) => b.timestamp - a.timestamp); if(mySlips.length === 0) { c.innerHTML='<div class="text-center p-6 border-2 border-dashed bg-white rounded-xl text-gray-400 font-bold">ยังไม่มีสลิปเงินเดือน</div>'; return; } c.innerHTML = mySlips.map(s => `<div class="bg-white p-4 rounded-xl neo-border neo-shadow-sm flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center neo-border shrink-0"><i class="fa-solid fa-file-invoice-dollar text-xl"></i></div><div class="min-w-0"><h4 class="font-extrabold text-[#111827] truncate">สลิปเดือน ${s.monthLabel}</h4><p class="text-xs font-bold text-gray-500">สุทธิ: <span class="text-green-600">${formatMoney(s.netPay)} ฿</span></p></div></div><button onclick="viewSlip(${s.id})" class="w-10 h-10 bg-[#111827] text-white rounded-lg flex items-center justify-center active:scale-95 shrink-0"><i class="fa-solid fa-eye"></i></button></div>`).join(''); }
 
-        // ================= Owner =================
         function switchOwnerTab(tab) {
             ['owner-tab-dashboard', 'owner-tab-employees', 'owner-tab-leave', 'owner-tab-payroll'].forEach(id=>document.getElementById(id).classList.add('hidden'));
             ['nav-owner-dashboard', 'nav-owner-employees', 'nav-owner-leave', 'nav-owner-payroll'].forEach(id=>document.getElementById(id).className="flex-[1.2] flex flex-col items-center justify-center text-gray-400 border-r-3 border-[#111827] py-2"+(id==='nav-owner-leave'?' relative':''));
@@ -923,7 +911,6 @@
         
         function updateSalaryUnit() { const type = document.getElementById('emp-salary-type').value; const label = document.getElementById('salary-unit-text'); const input = document.getElementById('emp-base-rate'); if(type === 'monthly') { label.innerText = '(฿/เดือน)'; input.placeholder = 'เช่น 15000'; } else if(type === 'weekly') { label.innerText = '(฿/สัปดาห์)'; input.placeholder = 'เช่น 3500'; } else if(type === 'daily') { label.innerText = '(฿/วัน)'; input.placeholder = 'เช่น 500'; } else if(type === 'hourly') { label.innerText = '(฿/ชม.)'; input.placeholder = 'เช่น 60'; } }
 
-        // Updated Render function with Search feature
         function renderOwnerEmployeeList() { 
             const container = document.getElementById('owner-employee-management-list'); 
             const searchTerm = (document.getElementById('search-emp')?.value || '').toLowerCase().trim();
@@ -1061,7 +1048,6 @@
             } 
         }
 
-        // Payroll
         function calculateEmployeePayroll(empId, monthStr) {
             const emp = employees.find(e => e.id === empId); if(!emp) return null;
             const [yStr, mStr] = monthStr.split('-'); const y = parseInt(yStr), m = parseInt(mStr);
@@ -1119,7 +1105,7 @@
             showToast('ระบบได้บันทึกรูปสลิปเงินเดือนเรียบร้อยแล้ว', 'success');
         }
 
-        // โหลดข้อมูล (ย้าย showScreen('screen-role') เข้าไปในฟังก์ชันโหลด เพื่อให้รอหน้าโหลดทำงานเสร็จก่อน)
+        // เริ่มต้นโหลดข้อมูล
         loadData(); 
     </script>
 </body>
