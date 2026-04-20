@@ -2,240 +2,155 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time Tracking Dashboard - 2026 Isometric UI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Time Tracking App</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap');
-        
+        /* สไตล์แบบ Flat 2010s & ไอโซเมตริก (เงาแข็ง) */
         body {
-            font-family: 'Prompt', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-            color: #e2e8f0;
-            min-height: 100vh;
-            overflow-x: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #F4F4F0; /* สีพื้นหลังสไตล์กระดาษ/มินิมอล */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            box-sizing: border-box;
         }
 
-        /* Isometric 2026 Design System */
-        .iso-container {
-            perspective: 1200px;
+        .header {
+            margin-top: 40px;
+            margin-bottom: 40px;
+            text-align: center;
         }
 
-        .iso-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            /* Isometric Transformation */
-            transform: rotateX(15deg) rotateY(-10deg) translateZ(20px);
-            box-shadow: 
-                20px 20px 40px rgba(0, 0, 0, 0.4),
-                -5px -5px 20px rgba(255, 255, 255, 0.05),
-                inset 1px 1px 2px rgba(255, 255, 255, 0.2);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .iso-card:hover {
-            transform: rotateX(0deg) rotateY(0deg) translateZ(50px) scale(1.02);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(99, 102, 241, 0.5);
+        /* ปุ่มกดสไตล์ Isometric Flat */
+        .btn {
+            width: 100%;
+            max-width: 300px;
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            border: 3px solid #222;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .glass-table th {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .glass-table tr {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            transition: background 0.2s;
-        }
-        
-        .glass-table tr:hover {
-            background: rgba(99, 102, 241, 0.1);
+        /* สีและเงาปุ่มเข้างาน */
+        .btn-checkin {
+            background-color: #A8E6CF; /* สีเขียวพาสเทล Flat */
+            color: #222;
+            box-shadow: 6px 6px 0px #222; /* เงาแข็งแบบ Isometric */
         }
 
-        /* Responsive reset for mobile */
-        @media (max-width: 768px) {
-            .iso-card {
-                transform: none !important;
-            }
+        /* สีและเงาปุ่มออกงาน */
+        .btn-checkout {
+            background-color: #FF8B94; /* สีแดง/ชมพูพาสเทล Flat */
+            color: #222;
+            box-shadow: 6px 6px 0px #222;
+        }
+
+        /* แอนิเมชันตอนกด (ยุบตัวลงไปหาเงา) */
+        .btn:active {
+            transform: translate(6px, 6px);
+            box-shadow: 0px 0px 0px #222;
+        }
+
+        /* กล่องแสดงสถานะ */
+        .status-box {
+            width: 100%;
+            max-width: 300px;
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #fff;
+            border: 3px solid #222;
+            box-shadow: 4px 4px 0px #222;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+            box-sizing: border-box;
         }
     </style>
 </head>
-<body class="p-6 md:p-12 iso-container">
+<body>
 
-    <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-10 iso-card p-6">
-            <div>
-                <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">
-                    Employee Time Tracking
-                </h1>
-                <p class="text-gray-400 mt-2">ระบบจัดการเวลาเข้า-ออก (Dashboard เจ้าของร้าน)</p>
-            </div>
-            <div class="mt-4 md:mt-0 flex gap-4">
-                <button id="refreshBtn" class="px-6 py-2 bg-indigo-600/80 hover:bg-indigo-500 rounded-xl backdrop-blur-md transition-all shadow-lg border border-indigo-400/30">
-                    รีเฟรชข้อมูล
-                </button>
-                <button id="exportBtn" class="px-6 py-2 bg-emerald-600/80 hover:bg-emerald-500 rounded-xl backdrop-blur-md transition-all shadow-lg border border-emerald-400/30">
-                    📥 Export to Sheets (CSV)
-                </button>
-            </div>
-        </div>
+    <div class="header">
+        <h1>WORK LOG</h1>
+    </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-            <div class="iso-card p-6 flex flex-col justify-center items-center">
-                <h3 class="text-gray-400 text-lg">พนักงานเข้างานวันนี้</h3>
-                <p class="text-5xl font-bold text-cyan-400 mt-2" id="todayCount">0</p>
-            </div>
-            <div class="iso-card p-6 flex flex-col justify-center items-center">
-                <h3 class="text-gray-400 text-lg">สาย (เกิน 09:00)</h3>
-                <p class="text-5xl font-bold text-rose-400 mt-2" id="lateCount">0</p>
-            </div>
-            <div class="iso-card p-6 flex flex-col justify-center items-center">
-                <h3 class="text-gray-400 text-lg">สถิติรวมสัปดาห์นี้</h3>
-                <p class="text-5xl font-bold text-indigo-400 mt-2" id="weeklyCount">0</p>
-            </div>
-        </div>
+    <button class="btn btn-checkin" id="btn-in">Check In</button>
+    <button class="btn btn-checkout" id="btn-out">Check Out</button>
 
-        <div class="iso-card p-8 overflow-hidden">
-            <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
-                <span class="w-2 h-6 bg-cyan-400 rounded-full"></span> บันทึกเวลาล่าสุด
-            </h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse glass-table">
-                    <thead>
-                        <tr>
-                            <th class="p-4 rounded-tl-xl font-medium">ชื่อพนักงาน</th>
-                            <th class="p-4 font-medium">วันที่</th>
-                            <th class="p-4 font-medium">เวลาเข้า (In)</th>
-                            <th class="p-4 font-medium">เวลาออก (Out)</th>
-                            <th class="p-4 rounded-tr-xl font-medium">สถานะ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr><td colspan="5" class="p-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <div class="status-box" id="status-display">
+        สถานะ: รอการบันทึกเวลา
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // Your Firebase configuration
+        // 1. นำ Config จาก Firebase Console มาใส่ตรงนี้
         const firebaseConfig = {
-            apiKey: "AIzaSyBHuZGyY1F3v4rCrhrpt9YB90C0Ahh-stE",
-            authDomain: "my-company-time-tracking.firebaseapp.com",
-            projectId: "my-company-time-tracking",
-            storageBucket: "my-company-time-tracking.firebasestorage.app",
-            messagingSenderId: "758524847747",
-            appId: "1:758524847747:web:2e5a49e4064334f1265db6",
-            measurementId: "G-50SYJKTRT1"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
-        // Initialize Firebase
+        // 2. เริ่มต้นระบบ Firebase และ Firestore
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        
-        let globalData = []; // เก็บข้อมูลสำหรับ Export
 
-        // Function to fetch data from Firestore (สมมติว่า collection ชื่อ 'time_logs')
-        async function fetchLogs() {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-400 animate-pulse">กำลังดึงข้อมูลจาก Firebase...</td></tr>';
-            
+        const statusDisplay = document.getElementById('status-display');
+
+        // ฟังก์ชันบันทึกข้อมูล
+        async function logTime(type) {
+            statusDisplay.innerText = "กำลังบันทึกข้อมูล...";
             try {
-                // เปลี่ยน 'time_logs' เป็นชื่อ collection จริงของคุณ
-                const logsCol = collection(db, 'time_logs'); 
-                const q = query(logsCol, orderBy('date', 'desc'), limit(50));
-                const snapshot = await getDocs(q);
+                // จำลองชื่อพนักงาน (ของจริงอาจดึงจากระบบ Login)
+                const employeeName = "พนักงาน 01"; 
                 
-                tableBody.innerHTML = '';
-                globalData = [];
-                let todayCount = 0;
-                let lateCount = 0;
-                const todayStr = new Date().toISOString().split('T')[0];
-
-                if(snapshot.empty) {
-                    tableBody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">ยังไม่มีข้อมูลในระบบ</td></tr>';
-                    return;
-                }
-
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    globalData.push(data);
-                    
-                    // สมมติโครงสร้าง Data: { name: 'สมชาย', date: '2026-04-20', timeIn: '08:45', timeOut: '17:30' }
-                    const isToday = data.date === todayStr;
-                    if(isToday) todayCount++;
-                    
-                    // เช็คสาย (หลัง 09:00)
-                    const isLate = data.timeIn && data.timeIn > '09:00';
-                    if(isToday && isLate) lateCount++;
-
-                    const statusHTML = isLate 
-                        ? `<span class="bg-rose-500/20 text-rose-300 px-3 py-1 rounded-full text-sm border border-rose-500/30">สาย</span>`
-                        : `<span class="bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-sm border border-emerald-500/30">ปกติ</span>`;
-
-                    const row = `
-                        <tr>
-                            <td class="p-4 font-medium text-indigo-200">${data.name || 'ไม่ระบุ'}</td>
-                            <td class="p-4">${data.date || '-'}</td>
-                            <td class="p-4 text-cyan-300">${data.timeIn || '-'}</td>
-                            <td class="p-4 text-orange-300">${data.timeOut || '-'}</td>
-                            <td class="p-4">${statusHTML}</td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
+                // บันทึกลง Firestore ในคอลเล็กชันชื่อ "time_logs"
+                await addDoc(collection(db, "time_logs"), {
+                    employee: employeeName,
+                    action: type,
+                    timestamp: serverTimestamp() // ใช้เวลาจากเซิร์ฟเวอร์ Firebase ตรงๆ
                 });
 
-                document.getElementById('todayCount').innerText = todayCount;
-                document.getElementById('lateCount').innerText = lateCount;
-                document.getElementById('weeklyCount').innerText = snapshot.size;
+                const timeNow = new Date().toLocaleTimeString('th-TH');
+                statusDisplay.innerText = `บันทึก "${type}" สำเร็จ!\nเวลา: ${timeNow}`;
+                statusDisplay.style.color = "#4CAF50";
 
             } catch (error) {
-                console.error("Error fetching documents: ", error);
-                tableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-rose-400">เกิดข้อผิดพลาดในการดึงข้อมูล (ตรวจสอบสิทธิ์ Firestore Rules หรือชื่อ Collection)</td></tr>`;
+                console.error("Error adding document: ", error);
+                statusDisplay.innerText = "เกิดข้อผิดพลาดในการบันทึก";
+                statusDisplay.style.color = "red";
             }
         }
 
-        // Export Function (CSV) for Google Sheets
-        function exportToCSV() {
-            if (globalData.length === 0) {
-                alert("ไม่มีข้อมูลสำหรับ Export");
-                return;
-            }
-            
-            // สร้าง Header ของ CSV
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-            csvContent += "Name,Date,Time In,Time Out\n";
-
-            globalData.forEach(row => {
-                const name = row.name || "";
-                const date = row.date || "";
-                const timeIn = row.timeIn || "";
-                const timeOut = row.timeOut || "";
-                csvContent += `"${name}","${date}","${timeIn}","${timeOut}"\n`;
-            });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `time_tracking_${new Date().toISOString().split('T')[0]}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Event Listeners
-        document.getElementById('refreshBtn').addEventListener('click', fetchLogs);
-        document.getElementById('exportBtn').addEventListener('click', exportToCSV);
-
-        // โหลดข้อมูลครั้งแรก
-        fetchLogs();
+        // จับเหตุการณ์การกดปุ่ม
+        document.getElementById('btn-in').addEventListener('click', () => logTime("เข้างาน"));
+        document.getElementById('btn-out').addEventListener('click', () => logTime("ออกงาน"));
     </script>
 </body>
 </html>
