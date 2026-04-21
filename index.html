@@ -3,97 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ระบบลงเวลาเข้า-ออกงาน (Premium UX)</title>
+    <meta name="theme-color" content="#f9fafb">
+    <title>ระบบลงเวลา (Enterprise PWA)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* เอฟเฟกต์เรดาร์กระจายตัว */
-        @keyframes radar-pulse {
-            0% { transform: scale(1); opacity: 0.5; }
-            100% { transform: scale(1.3); opacity: 0; }
-        }
-        .animate-radar::before {
-            content: '';
-            position: absolute; width: 100%; height: 100%;
-            background-color: inherit; border-radius: 50%;
-            z-index: -1; animation: radar-pulse 1.5s infinite ease-out;
-        }
-
-        /* เอฟเฟกต์หน้าต่างเด้ง (Modal) */
+        @keyframes radar-pulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.3); opacity: 0; } }
+        .animate-radar::before { content: ''; position: absolute; width: 100%; height: 100%; background-color: inherit; border-radius: 50%; z-index: -1; animation: radar-pulse 1.5s infinite ease-out; }
         .modal-enter { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes popIn {
-            0% { transform: scale(0.8); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
-<body class="bg-gray-50 h-screen flex flex-col items-center p-4 font-sans text-gray-800 relative">
+<body class="bg-gray-50 h-screen flex flex-col items-center font-sans text-gray-800 relative overflow-hidden">
 
-    <div class="w-full max-w-md bg-white rounded-3xl shadow-sm p-6 mt-2 text-center border border-gray-100">
-        <div class="flex justify-between items-center mb-2">
-            <h1 class="text-xl font-bold">ระบบลงเวลา</h1>
-            <button onclick="confirmSetOffice()" class="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full hover:bg-blue-100 active:scale-95 transition font-medium">
-                📍 ตั้งค่าพิกัดออฟฟิศ
-            </button>
-        </div>
-        <p class="text-gray-500 text-sm mt-1" id="currentDate">กำลังโหลด...</p>
-        <div class="text-5xl font-mono font-black text-blue-600 mt-2 tracking-tighter" id="currentTime">00:00:00</div>
+    <div id="networkBanner" class="fixed top-0 left-0 w-full py-1.5 text-center text-xs font-bold text-white transition-transform duration-300 transform -translate-y-full z-50 shadow-md">
+        สถานะการเชื่อมต่อ
     </div>
 
-    <div class="w-full max-w-md mt-8 flex flex-col items-center relative z-10">
-        <input type="file" id="cameraInput" accept="image/*" capture="user" class="hidden" onchange="processCheckIn(event)">
-        
-        <div class="relative w-48 h-48 rounded-full">
-            <button id="actionBtn" onclick="initiateAction()" 
-                class="absolute inset-0 w-full h-full rounded-full text-white text-3xl font-bold shadow-[0_10px_25px_rgba(0,0,0,0.1)] transition-all duration-300 transform active:scale-95 flex flex-col items-center justify-center bg-gray-300 border-4 border-white z-10">
-                <span id="btnText">รอพิกัด</span>
-                <span id="btnSubText" class="text-sm font-normal mt-2 opacity-90">ตรวจสอบ GPS...</span>
+    <div id="onboardingScreen" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center p-6 transition-opacity duration-500">
+        <div class="w-full max-w-sm text-center">
+            <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center text-4xl mx-auto mb-6 shadow-inner">👋</div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">ยินดีต้อนรับ</h1>
+            <p class="text-gray-500 text-sm mb-8">กรุณากรอกข้อมูลเพื่อตั้งค่าโปรไฟล์พนักงานของคุณ (ทำเพียงครั้งเดียว)</p>
+            
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">รหัสพนักงาน</label>
+                    <input type="text" id="empIdInput" placeholder="เช่น EMP-001" class="w-full p-4 rounded-2xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">ชื่อ - นามสกุล</label>
+                    <input type="text" id="empNameInput" placeholder="ชื่อจริง นามสกุล" class="w-full p-4 rounded-2xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+                </div>
+            </div>
+            
+            <button onclick="saveProfile()" class="w-full bg-blue-600 text-white font-bold text-lg py-4 rounded-2xl mt-8 shadow-lg shadow-blue-600/30 active:scale-95 transition-all">
+                เริ่มใช้งาน
             </button>
         </div>
-        
-        <div class="w-full mt-8 px-2">
-            <div class="relative flex items-center">
-                <span class="absolute left-4 text-xl">📝</span>
-                <input type="text" id="noteInput" placeholder="เพิ่มหมายเหตุ (ถ้ามี)..." 
-                    class="w-full pl-12 pr-4 py-4 rounded-2xl border-none bg-white shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all text-sm font-medium">
-            </div>
-        </div>
+    </div>
 
-        <div class="mt-4 w-full bg-white rounded-2xl p-4 shadow-sm flex items-center justify-between mx-2">
+    <div class="w-full h-full flex flex-col items-center p-4 overflow-y-auto hide-scrollbar pt-6">
+        
+        <div class="w-full max-w-md flex justify-between items-center mb-6 px-2">
             <div class="flex items-center">
-                <div id="gpsStatusDot" class="w-3 h-3 rounded-full bg-gray-400 mr-3 animate-pulse"></div>
-                <div class="flex flex-col text-left">
-                    <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">พิกัด GPS</span>
-                    <span id="locationStatus" class="text-sm text-gray-700 font-medium mt-0.5">กำลังค้นหาตำแหน่ง...</span>
+                <div class="w-12 h-12 bg-gradient-to-tr from-blue-500 to-blue-400 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md border-2 border-white" id="avatarLetter">?</div>
+                <div class="ml-3">
+                    <p class="text-xs text-gray-500 font-medium">สวัสดี,</p>
+                    <h2 class="text-lg font-bold text-gray-800 leading-tight" id="displayEmpName">ชื่อพนักงาน</h2>
                 </div>
             </div>
-            <span id="distanceBadge" class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-lg font-mono font-bold">-</span>
+            <button onclick="confirmSetOffice()" class="w-10 h-10 bg-white rounded-full shadow-sm border border-gray-100 flex items-center justify-center text-xl hover:bg-gray-50 active:scale-95 transition">
+                ⚙️
+            </button>
         </div>
-    </div>
 
-    <div class="w-full max-w-md mt-6 bg-white rounded-3xl shadow-sm p-6 flex-grow mb-4 overflow-hidden flex flex-col border border-gray-50 relative z-0">
-        <h2 class="text-lg font-bold mb-4 pb-3 border-b border-gray-100 flex justify-between items-center text-gray-800">
-            ประวัติการลงเวลา
-        </h2>
-        <div id="logHistory" class="overflow-y-auto flex-grow space-y-4 hide-scrollbar pb-10"></div>
-    </div>
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] p-5 text-center border border-gray-50 mb-6">
+            <p class="text-gray-400 text-xs font-bold tracking-wider uppercase mb-1" id="currentDate">กำลังโหลด...</p>
+            <div class="text-5xl font-mono font-black text-slate-800 tracking-tighter" id="currentTime">00:00:00</div>
+        </div>
 
-    <div id="customModal" class="fixed inset-0 bg-gray-900 bg-opacity-40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl modal-enter text-center" id="modalContent">
-            <div id="modalIcon" class="text-5xl mb-4">⚠️</div>
-            <h3 id="modalTitle" class="text-xl font-bold text-gray-800 mb-2">หัวข้อ</h3>
-            <p id="modalMessage" class="text-gray-500 text-sm mb-6">รายละเอียด</p>
-            <div id="modalButtons" class="flex space-x-3 w-full">
+        <div class="w-full max-w-md flex flex-col items-center relative z-10">
+            <input type="file" id="cameraInput" accept="image/*" capture="user" class="hidden" onchange="processCheckIn(event)">
+            
+            <div class="relative w-52 h-52 rounded-full mb-6 mt-2">
+                <button id="actionBtn" onclick="initiateAction()" 
+                    class="absolute inset-0 w-full h-full rounded-full text-white text-4xl font-black shadow-[0_15px_35px_rgba(0,0,0,0.1)] transition-all duration-300 transform active:scale-95 flex flex-col items-center justify-center bg-gray-300 border-[6px] border-white z-10">
+                    <span id="btnText">รอพิกัด</span>
+                    <span id="btnSubText" class="text-sm font-medium mt-2 opacity-90">ตรวจสอบ GPS...</span>
+                </button>
+            </div>
+            
+            <div class="w-full px-2 mb-4">
+                <input type="text" id="noteInput" placeholder="📝 เพิ่มหมายเหตุก่อนกดปุ่ม..." 
+                    class="w-full px-5 py-3.5 rounded-2xl bg-white border border-gray-200 shadow-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all text-sm">
+            </div>
+
+            <div class="w-full bg-white rounded-2xl p-3 shadow-sm flex items-center justify-between mx-2 border border-gray-100">
+                <div class="flex items-center">
+                    <div id="gpsStatusDot" class="w-2.5 h-2.5 rounded-full bg-gray-400 mr-2.5 animate-pulse"></div>
+                    <span id="locationStatus" class="text-xs text-gray-600 font-bold tracking-wide">กำลังค้นหาตำแหน่ง...</span>
                 </div>
+                <span id="distanceBadge" class="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded-md font-mono font-bold">-</span>
+            </div>
+        </div>
+
+        <div class="w-full max-w-md mt-6 bg-white rounded-3xl shadow-sm p-6 flex-grow mb-6 border border-gray-50">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-50">
+                <h2 class="text-base font-bold text-gray-800">ประวัติการลงเวลา</h2>
+                <button onclick="exportCSV()" class="text-[10px] bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full font-bold hover:bg-blue-100 transition active:scale-95">
+                    📥 โหลดไฟล์ CSV
+                </button>
+            </div>
+            <div id="logHistory" class="space-y-4"></div>
         </div>
     </div>
 
-    <div id="successToast" class="fixed top-10 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg z-50 flex items-center space-x-2 transition-all duration-300 opacity-0 -translate-y-10 pointer-events-none">
-        <span class="text-xl">✔️</span>
-        <span class="font-bold text-sm">บันทึกเวลาสำเร็จ!</span>
+    <div id="customModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-[2rem] p-6 w-full max-w-sm shadow-2xl modal-enter text-center">
+            <div id="modalIcon" class="text-5xl mb-3 mt-2">⚠️</div>
+            <h3 id="modalTitle" class="text-xl font-bold text-gray-800 mb-2">หัวข้อ</h3>
+            <p id="modalMessage" class="text-gray-500 text-sm mb-6 px-2">รายละเอียด</p>
+            <div id="modalButtons" class="flex space-x-3 w-full"></div>
+        </div>
+    </div>
+
+    <div id="successToast" class="fixed top-12 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-5 py-3 rounded-full shadow-xl z-[200] flex items-center space-x-2 transition-all duration-300 opacity-0 -translate-y-10 pointer-events-none border border-slate-700">
+        <span class="text-emerald-400 text-lg">✔️</span>
+        <span class="font-bold text-sm tracking-wide">บันทึกเวลาสำเร็จ</span>
     </div>
 
     <script>
@@ -101,30 +120,75 @@
         let isLocationValid = false;
         let logs = JSON.parse(localStorage.getItem('timeLogs')) || [];
         let officeCoords = JSON.parse(localStorage.getItem('officeConfig'));
+        let userProfile = JSON.parse(localStorage.getItem('userProfile'));
         const ALLOWED_RADIUS_METERS = 100; 
 
-        // [ระบบ UX] ฟังก์ชันเรียก Modal แจ้งเตือน
+        // --- ระบบ Network Status ---
+        function updateNetworkStatus() {
+            const banner = document.getElementById('networkBanner');
+            if (navigator.onLine) {
+                banner.innerText = "🟢 กลับมาเชื่อมต่ออินเทอร์เน็ตแล้ว";
+                banner.className = "fixed top-0 left-0 w-full py-1.5 text-center text-xs font-bold text-white transition-transform duration-300 transform translate-y-0 z-50 shadow-md bg-emerald-500";
+                setTimeout(() => { banner.classList.replace('translate-y-0', '-translate-y-full'); }, 3000);
+            } else {
+                banner.innerText = "🔴 ขาดการเชื่อมต่ออินเทอร์เน็ต (แอปยังใช้งานได้)";
+                banner.className = "fixed top-0 left-0 w-full py-1.5 text-center text-xs font-bold text-white transition-transform duration-300 transform translate-y-0 z-50 shadow-md bg-red-500";
+            }
+        }
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+
+        // --- ระบบ Onboarding & Profile ---
+        function checkProfile() {
+            const screen = document.getElementById('onboardingScreen');
+            if (!userProfile) {
+                screen.classList.remove('hidden');
+            } else {
+                screen.classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => screen.classList.add('hidden'), 500);
+                updateProfileUI();
+            }
+        }
+
+        function saveProfile() {
+            const empId = document.getElementById('empIdInput').value.trim();
+            const empName = document.getElementById('empNameInput').value.trim();
+            
+            if (!empId || !empName) {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วนครับ");
+                return;
+            }
+            
+            userProfile = { id: empId, name: empName };
+            localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            checkProfile();
+        }
+
+        function updateProfileUI() {
+            if (!userProfile) return;
+            document.getElementById('displayEmpName').innerText = userProfile.name;
+            // เอาตัวอักษรตัวแรกของชื่อมาทำเป็นรูปโปรไฟล์
+            document.getElementById('avatarLetter').innerText = userProfile.name.charAt(0).toUpperCase();
+        }
+
+        // --- ระบบ Modal ---
         function showAppModal(title, message, icon, type, onConfirm) {
             const modal = document.getElementById('customModal');
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalMessage').innerText = message;
             document.getElementById('modalIcon').innerText = icon;
-            
             const btnContainer = document.getElementById('modalButtons');
-            btnContainer.innerHTML = '';
-
+            
             if (type === 'alert') {
-                btnContainer.innerHTML = `<button onclick="closeAppModal()" class="w-full bg-blue-500 text-white font-bold py-3 rounded-xl hover:bg-blue-600 active:scale-95 transition">ตกลง</button>`;
+                btnContainer.innerHTML = `<button onclick="closeAppModal()" class="w-full bg-slate-800 text-white font-bold py-3.5 rounded-2xl hover:bg-slate-700 active:scale-95 transition">รับทราบ</button>`;
             } else if (type === 'confirm') {
                 btnContainer.innerHTML = `
-                    <button onclick="closeAppModal()" class="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition">ยกเลิก</button>
-                    <button id="confirmBtn" class="flex-1 bg-blue-500 text-white font-bold py-3 rounded-xl hover:bg-blue-600 active:scale-95 transition">ยืนยัน</button>
+                    <button onclick="closeAppModal()" class="flex-1 bg-gray-100 text-gray-700 font-bold py-3.5 rounded-2xl hover:bg-gray-200 active:scale-95 transition">ยกเลิก</button>
+                    <button id="confirmBtn" class="flex-1 bg-blue-600 text-white font-bold py-3.5 rounded-2xl hover:bg-blue-700 active:scale-95 transition shadow-lg shadow-blue-500/30">ยืนยัน</button>
                 `;
                 document.getElementById('confirmBtn').onclick = () => { closeAppModal(); onConfirm(); };
             }
-
             modal.classList.remove('hidden');
-            // setTimeout เพื่อให้ transition ทำงาน
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
         }
 
@@ -134,15 +198,14 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
-        // [ระบบ UX] แจ้งเตือนเมื่อสำเร็จ
         function showSuccessToast() {
-            if ("vibrate" in navigator) navigator.vibrate([100, 50, 100]); // สั่นเบาๆ 2 จังหวะ
+            if ("vibrate" in navigator) navigator.vibrate([50, 50, 50]); 
             const toast = document.getElementById('successToast');
             toast.classList.remove('opacity-0', '-translate-y-10');
             setTimeout(() => toast.classList.add('opacity-0', '-translate-y-10'), 3000);
         }
 
-        // นาฬิกา
+        // --- นาฬิกา ---
         function updateClock() {
             const now = new Date();
             document.getElementById('currentTime').innerText = now.toLocaleTimeString('th-TH', { hour12: false });
@@ -150,28 +213,16 @@
         }
         setInterval(updateClock, 1000); updateClock();
 
-        function initApp() {
-            if (logs.length > 0 && logs[0].type === 'เข้างาน') isCheckedIn = true;
-            
-            if (!officeCoords) {
-                document.getElementById('locationStatus').innerText = "รอการตั้งค่าออฟฟิศ";
-                document.getElementById('gpsStatusDot').className = "w-3 h-3 rounded-full bg-yellow-400 mr-3 animate-pulse";
-            } else {
-                trackLocation();
-            }
-            renderLogs(); updateButtonUI();
-        }
-
+        // --- พิกัด GPS ---
         function confirmSetOffice() {
-            showAppModal('ตั้งค่าออฟฟิศ?', 'ต้องการบันทึกพิกัดที่คุณยืนอยู่ตอนนี้ เป็นจุดสแกนเข้างานใช่หรือไม่?', '🏢', 'confirm', () => {
+            showAppModal('ตั้งค่าระบบ', 'ต้องการตั้งพิกัดที่คุณยืนอยู่ เป็นจุดศูนย์กลางของออฟฟิศใช่หรือไม่?', '📍', 'confirm', () => {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         officeCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
                         localStorage.setItem('officeConfig', JSON.stringify(officeCoords));
-                        showSuccessToast();
-                        trackLocation();
+                        showSuccessToast(); trackLocation();
                     },
-                    () => showAppModal('เกิดข้อผิดพลาด', 'ไม่สามารถดึงพิกัดได้ โปรดเปิด GPS', '❌', 'alert'),
+                    () => showAppModal('ผิดพลาด', 'ไม่สามารถดึงพิกัดได้ โปรดเปิด GPS', '❌', 'alert'),
                     { enableHighAccuracy: true }
                 );
             });
@@ -185,8 +236,7 @@
 
         function trackLocation() {
             if (!officeCoords) return;
-            const btn = document.getElementById('actionBtn');
-            btn.classList.add('animate-radar'); // เปิดเรดาร์เวลาค้นหา
+            document.getElementById('actionBtn').classList.add('animate-radar');
 
             navigator.geolocation.watchPosition(
                 (position) => {
@@ -199,30 +249,29 @@
 
                     if (distanceMeters <= ALLOWED_RADIUS_METERS) {
                         isLocationValid = true;
-                        statusText.innerText = `อยู่ในพื้นที่ออฟฟิศ`;
-                        statusText.className = "text-sm text-green-600 font-bold mt-0.5";
-                        badge.className = "text-xs bg-green-100 text-green-700 px-2 py-1 rounded-lg font-mono font-bold shadow-sm";
-                        dot.className = "w-3 h-3 rounded-full bg-green-500 mr-3 shadow-[0_0_8px_rgba(34,197,94,0.6)]";
+                        statusText.innerText = `อยู่ในพื้นที่ออฟฟิศ`; statusText.className = "text-xs text-emerald-600 font-bold tracking-wide";
+                        badge.className = "text-[10px] bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md font-mono font-bold border border-emerald-100";
+                        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2.5 shadow-[0_0_8px_rgba(16,185,129,0.5)]";
                     } else {
                         isLocationValid = false;
-                        statusText.innerText = `อยู่นอกพื้นที่`;
-                        statusText.className = "text-sm text-red-500 font-bold mt-0.5";
-                        badge.className = "text-xs bg-red-100 text-red-700 px-2 py-1 rounded-lg font-mono font-bold";
-                        dot.className = "w-3 h-3 rounded-full bg-red-500 mr-3";
+                        statusText.innerText = `อยู่นอกพื้นที่ทำงาน`; statusText.className = "text-xs text-rose-500 font-bold tracking-wide";
+                        badge.className = "text-[10px] bg-rose-50 text-rose-700 px-2 py-1 rounded-md font-mono font-bold border border-rose-100";
+                        dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 mr-2.5";
                     }
                     updateButtonUI();
                 },
-                () => { document.getElementById('locationStatus').innerText = "ไม่พบสัญญาณ GPS"; },
+                () => { document.getElementById('locationStatus').innerText = "รอสัญญาณ GPS..."; },
                 { enableHighAccuracy: true }
             );
         }
 
+        // --- กระบวนการลงเวลา ---
         function initiateAction() {
-            if (!officeCoords) { showAppModal('แจ้งเตือน', "กรุณากด 'ตั้งค่าพิกัดออฟฟิศ' มุมขวาบนก่อนเริ่มใช้งาน", 'ℹ️', 'alert'); return; }
-            if (!isLocationValid) { showAppModal('นอกพื้นที่', "คุณต้องอยู่ห่างจากออฟฟิศไม่เกิน 100 เมตร เพื่อลงเวลา", '🚫', 'alert'); return; }
+            if (!officeCoords) { showAppModal('เริ่มใช้งาน', "กดปุ่ม ⚙️ มุมขวาบนเพื่อตั้งพิกัดออฟฟิศก่อนครับ", '🏢', 'alert'); return; }
+            if (!isLocationValid) { showAppModal('นอกระยะ', "คุณอยู่ไกลเกิน 100 เมตร ไม่สามารถลงเวลาได้", '🚫', 'alert'); return; }
             
             if (isCheckedIn) {
-                showAppModal('ยืนยันออกงาน?', "แน่ใจหรือไม่ว่าต้องการลงเวลา 'ออกงาน' ?", '👋', 'confirm', () => {
+                showAppModal('ออกงาน', "ยืนยันการลงเวลา 'กลับบ้าน' ?", '👋', 'confirm', () => {
                     document.getElementById('cameraInput').click();
                 });
             } else {
@@ -250,7 +299,7 @@
                 else { if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; } }
                 canvas.width = width; canvas.height = height;
                 let ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
-                callback(canvas.toDataURL('image/jpeg', 0.7)); 
+                callback(canvas.toDataURL('image/jpeg', 0.6)); // ลดเหลือ 60% ประหยัดที่ขึ้น
             };
         }
 
@@ -258,20 +307,24 @@
             const noteInput = document.getElementById('noteInput');
             const now = new Date();
             const newLog = {
-                id: now.getTime(), date: now.toLocaleDateString('th-TH'),
+                id: now.getTime(), 
+                date: now.toLocaleDateString('th-TH'),
                 time: now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-                type: isCheckedIn ? 'ออกงาน' : 'เข้างาน', note: noteInput.value.trim() || "", photo: photoBase64
+                type: isCheckedIn ? 'ออกงาน' : 'เข้างาน', 
+                note: noteInput.value.trim() || "", 
+                photo: photoBase64,
+                empId: userProfile.id, // บันทึกรหัสพนักงานลงไปด้วย
+                empName: userProfile.name // บันทึกชื่อลงไปด้วย
             };
 
             logs.unshift(newLog);
-            if (logs.length > 50) logs.pop(); 
+            if (logs.length > 30) logs.pop(); // เก็บ 30 รายการล่าสุด
             localStorage.setItem('timeLogs', JSON.stringify(logs));
 
             isCheckedIn = !isCheckedIn;
             noteInput.value = ''; document.getElementById('cameraInput').value = ''; 
             
-            updateButtonUI(); renderLogs();
-            showSuccessToast(); // แสดงอนิเมชันสำเร็จ
+            updateButtonUI(); renderLogs(); showSuccessToast();
         }
 
         function updateButtonUI() {
@@ -279,22 +332,22 @@
             const btnText = document.getElementById('btnText');
             const btnSubText = document.getElementById('btnSubText');
             
-            btn.className = "absolute inset-0 w-full h-full rounded-full text-white text-3xl font-bold shadow-[0_10px_25px_rgba(0,0,0,0.1)] transition-all duration-300 transform active:scale-95 flex flex-col items-center justify-center border-4 border-white z-10";
+            btn.className = "absolute inset-0 w-full h-full rounded-full text-white text-4xl font-black shadow-[0_15px_35px_rgba(0,0,0,0.1)] transition-all duration-300 transform active:scale-95 flex flex-col items-center justify-center border-[6px] border-white z-10";
 
             if (!officeCoords) {
-                btn.classList.add('bg-gray-300');
+                btn.classList.add('bg-slate-200', 'text-slate-400', 'border-slate-100');
                 btn.classList.remove('animate-radar');
-                btnText.innerText = 'รอตั้งค่า'; btnSubText.innerText = 'โปรดตั้งพิกัดออฟฟิศ';
+                btnText.innerText = 'รอตั้งค่า'; btnSubText.innerText = 'กดไอคอน ⚙️ ด้านบน';
             } else if (!isLocationValid) {
-                btn.classList.add('bg-gray-400');
+                btn.classList.add('bg-slate-400');
                 btn.classList.remove('animate-radar');
                 btnText.innerText = 'ล็อก'; btnSubText.innerText = 'อยู่นอกพื้นที่';
             } else if (isCheckedIn) {
-                btn.classList.add('bg-rose-500', 'shadow-[0_10px_30px_rgba(244,63,94,0.4)]');
+                btn.classList.add('bg-rose-500', 'shadow-[0_15px_40px_rgba(244,63,94,0.35)]');
                 btn.classList.add('animate-radar');
                 btnText.innerText = 'ออกงาน'; btnSubText.innerText = 'พร้อมลงเวลา';
             } else {
-                btn.classList.add('bg-emerald-500', 'shadow-[0_10px_30px_rgba(16,185,129,0.4)]');
+                btn.classList.add('bg-blue-600', 'shadow-[0_15px_40px_rgba(37,99,235,0.35)]');
                 btn.classList.add('animate-radar');
                 btnText.innerText = 'เข้างาน'; btnSubText.innerText = 'พร้อมลงเวลา';
             }
@@ -303,31 +356,32 @@
         function renderLogs() {
             const logContainer = document.getElementById('logHistory');
             logContainer.innerHTML = '';
-            if (logs.length === 0) { logContainer.innerHTML = '<div class="text-center text-gray-400 py-10 font-medium">ยังไม่มีประวัติการลงเวลา</div>'; return; }
+            if (logs.length === 0) { logContainer.innerHTML = '<div class="text-center text-gray-400 py-8 text-sm">ยังไม่มีประวัติการลงเวลา</div>'; return; }
 
+            // เรียงจัดกลุ่มตามวัน
             const groupedLogs = logs.reduce((acc, log) => {
                 if (!acc[log.date]) acc[log.date] = [];
                 acc[log.date].push(log); return acc;
             }, {});
 
             for (const [date, dayLogs] of Object.entries(groupedLogs)) {
-                let dayHtml = `<div class="mb-5"><h3 class="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">${date}</h3><div class="space-y-3">`;
+                let dayHtml = `<div class="mb-5"><h3 class="text-[11px] font-bold text-gray-400 mb-2.5 uppercase tracking-widest pl-1">${date}</h3><div class="space-y-3">`;
                 dayLogs.forEach(log => {
                     const isCheckIn = log.type === 'เข้างาน';
-                    const iconBg = isCheckIn ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600';
-                    const timeIcon = isCheckIn ? '☀️' : '🌙';
-                    const noteHtml = log.note ? `<p class="text-xs text-gray-500 mt-1.5 flex items-start"><span class="mr-1">💬</span>${log.note}</p>` : '';
+                    const iconBg = isCheckIn ? 'bg-blue-50 text-blue-600' : 'bg-rose-50 text-rose-600';
+                    const timeIcon = isCheckIn ? '→' : '←';
+                    const noteHtml = log.note ? `<p class="text-[11px] text-gray-500 mt-1 flex items-center"><span class="w-1 h-1 rounded-full bg-gray-300 mr-1.5"></span>${log.note}</p>` : '';
 
                     dayHtml += `
-                        <div class="flex items-start p-3.5 bg-white rounded-2xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] transition hover:shadow-md">
-                            <img src="${log.photo}" class="w-14 h-14 rounded-xl object-cover mr-4 shadow-sm border border-gray-100">
+                        <div class="flex items-center p-3 bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                            <img src="${log.photo}" class="w-12 h-12 rounded-xl object-cover mr-3.5 shadow-sm border border-gray-50 bg-gray-50 text-[8px] text-center" alt="รูปเซลฟี่">
                             <div class="flex flex-col flex-grow">
                                 <div class="flex justify-between items-center w-full">
                                     <div class="flex items-center">
-                                        <div class="w-7 h-7 rounded-full ${iconBg} flex items-center justify-center text-xs mr-2 shadow-sm">${timeIcon}</div>
-                                        <span class="font-bold text-sm text-gray-800">${log.type}</span>
+                                        <div class="w-6 h-6 rounded-full ${iconBg} flex items-center justify-center text-xs mr-2 font-bold">${timeIcon}</div>
+                                        <span class="font-bold text-sm text-slate-700">${log.type}</span>
                                     </div>
-                                    <span class="font-mono font-black text-gray-900">${log.time}</span>
+                                    <span class="font-mono font-black text-slate-800">${log.time}</span>
                                 </div>
                                 ${noteHtml}
                             </div>
@@ -336,7 +390,32 @@
                 dayHtml += `</div></div>`; logContainer.innerHTML += dayHtml;
             }
         }
-        initApp();
+
+        // --- ระบบ Export CSV (อัปเกรดให้มีชื่อ/รหัส) ---
+        function exportCSV() {
+            if (logs.length === 0) { showAppModal('แจ้งเตือน', 'ไม่มีข้อมูลให้ดาวน์โหลดครับ', 'ℹ️', 'alert'); return; }
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
+            csvContent += "รหัสพนักงาน,ชื่อพนักงาน,วันที่,เวลา,ประเภท,หมายเหตุ\n"; 
+            
+            logs.forEach(log => {
+                const safeNote = `"${(log.note || "-").replace(/"/g, '""')}"`;
+                // ใช้ข้อมูลจาก log โดยตรงเผื่อพนักงานเปลี่ยนชื่อ
+                csvContent += `${log.empId || "-"},${log.empName || "-"},${log.date},${log.time},${log.type},${safeNote}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `ประวัติลงเวลา_${userProfile?.name || 'พนักงาน'}.csv`);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+
+        // เริ่มแอป
+        checkProfile();
+        if(logs.length > 0 && logs[0].type === 'เข้างาน') isCheckedIn = true;
+        if(officeCoords) trackLocation();
+        renderLogs(); updateButtonUI();
+        if(!navigator.onLine) updateNetworkStatus(); // เช็คเน็ตตอนเปิดแอป
     </script>
 </body>
 </html>
