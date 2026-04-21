@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#f9fafb">
-    <title>ระบบลงเวลา (Enterprise PWA)</title>
+    <title>ระบบลงเวลา (HR Analytics)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -18,36 +18,30 @@
 </head>
 <body class="bg-gray-50 h-screen flex flex-col items-center font-sans text-gray-800 relative overflow-hidden">
 
-    <div id="networkBanner" class="fixed top-0 left-0 w-full py-1.5 text-center text-xs font-bold text-white transition-transform duration-300 transform -translate-y-full z-50 shadow-md">
-        สถานะการเชื่อมต่อ
-    </div>
+    <div id="networkBanner" class="fixed top-0 left-0 w-full py-1.5 text-center text-xs font-bold text-white transition-transform duration-300 transform -translate-y-full z-50 shadow-md"></div>
 
     <div id="onboardingScreen" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center p-6 transition-opacity duration-500">
         <div class="w-full max-w-sm text-center">
             <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center text-4xl mx-auto mb-6 shadow-inner">👋</div>
             <h1 class="text-2xl font-bold text-gray-800 mb-2">ยินดีต้อนรับ</h1>
-            <p class="text-gray-500 text-sm mb-8">กรุณากรอกข้อมูลเพื่อตั้งค่าโปรไฟล์พนักงานของคุณ (ทำเพียงครั้งเดียว)</p>
-            
+            <p class="text-gray-500 text-sm mb-8">กรุณากรอกข้อมูลพนักงานเพื่อเริ่มใช้งาน</p>
             <div class="space-y-4 text-left">
                 <div>
                     <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">รหัสพนักงาน</label>
-                    <input type="text" id="empIdInput" placeholder="เช่น EMP-001" class="w-full p-4 rounded-2xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+                    <input type="text" id="empIdInput" placeholder="เช่น EMP-001" class="w-full p-4 rounded-2xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">ชื่อ - นามสกุล</label>
-                    <input type="text" id="empNameInput" placeholder="ชื่อจริง นามสกุล" class="w-full p-4 rounded-2xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+                    <input type="text" id="empNameInput" placeholder="ชื่อจริง นามสกุล" class="w-full p-4 rounded-2xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
                 </div>
             </div>
-            
-            <button onclick="saveProfile()" class="w-full bg-blue-600 text-white font-bold text-lg py-4 rounded-2xl mt-8 shadow-lg shadow-blue-600/30 active:scale-95 transition-all">
-                เริ่มใช้งาน
-            </button>
+            <button onclick="saveProfile()" class="w-full bg-blue-600 text-white font-bold text-lg py-4 rounded-2xl mt-8 shadow-lg shadow-blue-600/30 active:scale-95 transition-all">เริ่มใช้งาน</button>
         </div>
     </div>
 
     <div class="w-full h-full flex flex-col items-center p-4 overflow-y-auto hide-scrollbar pt-6">
         
-        <div class="w-full max-w-md flex justify-between items-center mb-6 px-2">
+        <div class="w-full max-w-md flex justify-between items-center mb-5 px-2">
             <div class="flex items-center">
                 <div class="w-12 h-12 bg-gradient-to-tr from-blue-500 to-blue-400 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md border-2 border-white" id="avatarLetter">?</div>
                 <div class="ml-3">
@@ -55,12 +49,10 @@
                     <h2 class="text-lg font-bold text-gray-800 leading-tight" id="displayEmpName">ชื่อพนักงาน</h2>
                 </div>
             </div>
-            <button onclick="confirmSetOffice()" class="w-10 h-10 bg-white rounded-full shadow-sm border border-gray-100 flex items-center justify-center text-xl hover:bg-gray-50 active:scale-95 transition">
-                ⚙️
-            </button>
+            <button onclick="confirmSetOffice()" class="w-10 h-10 bg-white rounded-full shadow-sm border border-gray-100 flex items-center justify-center text-xl hover:bg-gray-50 active:scale-95 transition">⚙️</button>
         </div>
 
-        <div class="w-full max-w-md bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] p-5 text-center border border-gray-50 mb-6">
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] p-5 text-center border border-gray-50 mb-5">
             <p class="text-gray-400 text-xs font-bold tracking-wider uppercase mb-1" id="currentDate">กำลังโหลด...</p>
             <div class="text-5xl font-mono font-black text-slate-800 tracking-tighter" id="currentTime">00:00:00</div>
         </div>
@@ -68,16 +60,20 @@
         <div class="w-full max-w-md flex flex-col items-center relative z-10">
             <input type="file" id="cameraInput" accept="image/*" capture="user" class="hidden" onchange="processCheckIn(event)">
             
-            <div class="relative w-52 h-52 rounded-full mb-6 mt-2">
+            <div class="relative w-48 h-48 rounded-full mb-5">
                 <button id="actionBtn" onclick="initiateAction()" 
                     class="absolute inset-0 w-full h-full rounded-full text-white text-4xl font-black shadow-[0_15px_35px_rgba(0,0,0,0.1)] transition-all duration-300 transform active:scale-95 flex flex-col items-center justify-center bg-gray-300 border-[6px] border-white z-10">
                     <span id="btnText">รอพิกัด</span>
-                    <span id="btnSubText" class="text-sm font-medium mt-2 opacity-90">ตรวจสอบ GPS...</span>
+                    <span id="btnSubText" class="text-sm font-medium mt-1 opacity-90">ตรวจสอบ GPS...</span>
                 </button>
             </div>
             
-            <div class="w-full px-2 mb-4">
-                <input type="text" id="noteInput" placeholder="📝 เพิ่มหมายเหตุก่อนกดปุ่ม..." 
+            <button onclick="openLeaveModal()" class="mb-4 text-sm text-gray-500 font-medium bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100 hover:bg-gray-50 active:scale-95 transition">
+                📝 แจ้งลางาน / ป่วย
+            </button>
+
+            <div class="w-full px-2 mb-3">
+                <input type="text" id="noteInput" placeholder="เพิ่มหมายเหตุก่อนลงเวลา (ถ้ามี)..." 
                     class="w-full px-5 py-3.5 rounded-2xl bg-white border border-gray-200 shadow-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all text-sm">
             </div>
 
@@ -90,12 +86,10 @@
             </div>
         </div>
 
-        <div class="w-full max-w-md mt-6 bg-white rounded-3xl shadow-sm p-6 flex-grow mb-6 border border-gray-50">
+        <div class="w-full max-w-md mt-5 bg-white rounded-3xl shadow-sm p-6 flex-grow mb-6 border border-gray-50">
             <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-50">
                 <h2 class="text-base font-bold text-gray-800">ประวัติการลงเวลา</h2>
-                <button onclick="exportCSV()" class="text-[10px] bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full font-bold hover:bg-blue-100 transition active:scale-95">
-                    📥 โหลดไฟล์ CSV
-                </button>
+                <button onclick="exportCSV()" class="text-[10px] bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full font-bold hover:bg-blue-100 transition active:scale-95">📥 โหลดไฟล์ CSV</button>
             </div>
             <div id="logHistory" class="space-y-4"></div>
         </div>
@@ -110,276 +104,265 @@
         </div>
     </div>
 
+    <div id="leaveModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-[2rem] p-6 w-full max-w-sm shadow-2xl modal-enter text-left">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">📝 แจ้งลางาน</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">ประเภทการลา</label>
+                    <select id="leaveTypeInput" class="w-full p-4 rounded-2xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        <option value="ลาป่วย">ลาป่วย 🤒</option>
+                        <option value="ลากิจ">ลากิจ 💼</option>
+                        <option value="พักร้อน">พักร้อน 🏖️</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">เหตุผลการลา</label>
+                    <textarea id="leaveReasonInput" rows="3" placeholder="ระบุเหตุผลสั้นๆ..." class="w-full p-4 rounded-2xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"></textarea>
+                </div>
+            </div>
+            <div class="flex space-x-3 w-full mt-6">
+                <button onclick="closeLeaveModal()" class="flex-1 bg-gray-100 text-gray-700 font-bold py-3.5 rounded-2xl hover:bg-gray-200 active:scale-95 transition">ยกเลิก</button>
+                <button onclick="submitLeave()" class="flex-1 bg-blue-600 text-white font-bold py-3.5 rounded-2xl hover:bg-blue-700 active:scale-95 transition shadow-lg shadow-blue-500/30">ยืนยันการลา</button>
+            </div>
+        </div>
+    </div>
+
     <div id="successToast" class="fixed top-12 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-5 py-3 rounded-full shadow-xl z-[200] flex items-center space-x-2 transition-all duration-300 opacity-0 -translate-y-10 pointer-events-none border border-slate-700">
         <span class="text-emerald-400 text-lg">✔️</span>
-        <span class="font-bold text-sm tracking-wide">บันทึกเวลาสำเร็จ</span>
+        <span class="font-bold text-sm tracking-wide">บันทึกสำเร็จ</span>
     </div>
 
     <script>
         let isCheckedIn = false;
         let isLocationValid = false;
+        let lastCheckInTime = null; // เก็บเวลาเข้างานเพื่อคำนวณระยะเวลา
         let logs = JSON.parse(localStorage.getItem('timeLogs')) || [];
         let officeCoords = JSON.parse(localStorage.getItem('officeConfig'));
         let userProfile = JSON.parse(localStorage.getItem('userProfile'));
+        
         const ALLOWED_RADIUS_METERS = 100; 
+        const WORK_START_TIME = "09:00:00"; // ตั้งเวลาเข้างานปกติ
 
-        // --- ระบบ Network Status ---
-        function updateNetworkStatus() {
+        // --- Network & Onboarding ---
+        window.addEventListener('online', () => updateNetworkStatus(true));
+        window.addEventListener('offline', () => updateNetworkStatus(false));
+        function updateNetworkStatus(isOnline) {
             const banner = document.getElementById('networkBanner');
-            if (navigator.onLine) {
+            if (isOnline) {
                 banner.innerText = "🟢 กลับมาเชื่อมต่ออินเทอร์เน็ตแล้ว";
                 banner.className = "fixed top-0 left-0 w-full py-1.5 text-center text-xs font-bold text-white transition-transform duration-300 transform translate-y-0 z-50 shadow-md bg-emerald-500";
-                setTimeout(() => { banner.classList.replace('translate-y-0', '-translate-y-full'); }, 3000);
+                setTimeout(() => banner.classList.replace('translate-y-0', '-translate-y-full'), 3000);
             } else {
-                banner.innerText = "🔴 ขาดการเชื่อมต่ออินเทอร์เน็ต (แอปยังใช้งานได้)";
+                banner.innerText = "🔴 ขาดการเชื่อมต่ออินเทอร์เน็ต";
                 banner.className = "fixed top-0 left-0 w-full py-1.5 text-center text-xs font-bold text-white transition-transform duration-300 transform translate-y-0 z-50 shadow-md bg-red-500";
             }
         }
-        window.addEventListener('online', updateNetworkStatus);
-        window.addEventListener('offline', updateNetworkStatus);
 
-        // --- ระบบ Onboarding & Profile ---
         function checkProfile() {
-            const screen = document.getElementById('onboardingScreen');
-            if (!userProfile) {
-                screen.classList.remove('hidden');
-            } else {
-                screen.classList.add('opacity-0', 'pointer-events-none');
-                setTimeout(() => screen.classList.add('hidden'), 500);
-                updateProfileUI();
-            }
+            if (!userProfile) document.getElementById('onboardingScreen').classList.remove('hidden');
+            else { document.getElementById('onboardingScreen').classList.add('hidden'); updateProfileUI(); }
         }
-
         function saveProfile() {
             const empId = document.getElementById('empIdInput').value.trim();
             const empName = document.getElementById('empNameInput').value.trim();
-            
-            if (!empId || !empName) {
-                alert("กรุณากรอกข้อมูลให้ครบถ้วนครับ");
-                return;
-            }
-            
+            if (!empId || !empName) return alert("กรุณากรอกข้อมูลให้ครบถ้วนครับ");
             userProfile = { id: empId, name: empName };
             localStorage.setItem('userProfile', JSON.stringify(userProfile));
-            checkProfile();
+            document.getElementById('onboardingScreen').classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => document.getElementById('onboardingScreen').classList.add('hidden'), 500);
+            updateProfileUI();
         }
-
         function updateProfileUI() {
             if (!userProfile) return;
             document.getElementById('displayEmpName').innerText = userProfile.name;
-            // เอาตัวอักษรตัวแรกของชื่อมาทำเป็นรูปโปรไฟล์
             document.getElementById('avatarLetter').innerText = userProfile.name.charAt(0).toUpperCase();
         }
 
-        // --- ระบบ Modal ---
+        // --- Modals ---
         function showAppModal(title, message, icon, type, onConfirm) {
             const modal = document.getElementById('customModal');
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalMessage').innerText = message;
-            document.getElementById('modalIcon').innerText = icon;
+            document.getElementById('modalTitle').innerText = title; document.getElementById('modalMessage').innerText = message; document.getElementById('modalIcon').innerText = icon;
             const btnContainer = document.getElementById('modalButtons');
-            
             if (type === 'alert') {
-                btnContainer.innerHTML = `<button onclick="closeAppModal()" class="w-full bg-slate-800 text-white font-bold py-3.5 rounded-2xl hover:bg-slate-700 active:scale-95 transition">รับทราบ</button>`;
+                btnContainer.innerHTML = `<button onclick="closeAppModal()" class="w-full bg-slate-800 text-white font-bold py-3.5 rounded-2xl">รับทราบ</button>`;
             } else if (type === 'confirm') {
-                btnContainer.innerHTML = `
-                    <button onclick="closeAppModal()" class="flex-1 bg-gray-100 text-gray-700 font-bold py-3.5 rounded-2xl hover:bg-gray-200 active:scale-95 transition">ยกเลิก</button>
-                    <button id="confirmBtn" class="flex-1 bg-blue-600 text-white font-bold py-3.5 rounded-2xl hover:bg-blue-700 active:scale-95 transition shadow-lg shadow-blue-500/30">ยืนยัน</button>
-                `;
+                btnContainer.innerHTML = `<button onclick="closeAppModal()" class="flex-1 bg-gray-100 text-gray-700 font-bold py-3.5 rounded-2xl">ยกเลิก</button><button id="confirmBtn" class="flex-1 bg-blue-600 text-white font-bold py-3.5 rounded-2xl">ยืนยัน</button>`;
                 document.getElementById('confirmBtn').onclick = () => { closeAppModal(); onConfirm(); };
             }
-            modal.classList.remove('hidden');
-            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
         }
-
         function closeAppModal() {
-            const modal = document.getElementById('customModal');
-            modal.classList.add('opacity-0');
+            const modal = document.getElementById('customModal'); modal.classList.add('opacity-0');
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
-
         function showSuccessToast() {
             if ("vibrate" in navigator) navigator.vibrate([50, 50, 50]); 
             const toast = document.getElementById('successToast');
-            toast.classList.remove('opacity-0', '-translate-y-10');
-            setTimeout(() => toast.classList.add('opacity-0', '-translate-y-10'), 3000);
+            toast.classList.remove('opacity-0', '-translate-y-10'); setTimeout(() => toast.classList.add('opacity-0', '-translate-y-10'), 3000);
         }
 
-        // --- นาฬิกา ---
-        function updateClock() {
+        // --- Leave System (ระบบลา) ---
+        function openLeaveModal() {
+            const modal = document.getElementById('leaveModal');
+            modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+        function closeLeaveModal() {
+            const modal = document.getElementById('leaveModal'); modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+        function submitLeave() {
+            const type = document.getElementById('leaveTypeInput').value;
+            const reason = document.getElementById('leaveReasonInput').value.trim();
+            if (!reason) return alert("กรุณาระบุเหตุผลการลาด้วยครับ");
+            
             const now = new Date();
-            document.getElementById('currentTime').innerText = now.toLocaleTimeString('th-TH', { hour12: false });
-            document.getElementById('currentDate').innerText = now.toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const newLog = {
+                id: now.getTime(), date: now.toLocaleDateString('th-TH'), time: now.toLocaleTimeString('th-TH', { hour12: false }),
+                type: 'ลางาน', status: type, note: reason, photo: '', empId: userProfile.id, empName: userProfile.name
+            };
+            logs.unshift(newLog); localStorage.setItem('timeLogs', JSON.stringify(logs));
+            closeLeaveModal(); document.getElementById('leaveReasonInput').value = '';
+            renderLogs(); showSuccessToast();
         }
-        setInterval(updateClock, 1000); updateClock();
 
-        // --- พิกัด GPS ---
+        // --- Clock & GPS ---
+        setInterval(() => {
+            const now = new Date(); document.getElementById('currentTime').innerText = now.toLocaleTimeString('th-TH', { hour12: false });
+            document.getElementById('currentDate').innerText = now.toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }, 1000);
+
         function confirmSetOffice() {
-            showAppModal('ตั้งค่าระบบ', 'ต้องการตั้งพิกัดที่คุณยืนอยู่ เป็นจุดศูนย์กลางของออฟฟิศใช่หรือไม่?', '📍', 'confirm', () => {
+            showAppModal('ตั้งค่าระบบ', 'ตั้งพิกัดปัจจุบันเป็นออฟฟิศ?', '📍', 'confirm', () => {
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        officeCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
-                        localStorage.setItem('officeConfig', JSON.stringify(officeCoords));
-                        showSuccessToast(); trackLocation();
-                    },
-                    () => showAppModal('ผิดพลาด', 'ไม่สามารถดึงพิกัดได้ โปรดเปิด GPS', '❌', 'alert'),
-                    { enableHighAccuracy: true }
+                    (p) => { officeCoords = { lat: p.coords.latitude, lng: p.coords.longitude }; localStorage.setItem('officeConfig', JSON.stringify(officeCoords)); showSuccessToast(); trackLocation(); },
+                    () => showAppModal('ผิดพลาด', 'ไม่สามารถดึงพิกัดได้ โปรดเปิด GPS', '❌', 'alert'), { enableHighAccuracy: true }
                 );
             });
         }
-
         function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
             var R = 6371; var dLat = (lat2 - lat1) * Math.PI / 180; var dLon = (lon2 - lon1) * Math.PI / 180;
             var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
         }
-
         function trackLocation() {
-            if (!officeCoords) return;
-            document.getElementById('actionBtn').classList.add('animate-radar');
-
+            if (!officeCoords) return; document.getElementById('actionBtn').classList.add('animate-radar');
             navigator.geolocation.watchPosition(
-                (position) => {
-                    const distanceMeters = Math.floor(getDistanceFromLatLonInKm(officeCoords.lat, officeCoords.lng, position.coords.latitude, position.coords.longitude) * 1000);
-                    const statusText = document.getElementById('locationStatus');
-                    const badge = document.getElementById('distanceBadge');
-                    const dot = document.getElementById('gpsStatusDot');
-
+                (p) => {
+                    const distanceMeters = Math.floor(getDistanceFromLatLonInKm(officeCoords.lat, officeCoords.lng, p.coords.latitude, p.coords.longitude) * 1000);
+                    const sText = document.getElementById('locationStatus'), badge = document.getElementById('distanceBadge'), dot = document.getElementById('gpsStatusDot');
                     badge.innerText = `${distanceMeters} ม.`;
-
                     if (distanceMeters <= ALLOWED_RADIUS_METERS) {
-                        isLocationValid = true;
-                        statusText.innerText = `อยู่ในพื้นที่ออฟฟิศ`; statusText.className = "text-xs text-emerald-600 font-bold tracking-wide";
-                        badge.className = "text-[10px] bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md font-mono font-bold border border-emerald-100";
-                        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2.5 shadow-[0_0_8px_rgba(16,185,129,0.5)]";
+                        isLocationValid = true; sText.innerText = `อยู่ในพื้นที่ออฟฟิศ`; sText.className = "text-xs text-emerald-600 font-bold tracking-wide";
+                        badge.className = "text-[10px] bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md font-mono font-bold border border-emerald-100"; dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2.5";
                     } else {
-                        isLocationValid = false;
-                        statusText.innerText = `อยู่นอกพื้นที่ทำงาน`; statusText.className = "text-xs text-rose-500 font-bold tracking-wide";
-                        badge.className = "text-[10px] bg-rose-50 text-rose-700 px-2 py-1 rounded-md font-mono font-bold border border-rose-100";
-                        dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 mr-2.5";
+                        isLocationValid = false; sText.innerText = `อยู่นอกพื้นที่ทำงาน`; sText.className = "text-xs text-rose-500 font-bold tracking-wide";
+                        badge.className = "text-[10px] bg-rose-50 text-rose-700 px-2 py-1 rounded-md font-mono font-bold border border-rose-100"; dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 mr-2.5";
                     }
                     updateButtonUI();
-                },
-                () => { document.getElementById('locationStatus').innerText = "รอสัญญาณ GPS..."; },
-                { enableHighAccuracy: true }
+                }, () => {}, { enableHighAccuracy: true }
             );
         }
 
-        // --- กระบวนการลงเวลา ---
+        // --- Action Flow ---
         function initiateAction() {
-            if (!officeCoords) { showAppModal('เริ่มใช้งาน', "กดปุ่ม ⚙️ มุมขวาบนเพื่อตั้งพิกัดออฟฟิศก่อนครับ", '🏢', 'alert'); return; }
-            if (!isLocationValid) { showAppModal('นอกระยะ', "คุณอยู่ไกลเกิน 100 เมตร ไม่สามารถลงเวลาได้", '🚫', 'alert'); return; }
-            
-            if (isCheckedIn) {
-                showAppModal('ออกงาน', "ยืนยันการลงเวลา 'กลับบ้าน' ?", '👋', 'confirm', () => {
-                    document.getElementById('cameraInput').click();
-                });
-            } else {
-                document.getElementById('cameraInput').click();
-            }
+            if (!officeCoords) return showAppModal('เริ่มใช้งาน', "กดไอคอน ⚙️ ตั้งพิกัดออฟฟิศก่อนครับ", '🏢', 'alert');
+            if (!isLocationValid) return showAppModal('นอกระยะ', "คุณอยู่ไกลเกินกำหนด", '🚫', 'alert');
+            if (isCheckedIn) { showAppModal('ออกงาน', "ยืนยันลงเวลา 'กลับบ้าน' ?", '👋', 'confirm', () => document.getElementById('cameraInput').click()); } 
+            else { document.getElementById('cameraInput').click(); }
         }
 
         function processCheckIn(event) {
             const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
-                compressImage(e.target.result, 400, 400, function(compressedBase64) {
-                    saveLog(compressedBase64);
-                });
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function compressImage(base64Str, maxWidth, maxHeight, callback) {
-            let img = new Image(); img.src = base64Str;
-            img.onload = function() {
-                let canvas = document.createElement('canvas');
-                let width = img.width; let height = img.height;
-                if (width > height) { if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; } } 
-                else { if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; } }
-                canvas.width = width; canvas.height = height;
-                let ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
-                callback(canvas.toDataURL('image/jpeg', 0.6)); // ลดเหลือ 60% ประหยัดที่ขึ้น
-            };
+                let img = new Image(); img.src = e.target.result;
+                img.onload = function() {
+                    let canvas = document.createElement('canvas'); let w = img.width, h = img.height;
+                    if (w > h) { if (w > 400) { h *= 400 / w; w = 400; } } else { if (h > 400) { w *= 400 / h; h = 400; } }
+                    canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    saveLog(canvas.toDataURL('image/jpeg', 0.6));
+                };
+            }; reader.readAsDataURL(file);
         }
 
         function saveLog(photoBase64) {
             const noteInput = document.getElementById('noteInput');
             const now = new Date();
+            const timeStr = now.toLocaleTimeString('th-TH', { hour12: false });
+            
+            let statusBadge = "";
+            let workDurationStr = "";
+
+            if (!isCheckedIn) {
+                // เช็คมาสาย
+                if (timeStr > WORK_START_TIME) statusBadge = "มาสาย";
+                lastCheckInTime = now.getTime(); // บันทึกเวลาที่เข้า
+                localStorage.setItem('lastCheckIn', lastCheckInTime);
+            } else {
+                // คำนวณเวลาทำงาน
+                const storedCheckIn = localStorage.getItem('lastCheckIn');
+                if (storedCheckIn) {
+                    const diffMs = now.getTime() - parseInt(storedCheckIn);
+                    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+                    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    workDurationStr = `${diffHrs} ชม. ${diffMins} นาที`;
+                }
+                localStorage.removeItem('lastCheckIn');
+            }
+
             const newLog = {
-                id: now.getTime(), 
-                date: now.toLocaleDateString('th-TH'),
-                time: now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-                type: isCheckedIn ? 'ออกงาน' : 'เข้างาน', 
-                note: noteInput.value.trim() || "", 
-                photo: photoBase64,
-                empId: userProfile.id, // บันทึกรหัสพนักงานลงไปด้วย
-                empName: userProfile.name // บันทึกชื่อลงไปด้วย
+                id: now.getTime(), date: now.toLocaleDateString('th-TH'), time: timeStr,
+                type: isCheckedIn ? 'ออกงาน' : 'เข้างาน', note: noteInput.value.trim() || "", photo: photoBase64,
+                empId: userProfile.id, empName: userProfile.name,
+                statusBadge: statusBadge, workDuration: workDurationStr
             };
 
-            logs.unshift(newLog);
-            if (logs.length > 30) logs.pop(); // เก็บ 30 รายการล่าสุด
+            logs.unshift(newLog); if (logs.length > 30) logs.pop();
             localStorage.setItem('timeLogs', JSON.stringify(logs));
-
-            isCheckedIn = !isCheckedIn;
-            noteInput.value = ''; document.getElementById('cameraInput').value = ''; 
-            
+            isCheckedIn = !isCheckedIn; noteInput.value = ''; document.getElementById('cameraInput').value = ''; 
             updateButtonUI(); renderLogs(); showSuccessToast();
         }
 
         function updateButtonUI() {
-            const btn = document.getElementById('actionBtn');
-            const btnText = document.getElementById('btnText');
-            const btnSubText = document.getElementById('btnSubText');
-            
+            const btn = document.getElementById('actionBtn'), btnText = document.getElementById('btnText'), btnSubText = document.getElementById('btnSubText');
             btn.className = "absolute inset-0 w-full h-full rounded-full text-white text-4xl font-black shadow-[0_15px_35px_rgba(0,0,0,0.1)] transition-all duration-300 transform active:scale-95 flex flex-col items-center justify-center border-[6px] border-white z-10";
-
-            if (!officeCoords) {
-                btn.classList.add('bg-slate-200', 'text-slate-400', 'border-slate-100');
-                btn.classList.remove('animate-radar');
-                btnText.innerText = 'รอตั้งค่า'; btnSubText.innerText = 'กดไอคอน ⚙️ ด้านบน';
-            } else if (!isLocationValid) {
-                btn.classList.add('bg-slate-400');
-                btn.classList.remove('animate-radar');
-                btnText.innerText = 'ล็อก'; btnSubText.innerText = 'อยู่นอกพื้นที่';
-            } else if (isCheckedIn) {
-                btn.classList.add('bg-rose-500', 'shadow-[0_15px_40px_rgba(244,63,94,0.35)]');
-                btn.classList.add('animate-radar');
-                btnText.innerText = 'ออกงาน'; btnSubText.innerText = 'พร้อมลงเวลา';
-            } else {
-                btn.classList.add('bg-blue-600', 'shadow-[0_15px_40px_rgba(37,99,235,0.35)]');
-                btn.classList.add('animate-radar');
-                btnText.innerText = 'เข้างาน'; btnSubText.innerText = 'พร้อมลงเวลา';
-            }
+            if (!officeCoords) { btn.classList.add('bg-slate-200', 'text-slate-400', 'border-slate-100'); btn.classList.remove('animate-radar'); btnText.innerText = 'รอตั้งค่า'; btnSubText.innerText = 'กดไอคอน ⚙️ ด้านบน'; } 
+            else if (!isLocationValid) { btn.classList.add('bg-slate-400'); btn.classList.remove('animate-radar'); btnText.innerText = 'ล็อก'; btnSubText.innerText = 'อยู่นอกพื้นที่'; } 
+            else if (isCheckedIn) { btn.classList.add('bg-rose-500', 'shadow-[0_15px_40px_rgba(244,63,94,0.35)]'); btn.classList.add('animate-radar'); btnText.innerText = 'ออกงาน'; btnSubText.innerText = 'พร้อมลงเวลา'; } 
+            else { btn.classList.add('bg-blue-600', 'shadow-[0_15px_40px_rgba(37,99,235,0.35)]'); btn.classList.add('animate-radar'); btnText.innerText = 'เข้างาน'; btnSubText.innerText = 'พร้อมลงเวลา'; }
         }
 
         function renderLogs() {
-            const logContainer = document.getElementById('logHistory');
-            logContainer.innerHTML = '';
-            if (logs.length === 0) { logContainer.innerHTML = '<div class="text-center text-gray-400 py-8 text-sm">ยังไม่มีประวัติการลงเวลา</div>'; return; }
-
-            // เรียงจัดกลุ่มตามวัน
-            const groupedLogs = logs.reduce((acc, log) => {
-                if (!acc[log.date]) acc[log.date] = [];
-                acc[log.date].push(log); return acc;
-            }, {});
-
+            const logContainer = document.getElementById('logHistory'); logContainer.innerHTML = '';
+            if (logs.length === 0) return logContainer.innerHTML = '<div class="text-center text-gray-400 py-8 text-sm">ยังไม่มีประวัติ</div>';
+            
+            const groupedLogs = logs.reduce((acc, log) => { if (!acc[log.date]) acc[log.date] = []; acc[log.date].push(log); return acc; }, {});
             for (const [date, dayLogs] of Object.entries(groupedLogs)) {
                 let dayHtml = `<div class="mb-5"><h3 class="text-[11px] font-bold text-gray-400 mb-2.5 uppercase tracking-widest pl-1">${date}</h3><div class="space-y-3">`;
                 dayLogs.forEach(log => {
-                    const isCheckIn = log.type === 'เข้างาน';
-                    const iconBg = isCheckIn ? 'bg-blue-50 text-blue-600' : 'bg-rose-50 text-rose-600';
-                    const timeIcon = isCheckIn ? '→' : '←';
+                    const isCheckIn = log.type === 'เข้างาน'; const isLeave = log.type === 'ลางาน';
+                    const iconBg = isLeave ? 'bg-orange-50 text-orange-500' : (isCheckIn ? 'bg-blue-50 text-blue-600' : 'bg-rose-50 text-rose-600');
+                    const timeIcon = isLeave ? '📝' : (isCheckIn ? '→' : '←');
                     const noteHtml = log.note ? `<p class="text-[11px] text-gray-500 mt-1 flex items-center"><span class="w-1 h-1 rounded-full bg-gray-300 mr-1.5"></span>${log.note}</p>` : '';
+                    
+                    // ป้ายสถานะ มาสาย / ชั่วโมงทำงาน
+                    let badgeHtml = "";
+                    if (log.statusBadge === "มาสาย") badgeHtml = `<span class="ml-2 text-[9px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-sm font-bold">มาสาย</span>`;
+                    if (log.workDuration) badgeHtml = `<span class="ml-2 text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-sm font-bold border border-emerald-200">ทำงาน ${log.workDuration}</span>`;
+                    if (isLeave) badgeHtml = `<span class="ml-2 text-[9px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-sm font-bold border border-orange-200">${log.status}</span>`;
+
+                    const imgHtml = isLeave ? `<div class="w-12 h-12 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-xl mr-3.5">✉️</div>` : `<img src="${log.photo}" class="w-12 h-12 rounded-xl object-cover mr-3.5 shadow-sm border border-gray-50 bg-gray-50 text-[8px] text-center" alt="รูป">`;
 
                     dayHtml += `
                         <div class="flex items-center p-3 bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-                            <img src="${log.photo}" class="w-12 h-12 rounded-xl object-cover mr-3.5 shadow-sm border border-gray-50 bg-gray-50 text-[8px] text-center" alt="รูปเซลฟี่">
+                            ${imgHtml}
                             <div class="flex flex-col flex-grow">
                                 <div class="flex justify-between items-center w-full">
                                     <div class="flex items-center">
                                         <div class="w-6 h-6 rounded-full ${iconBg} flex items-center justify-center text-xs mr-2 font-bold">${timeIcon}</div>
                                         <span class="font-bold text-sm text-slate-700">${log.type}</span>
+                                        ${badgeHtml}
                                     </div>
                                     <span class="font-mono font-black text-slate-800">${log.time}</span>
                                 </div>
@@ -391,31 +374,28 @@
             }
         }
 
-        // --- ระบบ Export CSV (อัปเกรดให้มีชื่อ/รหัส) ---
         function exportCSV() {
-            if (logs.length === 0) { showAppModal('แจ้งเตือน', 'ไม่มีข้อมูลให้ดาวน์โหลดครับ', 'ℹ️', 'alert'); return; }
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-            csvContent += "รหัสพนักงาน,ชื่อพนักงาน,วันที่,เวลา,ประเภท,หมายเหตุ\n"; 
-            
+            if (logs.length === 0) return showAppModal('แจ้งเตือน', 'ไม่มีข้อมูลให้ดาวน์โหลด', 'ℹ️', 'alert');
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFFรหัส,ชื่อ,วันที่,เวลา,ประเภท,สถานะ/ระยะเวลา,หมายเหตุ\n"; 
             logs.forEach(log => {
                 const safeNote = `"${(log.note || "-").replace(/"/g, '""')}"`;
-                // ใช้ข้อมูลจาก log โดยตรงเผื่อพนักงานเปลี่ยนชื่อ
-                csvContent += `${log.empId || "-"},${log.empName || "-"},${log.date},${log.time},${log.type},${safeNote}\n`;
+                const statusInfo = log.type === 'ลางาน' ? log.status : (log.statusBadge || log.workDuration || "-");
+                csvContent += `${log.empId},${log.empName},${log.date},${log.time},${log.type},${statusInfo},${safeNote}\n`;
             });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `ประวัติลงเวลา_${userProfile?.name || 'พนักงาน'}.csv`);
+            const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", `ลงเวลา_${userProfile?.name}.csv`);
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
-        // เริ่มแอป
+        // Init
         checkProfile();
-        if(logs.length > 0 && logs[0].type === 'เข้างาน') isCheckedIn = true;
+        if(logs.length > 0) {
+            const lastActiveLog = logs.find(l => l.type !== 'ลางาน'); // หาประวัติที่ไม่ใช่การลา
+            if (lastActiveLog && lastActiveLog.type === 'เข้างาน') isCheckedIn = true;
+        }
         if(officeCoords) trackLocation();
         renderLogs(); updateButtonUI();
-        if(!navigator.onLine) updateNetworkStatus(); // เช็คเน็ตตอนเปิดแอป
+        if(!navigator.onLine) updateNetworkStatus(false);
     </script>
 </body>
 </html>
