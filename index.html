@@ -248,6 +248,7 @@
             onSnapshot(collection(db, baseCollectionPath, 'employees'), (snapshot) => {
                 employees = [];
                 snapshot.forEach(doc => employees.push({ id: doc.id, ...doc.data() }));
+                attemptAutoLogin(); // ตรวจสอบออโต้ล็อกอินทุกครั้งที่โหลดข้อมูลพนักงานเสร็จ
                 render();
             });
 
@@ -266,6 +267,28 @@
             });
         }
 
+        let localAuthState = null; // เก็บสถานะการล็อกอินของเครื่องนี้
+
+        function attemptAutoLogin() {
+            if (!localAuthState) return;
+            // ทำงานเฉพาะตอนอยู่หน้าแรก
+            if (currentView === 'role-select') {
+                if (localAuthState.role === 'owner') {
+                    currentView = 'owner-dash';
+                    render();
+                } else if (localAuthState.role === 'employee' && employees.length > 0) {
+                    const emp = employees.find(e => e.id === localAuthState.empId);
+                    if (emp) {
+                        activeEmployee = emp;
+                        empTab = 'time';
+                        currentView = 'emp-dash';
+                        startClock();
+                        render();
+                    }
+                }
+            }
+        }
+
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -281,7 +304,18 @@
 
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
-            if (user) setupRealtimeListeners();
+            if (user) {
+                // ดึงข้อมูลการจดจำล็อกอินของเครื่องนี้ (จำลองจาก Anonymous UID)
+                onSnapshot(doc(db, `artifacts/${appId}/users/${user.uid}/config`, 'session'), (snap) => {
+                    if (snap.exists()) {
+                        localAuthState = snap.data();
+                        attemptAutoLogin();
+                    } else {
+                        localAuthState = null;
+                    }
+                });
+                setupRealtimeListeners();
+            }
             else appDiv.innerHTML = `<div class="p-4 text-center text-red-500 font-bold">กรุณาเข้าสู่ระบบ</div>`;
         });
         initAuth();
@@ -356,10 +390,24 @@
                 summary.totalOTHrs += otHrs;
                 summary.shiftsCount++;
 
-                let shiftBasePay = summary.wageType === 'hourly' ? (regHrs * summary.baseRate) : summary.baseRate;
+                let shiftBasePay = 0;
+                if (summary.wageType === 'hourly') {
+                    shiftBasePay = regHrs * summary.baseRate;
+                } else if (summary.wageType === 'daily') {
+                    shiftBasePay = summary.baseRate;
+                }
+                // ถ้าเป็นรายสัปดาห์ จะยังไม่บวกเงินรายวันตรงนี้ แต่จะไปบวกเหมาจ่ายทีหลัง
+                
                 let shiftOTPay = otHrs * summary.otRate;
 
                 summary.totalPay += (shiftBasePay + shiftOTPay);
+            });
+
+            // เพิ่มค่าแรงเหมาจ่ายสำหรับพนักงานรายสัปดาห์ (ให้ครั้งเดียวถ้ายอดกะทำงาน > 0)
+            Object.keys(payrollSummary).forEach(id => {
+                if (payrollSummary[id].wageType === 'weekly' && payrollSummary[id].shiftsCount > 0) {
+                    payrollSummary[id].totalPay += payrollSummary[id].baseRate;
+                }
             });
 
             return payrollSummary;
@@ -695,7 +743,7 @@
                                 <div class="grid grid-cols-2 gap-2 text-sm mb-3">
                                     <div class="bg-white p-2 rounded border border-gray-200">
                                         <div class="text-gray-500 text-xs">เรทค่าแรง</div>
-                                        <div class="font-bold text-blue-600">${formatCurrency(p.baseRate)}/${p.wageType==='daily'?'วัน':'ชม.'}</div>
+                                        <div class="font-bold text-blue-600">${formatCurrency(p.baseRate)}/${p.wageType==='daily'?'วัน':p.wageType==='weekly'?'สัปดาห์':'ชม.'}</div>
                                     </div>
                                     <div class="bg-white p-2 rounded border border-gray-200">
                                         <div class="text-gray-500 text-xs">เรท OT</div>
@@ -761,6 +809,7 @@
                             <select id="new-emp-wage-type" class="iso-input mb-3 text-sm bg-white">
                                 <option value="daily">รับค่าแรง: แบบรายวัน</option>
                                 <option value="hourly">รับค่าแรง: แบบรายชั่วโมง</option>
+                                <option value="weekly">รับค่าแรง: แบบรายสัปดาห์</option>
                             </select>
                             <div class="flex gap-2 mb-3">
                                 <div class="flex-1">
@@ -787,6 +836,7 @@
                             <select id="edit-emp-wage-type" class="iso-input mb-3 text-sm bg-white">
                                 <option value="daily">รับค่าแรง: แบบรายวัน</option>
                                 <option value="hourly">รับค่าแรง: แบบรายชั่วโมง</option>
+                                <option value="weekly">รับค่าแรง: แบบรายสัปดาห์</option>
                             </select>
                             <div class="flex gap-2 mb-3">
                                 <div class="flex-1">
@@ -811,7 +861,7 @@
                                     <h4 class="font-bold">${emp.name}</h4>
                                     <div class="text-xs text-gray-500 mt-1 flex flex-wrap gap-2">
                                         <span class="bg-gray-100 px-1 rounded border">PIN: ${emp.pin}</span>
-                                        <span class="bg-blue-100 text-blue-700 px-1 rounded border">${emp.wageType==='hourly'?'รายชั่วโมง':'รายวัน'}</span>
+                                        <span class="bg-blue-100 text-blue-700 px-1 rounded border">${emp.wageType==='hourly'?'รายชั่วโมง':emp.wageType==='weekly'?'รายสัปดาห์':'รายวัน'}</span>
                                         <span class="bg-orange-100 text-orange-700 px-1 rounded border">฿${emp.baseRate || 0} | OT ฿${emp.otRate || 0}</span>
                                     </div>
                                 </div>
@@ -883,16 +933,28 @@
         }
 
         function attachEventListeners() {
-            document.querySelectorAll('[data-action="go-home"], [data-action="logout"]').forEach(el => el.onclick = () => changeView('role-select'));
+            document.querySelectorAll('[data-action="go-home"]').forEach(el => el.onclick = () => changeView('role-select'));
+            
+            document.querySelectorAll('[data-action="logout"]').forEach(el => el.onclick = async () => {
+                // ล้างข้อมูลออโต้ล็อกอินเมื่อกดออกจากระบบ
+                if (currentUser) {
+                    await deleteDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}/config`, 'session'));
+                }
+                changeView('role-select');
+            });
+
             document.querySelectorAll('[data-action="go-emp-login"]').forEach(el => el.onclick = () => changeView('emp-login'));
             document.querySelectorAll('[data-action="go-owner-login"]').forEach(el => el.onclick = () => changeView('owner-login'));
 
             const btnEmpLogin = document.getElementById('btn-emp-login');
             if (btnEmpLogin) {
-                btnEmpLogin.onclick = () => {
+                btnEmpLogin.onclick = async () => {
                     const emp = employees.find(e => e.id === document.getElementById('emp-select').value);
                     if (emp && emp.pin === document.getElementById('emp-pin').value) {
-                        activeEmployee = emp; empTab = 'time'; changeView('emp-dash'); startClock();
+                        activeEmployee = emp; empTab = 'time'; 
+                        // บันทึกสถานะออโต้ล็อกอินสำหรับพนักงาน
+                        await setDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}/config`, 'session'), { role: 'employee', empId: emp.id });
+                        changeView('emp-dash'); startClock();
                     } else showModal('รหัสผิดพลาด', 'PIN ไม่ถูกต้อง');
                 };
             }
@@ -904,8 +966,12 @@
 
             const btnOwnerLogin = document.getElementById('btn-owner-login');
             if (btnOwnerLogin) {
-                btnOwnerLogin.onclick = () => {
-                    if (document.getElementById('owner-pin').value === appSettings.ownerPin) changeView('owner-dash');
+                btnOwnerLogin.onclick = async () => {
+                    if (document.getElementById('owner-pin').value === appSettings.ownerPin) {
+                        // บันทึกสถานะออโต้ล็อกอินสำหรับเจ้าของร้าน
+                        await setDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}/config`, 'session'), { role: 'owner' });
+                        changeView('owner-dash');
+                    }
                     else showModal('ปฏิเสธ', 'รหัสไม่ถูกต้อง');
                 };
             }
