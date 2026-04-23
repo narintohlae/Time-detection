@@ -14,9 +14,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Production Modern OS UI Reskin */
+        /* Production Modern OS UI Reskin - Fully Responsive */
         body { font-family: 'Space Grotesk', 'Noto Sans Thai', sans-serif; background-color: #f8fafc; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; overflow: hidden; }
-        #app-container { max-width: 430px; margin: 0 auto; height: 100vh; height: 100dvh; background-color: #f8fafc; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        
+        #app-container { 
+            width: 100%; 
+            max-width: 100%; 
+            margin: 0 auto; 
+            height: 100vh; 
+            height: 100dvh; 
+            background-color: #f8fafc; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+            overflow: hidden; 
+        }
+
+        /* Desktop Container Scaling */
+        @media (min-width: 768px) {
+            #app-container { 
+                max-width: 1280px; 
+                border-left: 1px solid #f1f5f9; 
+                border-right: 1px solid #f1f5f9; 
+                box-shadow: 0 0 40px rgba(0,0,0,0.03); 
+            }
+        }
+
         .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
         /* Modernized Buttons & Cards */
@@ -28,7 +51,7 @@
         .btn-sm-3d:active:not(:disabled) { transform: scale(0.95); }
         .btn-sm-3d:disabled { opacity: 0.6; cursor: not-allowed; }
         
-        .card-3d { border-radius: 20px; background-color: #ffffff; margin-bottom: 16px; border: 1px solid #f1f5f9 !important; box-shadow: 0 8px 24px rgba(149, 157, 165, 0.08) !important; overflow: hidden; }
+        .card-3d { border-radius: 20px; background-color: #ffffff; border: 1px solid #f1f5f9 !important; box-shadow: 0 8px 24px rgba(149, 157, 165, 0.08) !important; overflow: hidden; }
 
         /* Override old hardcoded borders globally */
         .border-gray-800 { border-color: #e2e8f0 !important; }
@@ -63,7 +86,7 @@
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="text-gray-800 flex items-center justify-center min-h-screen">
+<body class="text-gray-800 flex items-center justify-center min-h-screen bg-gray-100">
 
     <div id="app-container">
         <!-- Loader Overlay -->
@@ -72,9 +95,9 @@
         </div>
 
         <!-- Toast Container -->
-        <div id="toast-container" class="absolute top-4 inset-x-4 z-[200] flex flex-col gap-2 pointer-events-none"></div>
+        <div id="toast-container" class="absolute top-4 inset-x-4 md:left-auto md:right-4 md:w-96 z-[200] flex flex-col gap-2 pointer-events-none"></div>
 
-        <header id="app-header" class="px-6 pt-12 pb-4 bg-white/90 backdrop-blur-md border-b border-gray-100 z-10 flex justify-between items-center shadow-sm">
+        <header id="app-header" class="px-6 pt-12 md:pt-6 pb-4 bg-white/90 backdrop-blur-md border-b border-gray-100 z-10 flex justify-between items-center shadow-sm">
             <h1 class="text-xl font-bold tracking-tight" id="header-title">WorkFlow</h1>
             <div class="flex items-center gap-3">
                 <button id="lang-toggle" onclick="App.toggleLang()" class="w-8 h-8 rounded-full border border-gray-200 bg-white flex items-center justify-center font-bold text-xs shadow-sm hover:bg-gray-50 active:scale-95 transition-all">EN</button>
@@ -84,7 +107,7 @@
 
         <main id="app-content" class="flex-1 overflow-y-auto no-scrollbar bg-[#f8fafc] p-6 relative"></main>
 
-        <nav id="app-nav" class="hidden bg-white/90 backdrop-blur-md border-t border-gray-100 pb-8 pt-3 px-4 z-10 flex overflow-x-auto no-scrollbar gap-2 items-center"></nav>
+        <nav id="app-nav" class="hidden bg-white/90 backdrop-blur-md border-t border-gray-100 pb-8 md:pb-4 pt-3 px-4 z-10 flex overflow-x-auto no-scrollbar gap-2 items-center"></nav>
     </div>
 
     <script>
@@ -170,7 +193,6 @@
         };
         function t(str) { return (state.lang === 'th' && i18n_th[str]) ? i18n_th[str] : str; }
 
-        // Production ID Generator
         function generateId() {
             return window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
         }
@@ -197,7 +219,6 @@
             }
         };
 
-        // Static Local DB for demo user profiles
         const db = {
             users: [
                 { id: 'u1', name: 'Alice Smith', role: 'employee', initials: 'AS', color: 'bg-pink-100 text-pink-700', phone: '555-0101', email: 'alice@workflow.com' },
@@ -206,14 +227,10 @@
             ]
         };
 
-        // Initialize Dynamic Collections
         const dynamicCollections = ['appConfig', 'logs', 'tasks', 'timeOffRequests', 'announcements', 'expenses', 'kudos', 'moods', 'tickets', 'suggestions', 'polls', 'events', 'goals', 'resources', 'bookings', 'visitors', 'menuItems', 'lunchOrders', 'inventory', 'loans', 'userPoints', 'rewardItems', 'redemptions', 'lostFound', 'shifts', 'carpools', 'wellness', 'jukebox', 'standups', 'marketplace', 'celebrations', 'courses', 'trainingLogs', 'workLocations', 'openRoles', 'referrals'];
         dynamicCollections.forEach(c => db[c] = []);
 
-        // Database Interface
-        let DB = {
-            add: async () => {}, update: async () => {}, delete: async () => {}
-        };
+        let DB = { add: async () => {}, update: async () => {}, delete: async () => {} };
 
         // =========================================
         // APP CONTROLLER
@@ -222,8 +239,6 @@
             modules: [],
             init: function() {
                 this.showLoader(1000);
-                
-                // Dynamically import Firebase to keep Global scope clean
                 import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js").then((appMod) => {
                     import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js").then((authMod) => {
                         import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js").then((fsMod) => {
@@ -235,34 +250,27 @@
                             const getColl = (name) => fsMod.collection(fdb, 'artifacts', APP_ID, 'public', 'data', name);
                             const getDocRef = (name, id) => fsMod.doc(fdb, 'artifacts', APP_ID, 'public', 'data', name, id);
 
-                            // Setup DB Methods
                             DB.add = async (coll, data) => { try { await fsMod.addDoc(getColl(coll), data); } catch(e) { console.error(e); } };
                             DB.update = async (coll, id, data) => { try { await fsMod.updateDoc(getDocRef(coll, id), data); } catch(e) { console.error(e); } };
                             DB.delete = async (coll, id) => { try { await fsMod.deleteDoc(getDocRef(coll, id)); } catch(e) { console.error(e); } };
 
-                            // Authenticate and Sync
                             authMod.signInAnonymously(auth).then(() => {
                                 let loaded = 0;
                                 dynamicCollections.forEach(c => {
                                     fsMod.onSnapshot(getColl(c), (snap) => {
                                         db[c] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                                         
-                                        // Update Global App Configuration Sync
                                         if (c === 'appConfig' && db.appConfig.length > 0) {
                                             state.features = db.appConfig[0].features || state.features;
                                             state.configDocId = db.appConfig[0].id;
                                         }
 
                                         loaded++;
-                                        
-                                        // Initial load handler
                                         if (loaded >= dynamicCollections.length && !state.isInitialized) {
                                             state.isInitialized = true;
                                             App.renderLogin();
                                             App.seedDataIfNeeded();
-                                        } 
-                                        // Realtime UI updates for ALL devices connected (Passing false prevents loader flash)
-                                        else if (state.isInitialized && state.currentView !== 'login') {
+                                        } else if (state.isInitialized && state.currentView !== 'login') {
                                             App.navigate(state.currentView, state.currentModuleId, false);
                                         }
                                     }, (err) => console.error(`Sync error on ${c}:`, err));
@@ -270,14 +278,13 @@
                             }).catch(err => {
                                 console.error("Auth Error", err);
                                 App.showToast("Database Connection Error", "error");
-                                App.renderLogin(); // Fallback
+                                App.renderLogin(); 
                             });
                         });
                     });
                 });
             },
             seedDataIfNeeded: async function() {
-                // Auto-populate reference tables and global settings if empty on first boot
                 const toSeed = [
                     { coll: 'appConfig', data: [ { type: 'global', features: state.features } ] },
                     { coll: 'inventory', data: [ { name: 'MacBook Charger', icon: 'ph-plug', total: 5, available: 5 }, { name: 'Projector', icon: 'ph-projector-screen', total: 2, available: 2 } ] },
@@ -352,14 +359,14 @@
                 }
             },
             renderLogin: function() {
-                let html = `<div class="flex flex-col items-center justify-center h-full space-y-8 pb-12"><div class="w-24 h-24 bg-blue-500 rounded-[28px] border border-blue-600 shadow-lg flex items-center justify-center transform rotate-12 mb-4"><i class="ph-fill ph-intersect text-5xl text-white"></i></div><h2 class="text-2xl font-bold text-center">${t("Welcome to WorkFlow")}</h2><p class="text-gray-500 text-center mb-6">${t("Select your profile to continue.")}</p><div class="w-full space-y-3 px-2">`;
+                let html = `<div class="flex flex-col items-center justify-center h-full space-y-8 pb-12 max-w-sm mx-auto w-full"><div class="w-24 h-24 bg-blue-500 rounded-[28px] border border-blue-600 shadow-lg flex items-center justify-center transform rotate-12 mb-4"><i class="ph-fill ph-intersect text-5xl text-white"></i></div><h2 class="text-2xl font-bold text-center">${t("Welcome to WorkFlow")}</h2><p class="text-gray-500 text-center mb-6">${t("Select your profile to continue.")}</p><div class="w-full space-y-3 px-2">`;
                 db.users.forEach(user => { html += `<button onclick="App.login('${user.id}')" class="btn-3d w-full py-4 px-5 bg-white flex items-center space-x-4 border border-gray-100 shadow-sm hover:border-blue-200 transition-colors"><div class="h-12 w-12 rounded-full ${user.color} flex items-center justify-center font-bold text-lg">${user.initials}</div><div class="text-left flex-1"><div class="font-bold text-[15px] text-gray-800">${user.name}</div><div class="text-[11px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">${t(user.role)}</div></div><i class="ph-bold ph-caret-right text-gray-300"></i></button>`; });
                 document.getElementById('app-content').innerHTML = html + `</div></div>`;
             },
             renderEmployeeHome: function() {
                 let html = `
-                    <div class="space-y-6 pb-20">
-                        <div class="mb-2 bg-white p-6 rounded-[24px] shadow-sm border border-gray-100 flex justify-between items-center">
+                    <div class="space-y-6 pb-20 max-w-7xl mx-auto w-full">
+                        <div class="mb-6 bg-white p-6 rounded-[24px] shadow-sm border border-gray-100 flex justify-between items-center max-w-3xl mx-auto">
                             <div>
                                 <h2 class="text-2xl font-bold text-gray-800">${t("Hello")}, ${state.currentUser.name.split(' ')[0]}!</h2>
                                 <p class="text-gray-500 text-sm">${t("What would you like to do today?")}</p>
@@ -368,7 +375,7 @@
                                 ${state.currentUser.initials}
                             </div>
                         </div>
-                        <div class="grid grid-cols-4 gap-y-6 gap-x-2 px-1">
+                        <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-y-8 gap-x-4 px-2">
                 `;
                 this.modules.forEach(mod => {
                     if (state.features[mod.id] && mod.hasUserTab) {
@@ -380,7 +387,17 @@
             },
             renderOwnerDashboard: function() {
                 const activeUsers = db.users.filter(u => u.role !== 'owner' && isClockedIn(u.id));
-                let html = `<div class="space-y-6 pb-20"><div class="flex justify-between items-end"><div><h2 class="text-2xl font-bold">${t("Overview")}</h2><p class="text-gray-500">${t("Live Office Status")}</p></div><div class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-lg font-bold text-sm flex items-center gap-1"><span class="text-emerald-500">●</span> ${activeUsers.length} ${t("Active")}</div></div><div class="card-3d bg-blue-50/50 overflow-hidden relative"><h3 class="font-bold text-sm p-4 border-b border-gray-100 bg-white/80 backdrop-blur-sm text-gray-700">${t("Floor Plan (Isometric)")}</h3><div class="iso-container"><div class="iso-grid">`;
+                let html = `
+                    <div class="space-y-6 pb-20 max-w-7xl mx-auto w-full">
+                        <div class="flex justify-between items-end">
+                            <div><h2 class="text-2xl font-bold">${t("Overview")}</h2><p class="text-gray-500">${t("Live Office Status")}</p></div>
+                            <div class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-lg font-bold text-sm flex items-center gap-1"><span class="text-emerald-500">●</span> ${activeUsers.length} ${t("Active")}</div>
+                        </div>
+                        <div class="card-3d bg-blue-50/50 overflow-hidden relative">
+                            <h3 class="font-bold text-sm p-4 border-b border-gray-100 bg-white/80 backdrop-blur-sm text-gray-700">${t("Floor Plan (Isometric)")}</h3>
+                            <div class="iso-container">
+                                <div class="iso-grid md:gap-8 lg:gap-10">
+                `;
                 const employees = db.users.filter(u => u.role !== 'owner');
                 for(let i=0; i<6; i++) {
                     const emp = employees[i];
@@ -389,22 +406,34 @@
                     else html += `<div class="iso-cube opacity-50"></div>`;
                 }
                 html += `</div></div><p class="text-[10px] uppercase font-bold tracking-wider text-center text-gray-400 pb-4">${t("Green indicates clocked-in staff.")}</p></div>`;
-                this.modules.forEach(mod => { if (state.features[mod.id] && mod.renderAdminWidget) html += mod.renderAdminWidget(); });
-                document.getElementById('app-content').innerHTML = html + `</div>`;
+                
+                // Owner Widgets Grid
+                html += `<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 w-full">`;
+                this.modules.forEach(mod => { 
+                    if (state.features[mod.id] && mod.renderAdminWidget) {
+                        // Inject h-full flex flex-col to card-3d classes returned by renderAdminWidget for perfect CSS grid alignment
+                        let widgetHtml = mod.renderAdminWidget();
+                        widgetHtml = widgetHtml.replace('class="card-3d', 'class="card-3d h-full flex flex-col');
+                        html += widgetHtml;
+                    }
+                });
+                html += `</div></div>`;
+                document.getElementById('app-content').innerHTML = html;
             },
             renderSettings: function() {
-                let html = `<div class="space-y-6 pb-20">`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full">`;
                 if (state.currentUser.role === 'owner') {
-                    html += `<div><h2 class="text-2xl font-bold">${t("App Features")}</h2><p class="text-gray-500">${t("Turn modules on or off dynamically.")}</p></div><div class="card-3d p-4 space-y-4">`;
+                    html += `<div><h2 class="text-2xl font-bold">${t("App Features")}</h2><p class="text-gray-500">${t("Turn modules on or off dynamically.")}</p></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
                     this.modules.forEach(mod => {
                         const isChecked = state.features[mod.id] ? 'checked' : '';
-                        html += `<div class="flex items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0"><div><div class="font-bold flex items-center gap-2 text-gray-800"><i class="${mod.icon} text-xl text-blue-500"></i> ${t(mod.name)}</div><div class="text-[11px] text-gray-500 mt-0.5">${t(mod.description)}</div></div><div class="relative inline-block w-12 h-6 align-middle select-none transition duration-200 ease-in"><input type="checkbox" id="toggle-${mod.id}" ${isChecked} class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white appearance-none cursor-pointer" onchange="App.toggleFeature('${mod.id}', this.checked)"/><label for="toggle-${mod.id}" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-200 cursor-pointer"></label></div></div>`;
+                        html += `<div class="card-3d m-0 p-4 flex items-center justify-between bg-white"><div><div class="font-bold flex items-center gap-2 text-gray-800"><i class="${mod.icon} text-xl text-blue-500"></i> ${t(mod.name)}</div><div class="text-[11px] text-gray-500 mt-0.5">${t(mod.description)}</div></div><div class="relative inline-block w-12 h-6 align-middle select-none transition duration-200 ease-in"><input type="checkbox" id="toggle-${mod.id}" ${isChecked} class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white appearance-none cursor-pointer" onchange="App.toggleFeature('${mod.id}', this.checked)"/><label for="toggle-${mod.id}" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-200 cursor-pointer"></label></div></div>`;
                     });
                     html += `</div>`;
                 } else {
                     html += `
-                        <div><h2 class="text-2xl font-bold">${t("Profile")}</h2><p class="text-gray-500">${t("Manage your account")}</p></div>
-                        <div class="card-3d p-8 flex flex-col items-center gap-4">
+                        <div class="max-w-2xl mx-auto">
+                        <div class="mb-4"><h2 class="text-2xl font-bold">${t("Profile")}</h2><p class="text-gray-500">${t("Manage your account")}</p></div>
+                        <div class="card-3d p-8 flex flex-col items-center gap-4 bg-white">
                             <div class="w-24 h-24 rounded-full ${state.currentUser.color} flex items-center justify-center font-bold text-4xl border border-gray-100 shadow-sm">${state.currentUser.initials}</div>
                             <div class="text-center">
                                 <h3 class="font-bold text-2xl mb-1">${state.currentUser.name}</h3>
@@ -412,21 +441,19 @@
                                 <div class="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-[10px] font-bold mt-4 inline-block uppercase tracking-wider border border-blue-100">${t(state.currentUser.role)}</div>
                             </div>
                         </div>
+                        </div>
                     `;
                 }
-                html += `<div class="mt-8"><button onclick="App.logout()" class="btn-3d w-full py-4 bg-white text-red-500 border border-red-100 flex justify-center items-center gap-2 hover:bg-red-50"><i class="ph-bold ph-sign-out text-lg"></i> ${t("Switch User Profile")}</button></div></div>`;
+                html += `<div class="mt-8 max-w-2xl mx-auto"><button onclick="App.logout()" class="btn-3d w-full py-4 bg-white text-red-500 border border-red-100 flex justify-center items-center gap-2 hover:bg-red-50"><i class="ph-bold ph-sign-out text-lg"></i> ${t("Switch User Profile")}</button></div></div>`;
                 document.getElementById('app-content').innerHTML = html;
             },
             toggleFeature: function(moduleId, isEnabled) { 
                 state.features[moduleId] = isEnabled; 
-                
-                // Save the new App Config to Firebase to sync across all devices
                 if(state.configDocId) {
                     DB.update('appConfig', state.configDocId, { features: state.features });
                 } else {
                     DB.add('appConfig', { type: 'global', features: state.features });
                 }
-                
                 this.renderNav(); 
                 if(state.currentView === 'owner_dashboard') this.renderOwnerDashboard(); 
                 this.showToast(t("Action completed successfully")); 
@@ -443,7 +470,7 @@
                     if(state.features['timeClock']) html += createNavItem('ph-clock', 'Time Clock', 'module', 'timeClock', state.currentModuleId === 'timeClock');
                     html += createNavItem('ph-user', 'Profile', 'settings', null, state.currentView === 'settings'); 
                 }
-                nav.innerHTML = `<div class="flex justify-around w-full max-w-sm mx-auto">${html}</div>`;
+                nav.innerHTML = `<div class="flex justify-around w-full max-w-md mx-auto">${html}</div>`;
             }
         };
 
@@ -459,9 +486,9 @@
             renderUserView: function() { 
                 const isW = isClockedIn(state.currentUser.id); 
                 return `
-                    <div class="space-y-6 pb-20">
+                    <div class="space-y-6 pb-20 max-w-7xl mx-auto w-full">
                         <div><h2 class="text-2xl font-bold">${t("Time Clock")}</h2><p class="text-gray-500">${t("Time Logs")}</p></div>
-                        <div class="card-3d p-8 text-center bg-gradient-to-b from-white to-gray-50">
+                        <div class="card-3d p-8 text-center bg-gradient-to-b from-white to-gray-50 max-w-md mx-auto">
                             <div class="flex flex-col items-center justify-center mb-8">
                                 <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6 shadow-inner border border-blue-100">
                                     <i class="ph-fill ph-clock text-5xl text-blue-500"></i>
@@ -478,41 +505,41 @@
             }, 
             onLoad: function() { const updateTime = () => { if(document.getElementById('live-clock')) document.getElementById('live-clock').innerText = new Date().toLocaleTimeString(); }; updateTime(); if(this.timer) clearInterval(this.timer); this.timer = setInterval(updateTime, 1000); }, 
             toggleClock: function() { DB.add('logs', { userId: state.currentUser.id, type: isClockedIn(state.currentUser.id) ? 'OUT' : 'IN', time: new Date().toISOString() }); App.showToast(t("Action completed successfully")); }, 
-            renderAdminWidget: function() { return `<div class="card-3d p-4"><h3 class="font-bold border-b border-gray-100 pb-2 mb-3 text-sm flex items-center gap-2"><i class="ph-fill ph-clock-counter-clockwise text-blue-500"></i> ${t("Time Logs")}</h3><p class="text-sm text-gray-500 text-center py-2">${db.logs.length} records</p></div>`; } 
+            renderAdminWidget: function() { return `<div class="card-3d p-4"><h3 class="font-bold border-b border-gray-100 pb-2 mb-3 text-sm flex items-center gap-2"><i class="ph-fill ph-clock-counter-clockwise text-blue-500"></i> ${t("Time Logs")}</h3><div class="flex-1 flex items-center justify-center"><p class="text-sm text-gray-500 font-medium">${db.logs.length} records processed</p></div></div>`; } 
         };
         
         const TaskManagerModule = { 
             id: 'taskManager', name: 'Tasks', description: 'Assign and track daily employee tasks.', icon: 'ph-check-square-offset', hasUserTab: true, 
             renderUserView: function() { 
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Tasks")}</h2></div><div class="space-y-3">`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Tasks")}</h2></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
                 const myTasks = db.tasks.filter(t => t.assignedTo === state.currentUser.id);
-                if(myTasks.length === 0) html += `<p class="text-center text-gray-400 py-6 text-sm">No tasks assigned.</p>`;
+                if(myTasks.length === 0) html += `<p class="text-center text-gray-400 py-6 text-sm col-span-full">No tasks assigned.</p>`;
                 myTasks.forEach(task => { html += `<button onclick="TaskManagerModule.toggleTask('${task.id}')" class="btn-sm-3d w-full bg-white p-4 flex items-center gap-4 hover:bg-gray-50 text-left outline-none"><div class="w-6 h-6 rounded-md border-2 ${task.isDone ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-300 text-transparent'} flex items-center justify-center flex-shrink-0 transition-colors"><i class="ph-bold ph-check text-sm"></i></div><span class="font-medium text-sm ${task.isDone ? 'line-through text-gray-400' : 'text-gray-800'}">${task.title}</span></button>`; });
                 return html + `</div></div>`; 
             }, 
             toggleTask: function(id) { const task=db.tasks.find(t=>t.id===id); if(task){ DB.update('tasks', id, {isDone: !task.isDone}); if(!task.isDone) App.showToast(t("Action completed successfully")); } },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-amber-50/50 border-amber-100"><h3 class="font-bold text-sm mb-3 flex items-center gap-2 text-amber-800"><i class="ph-fill ph-check-square-offset text-amber-500"></i> ${t("Tasks")}</h3><p class="text-xs text-amber-700">${db.tasks.length} total tasks</p></div>`; } 
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-amber-50/50 border-amber-100"><h3 class="font-bold text-sm mb-3 flex items-center gap-2 text-amber-800"><i class="ph-fill ph-check-square-offset text-amber-500"></i> ${t("Tasks")}</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-amber-600">${db.tasks.length} <span class="text-xs font-medium text-amber-700/60 uppercase tracking-wider block">Tasks</span></p></div></div>`; } 
         };
 
         const TimeOffModule = { 
             id: 'timeOff', name: 'Time Off', description: 'Manage employee leave and vacation requests.', icon: 'ph-calendar-blank', hasUserTab: true, 
             renderUserView: function() { 
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Time Off")}</h2></div><div class="card-3d p-4 bg-white"><input type="date" id="to-date" class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm font-medium outline-none focus:border-blue-400 focus:bg-white transition-colors"><input type="text" id="to-reason" placeholder="Reason" class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm font-medium outline-none focus:border-blue-400 focus:bg-white transition-colors"><button onclick="TimeOffModule.submit()" class="btn-sm-3d w-full py-3 bg-purple-500 text-white border-purple-600">Submit Request</button></div><div class="space-y-3">`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Time Off")}</h2></div><div class="card-3d p-5 bg-white max-w-2xl"><input type="date" id="to-date" class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm font-medium outline-none focus:border-blue-400 focus:bg-white transition-colors"><input type="text" id="to-reason" placeholder="Reason" class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm font-medium outline-none focus:border-blue-400 focus:bg-white transition-colors"><button onclick="TimeOffModule.submit()" class="btn-sm-3d w-full py-3 bg-purple-500 text-white border-purple-600">Submit Request</button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
                 const reqs = db.timeOffRequests.filter(r => r.userId === state.currentUser.id);
-                if(reqs.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm">No requests.</p>`;
+                if(reqs.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm col-span-full">No requests.</p>`;
                 reqs.forEach(req => { 
                     const statusColors = { pending: 'bg-amber-100 text-amber-700 border-amber-200', approved: 'bg-emerald-100 text-emerald-700 border-emerald-200', denied: 'bg-rose-100 text-rose-700 border-rose-200' };
-                    html += `<div class="card-3d p-4 flex justify-between items-center bg-white"><span class="font-medium text-sm text-gray-800">${req.date} <span class="text-gray-400 text-xs ml-1">(${req.reason})</span></span><span class="px-2 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider ${statusColors[req.status]}">${req.status}</span></div>`; 
+                    html += `<div class="card-3d p-4 flex justify-between items-center bg-white mb-0"><span class="font-medium text-sm text-gray-800">${req.date} <span class="text-gray-400 text-xs ml-1 block md:inline">(${req.reason})</span></span><span class="px-2 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider ${statusColors[req.status]}">${req.status}</span></div>`; 
                 });
                 return html + `</div></div>`; 
             }, 
             submit: function() { const d=document.getElementById('to-date').value; const r=document.getElementById('to-reason').value; if(d&&r){ DB.add('timeOffRequests', {userId:state.currentUser.id, date:d, reason:r, status:'pending'}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } },
             renderAdminWidget: function() { 
-                let html = `<div class="card-3d p-4 bg-purple-50/50 border-purple-100"><h3 class="font-bold text-sm border-b border-purple-100 pb-2 mb-3 flex items-center gap-2 text-purple-800"><i class="ph-fill ph-calendar-blank text-purple-500"></i> ${t("Time Off")}</h3>`;
+                let html = `<div class="card-3d p-4 bg-purple-50/50 border-purple-100"><h3 class="font-bold text-sm border-b border-purple-100 pb-2 mb-3 flex items-center gap-2 text-purple-800"><i class="ph-fill ph-calendar-blank text-purple-500"></i> ${t("Time Off")}</h3><div class="overflow-y-auto flex-1 pr-1">`;
                 const pending = db.timeOffRequests.filter(r=>r.status==='pending');
                 if(pending.length === 0) html += `<p class="text-xs text-purple-600/60 text-center py-2">No pending requests.</p>`;
                 pending.forEach(req => { const u = db.users.find(x=>x.id===req.userId); html += `<div class="bg-white p-3 border border-purple-100 rounded-xl mb-2 flex justify-between items-center shadow-sm"><div class="text-xs text-gray-800"><span class="font-bold">${u.name}</span><br><span class="text-gray-500">${req.date} (${req.reason})</span></div><div class="flex gap-1"><button onclick="TimeOffModule.upd('${req.id}', 'approved')" class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center hover:bg-emerald-200 transition-colors"><i class="ph-bold ph-check"></i></button><button onclick="TimeOffModule.upd('${req.id}', 'denied')" class="w-7 h-7 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-200 transition-colors"><i class="ph-bold ph-x"></i></button></div></div>`; });
-                return html + `</div>`; 
+                return html + `</div></div>`; 
             },
             upd: function(id, status) { DB.update('timeOffRequests', id, {status}); App.showToast(t("Action completed successfully")); }
         };
@@ -520,34 +547,34 @@
         const AnnouncementsModule = { 
             id: 'announcements', name: 'Noticeboard', description: 'Broadcast important updates to all employees.', icon: 'ph-megaphone', hasUserTab: true, 
             renderUserView: function() { 
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Noticeboard")}</h2></div><div class="space-y-4">`;
-                if(db.announcements.length === 0) html += `<p class="text-center text-gray-400 py-6 text-sm">No announcements.</p>`;
-                db.announcements.slice().reverse().forEach(news => { html += `<div class="card-3d p-5 bg-white border-l-4 ${news.priority==='high'?'border-l-rose-500 bg-rose-50/30':'border-l-blue-500'}"><h3 class="font-bold text-base text-gray-800 mb-1 leading-tight">${news.title}</h3><p class="text-sm text-gray-600 leading-relaxed">${news.content}</p><div class="text-[10px] text-gray-400 mt-3 font-medium">${new Date(news.date).toLocaleDateString()}</div></div>`; });
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Noticeboard")}</h2></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">`;
+                if(db.announcements.length === 0) html += `<p class="text-center text-gray-400 py-6 text-sm col-span-full">No announcements.</p>`;
+                db.announcements.slice().reverse().forEach(news => { html += `<div class="card-3d p-6 bg-white border-l-4 mb-0 flex flex-col justify-between ${news.priority==='high'?'border-l-rose-500 bg-rose-50/30':'border-l-blue-500'}"><div><h3 class="font-bold text-lg text-gray-800 mb-2 leading-tight">${news.title}</h3><p class="text-sm text-gray-600 leading-relaxed">${news.content}</p></div><div class="text-[10px] text-gray-400 mt-4 font-medium">${new Date(news.date).toLocaleDateString()}</div></div>`; });
                 return html + `</div></div>`; 
             }, 
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-orange-50/50 border-orange-100"><h3 class="font-bold text-sm mb-3 flex items-center gap-2 text-orange-800"><i class="ph-fill ph-megaphone text-orange-500"></i> Post News</h3><input type="text" id="news-t" placeholder="Title" class="w-full mb-3 p-2.5 border border-orange-200 rounded-xl bg-white text-sm outline-none focus:border-orange-400"><textarea id="news-c" placeholder="Content" class="w-full mb-3 p-2.5 border border-orange-200 rounded-xl bg-white text-sm outline-none focus:border-orange-400 h-20 resize-none"></textarea><button onclick="AnnouncementsModule.post()" class="btn-sm-3d w-full py-2.5 bg-orange-500 text-white border-orange-600">Post</button></div>`; },
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-orange-50/50 border-orange-100"><h3 class="font-bold text-sm mb-3 flex items-center gap-2 text-orange-800"><i class="ph-fill ph-megaphone text-orange-500"></i> Post News</h3><div class="flex flex-col h-full"><input type="text" id="news-t" placeholder="Title" class="w-full mb-3 p-2.5 border border-orange-200 rounded-xl bg-white text-sm outline-none focus:border-orange-400"><textarea id="news-c" placeholder="Content" class="w-full flex-1 min-h-[80px] mb-3 p-2.5 border border-orange-200 rounded-xl bg-white text-sm outline-none focus:border-orange-400 resize-none"></textarea><button onclick="AnnouncementsModule.post()" class="btn-sm-3d w-full py-2.5 bg-orange-500 text-white border-orange-600 mt-auto">Post</button></div></div>`; },
             post: function() { const t_input=document.getElementById('news-t').value; const c=document.getElementById('news-c').value; if(t_input&&c){ DB.add('announcements', {title:t_input, content:c, priority:'normal', date:new Date().toISOString()}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } }
         };
 
         const ExpensesModule = { 
             id: 'expenses', name: 'Expenses', description: 'Submit and approve reimbursement claims.', icon: 'ph-receipt', hasUserTab: true, 
             renderUserView: function() { 
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Expenses")}</h2></div><div class="card-3d p-4 bg-white"><div class="flex gap-2 mb-3"><div class="relative w-1/3"><span class="absolute left-3 top-3 text-gray-400 font-medium">$</span><input type="number" id="exp-amt" placeholder="0.00" class="w-full pl-7 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm font-bold outline-none focus:border-blue-400 focus:bg-white"></div><input type="text" id="exp-desc" placeholder="Description" class="flex-1 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm font-medium outline-none focus:border-blue-400 focus:bg-white"></div><button onclick="ExpensesModule.sub()" class="btn-sm-3d w-full py-3 bg-emerald-500 text-white border-emerald-600">Submit Claim</button></div><div class="space-y-3">`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Expenses")}</h2></div><div class="card-3d p-5 bg-white max-w-2xl"><div class="flex gap-3 mb-3"><div class="relative w-1/3"><span class="absolute left-3 top-3.5 text-gray-400 font-medium">$</span><input type="number" id="exp-amt" placeholder="0.00" class="w-full pl-7 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm font-bold outline-none focus:border-blue-400 focus:bg-white"></div><input type="text" id="exp-desc" placeholder="Description" class="flex-1 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm font-medium outline-none focus:border-blue-400 focus:bg-white"></div><button onclick="ExpensesModule.sub()" class="btn-sm-3d w-full py-3 bg-emerald-500 text-white border-emerald-600">Submit Claim</button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
                 const myExps = db.expenses.filter(e => e.userId === state.currentUser.id).sort((a,b)=>new Date(b.date)-new Date(a.date));
-                if(myExps.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm">No expenses submitted.</p>`;
+                if(myExps.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm col-span-full">No expenses submitted.</p>`;
                 myExps.forEach(exp => { 
                     const statusColors = { pending: 'bg-amber-100 text-amber-700', approved: 'bg-emerald-100 text-emerald-700', denied: 'bg-rose-100 text-rose-700' };
-                    html += `<div class="card-3d p-4 flex justify-between items-center bg-white"><div class="flex flex-col"><span class="font-bold text-base text-gray-800">$${exp.amount.toFixed(2)}</span><span class="text-xs text-gray-500">${exp.description}</span></div><span class="text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wider ${statusColors[exp.status]}">${exp.status}</span></div>`; 
+                    html += `<div class="card-3d p-4 flex justify-between items-center bg-white mb-0"><div class="flex flex-col"><span class="font-bold text-base text-gray-800">$${exp.amount.toFixed(2)}</span><span class="text-xs text-gray-500">${exp.description}</span></div><span class="text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wider ${statusColors[exp.status]}">${exp.status}</span></div>`; 
                 });
                 return html + `</div></div>`; 
             }, 
             sub: function() { const a=document.getElementById('exp-amt').value; const d=document.getElementById('exp-desc').value; if(a&&d){ DB.add('expenses', {userId:state.currentUser.id, amount:parseFloat(a), description:d, status:'pending', date:new Date().toISOString()}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } },
             renderAdminWidget: function() { 
-                let html = `<div class="card-3d p-4 bg-emerald-50/50 border-emerald-100"><h3 class="font-bold text-sm mb-3 flex items-center gap-2 text-emerald-800"><i class="ph-fill ph-receipt text-emerald-500"></i> Pending Expenses</h3>`;
+                let html = `<div class="card-3d p-4 bg-emerald-50/50 border-emerald-100"><h3 class="font-bold text-sm mb-3 flex items-center gap-2 text-emerald-800"><i class="ph-fill ph-receipt text-emerald-500"></i> Pending Expenses</h3><div class="overflow-y-auto flex-1 pr-1">`;
                 const pending = db.expenses.filter(e=>e.status==='pending');
                 if(pending.length === 0) html += `<p class="text-xs text-emerald-600/60 text-center py-2">No pending claims.</p>`;
                 pending.forEach(exp => { const u = db.users.find(x=>x.id===exp.userId); html += `<div class="bg-white p-3 border border-emerald-100 rounded-xl mb-2 flex justify-between items-center shadow-sm"><div class="text-xs text-gray-800"><span class="font-bold text-sm">$${exp.amount.toFixed(2)}</span><br><span class="text-gray-500">${u.name} - ${exp.description}</span></div><div><button onclick="ExpensesModule.upd('${exp.id}', 'approved')" class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-colors shadow-sm"><i class="ph-bold ph-check"></i></button></div></div>`; });
-                return html + `</div>`; 
+                return html + `</div></div>`; 
             },
             upd: function(id, status) { DB.update('expenses', id, {status}); App.showToast(t("Action completed successfully")); }
         };
@@ -556,53 +583,53 @@
             id: 'kudos', name: 'Shoutouts', description: 'Send public appreciation to your colleagues.', icon: 'ph-star', hasUserTab: true, 
             renderUserView: function() { 
                 let opts = '<option value="" disabled selected>-- Select Teammate --</option>'; db.users.filter(u=>u.id!==state.currentUser.id).forEach(u=>{opts+=`<option value="${u.id}">${u.name}</option>`});
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Shoutouts")}</h2></div><div class="card-3d p-4 bg-white"><select id="ku-to" class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm font-medium outline-none focus:border-pink-400 focus:bg-white">${opts}</select><textarea id="ku-msg" placeholder="Say something nice..." class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm font-medium outline-none focus:border-pink-400 focus:bg-white h-20 resize-none"></textarea><button onclick="KudosModule.sub()" class="btn-sm-3d w-full py-3 bg-pink-500 text-white border-pink-600 flex justify-center items-center gap-2"><i class="ph-bold ph-paper-plane-right"></i> Send</button></div><div class="space-y-4 mt-6">`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Shoutouts")}</h2></div><div class="card-3d p-5 bg-white max-w-2xl"><select id="ku-to" class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm font-medium outline-none focus:border-pink-400 focus:bg-white">${opts}</select><textarea id="ku-msg" placeholder="Say something nice..." class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm font-medium outline-none focus:border-pink-400 focus:bg-white h-20 resize-none"></textarea><button onclick="KudosModule.sub()" class="btn-sm-3d w-full py-3 bg-pink-500 text-white border-pink-600 flex justify-center items-center gap-2"><i class="ph-bold ph-paper-plane-right"></i> Send</button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">`;
                 const allKudos = [...db.kudos].sort((a,b)=>new Date(b.date)-new Date(a.date));
-                if(allKudos.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm">No shoutouts yet. Be the first!</p>`;
+                if(allKudos.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm col-span-full">No shoutouts yet. Be the first!</p>`;
                 allKudos.forEach(k => { 
                     const f=db.users.find(u=>u.id===k.fromId); const tUser=db.users.find(u=>u.id===k.toId); 
-                    html += `<div class="card-3d p-5 bg-gradient-to-br from-white to-pink-50/30 border-pink-100"><div class="flex items-center gap-2 mb-2 pb-2 border-b border-pink-100/50"><div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1"><i class="ph-fill ph-star text-pink-400 text-sm"></i> ${f.name} to ${tUser.name}</div></div><div class="font-medium text-sm text-gray-700 italic leading-relaxed">"${k.message}"</div></div>`; 
+                    html += `<div class="card-3d p-5 mb-0 bg-gradient-to-br from-white to-pink-50/30 border-pink-100 flex flex-col justify-between"><div class="flex items-center gap-2 mb-3 pb-3 border-b border-pink-100/50"><div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5"><i class="ph-fill ph-star text-pink-400 text-base"></i> ${f.name} <span class="text-pink-300 mx-1">&rarr;</span> ${tUser.name}</div></div><div class="font-medium text-sm text-gray-700 italic leading-relaxed">"${k.message}"</div></div>`; 
                 });
                 return html + `</div></div>`; 
             }, 
             sub: function() { const to=document.getElementById('ku-to').value; const m=document.getElementById('ku-msg').value; if(to&&m){ DB.add('kudos', {fromId:state.currentUser.id, toId:to, message:m, date:new Date().toISOString()}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-pink-50/50 border-pink-100"><h3 class="font-bold text-sm text-pink-800 flex items-center gap-2"><i class="ph-fill ph-star text-pink-500"></i> ${db.kudos.length} Shoutouts Given</h3></div>`; } 
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-pink-50/50 border-pink-100"><h3 class="font-bold text-sm text-pink-800 flex items-center gap-2"><i class="ph-fill ph-star text-pink-500"></i> Shoutouts Given</h3><div class="flex-1 flex items-center justify-center"><p class="text-3xl font-bold text-pink-500">${db.kudos.length}</p></div></div>`; } 
         };
 
         const MoodTrackerModule = { 
             id: 'moodTracker', name: 'Morale', description: 'Track daily team wellbeing and mood.', icon: 'ph-smiley', hasUserTab: true, 
             renderUserView: function() { 
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Morale")}</h2></div><div class="grid grid-cols-3 gap-3"><button onclick="MoodTrackerModule.sub('great')" class="btn-3d p-5 bg-white border border-gray-100 flex flex-col items-center gap-2 hover:bg-emerald-50 focus:bg-emerald-100"><span class="text-3xl">😁</span><span class="text-xs font-bold text-emerald-600">Great</span></button><button onclick="MoodTrackerModule.sub('okay')" class="btn-3d p-5 bg-white border border-gray-100 flex flex-col items-center gap-2 hover:bg-amber-50 focus:bg-amber-100"><span class="text-3xl">😐</span><span class="text-xs font-bold text-amber-600">Okay</span></button><button onclick="MoodTrackerModule.sub('rough')" class="btn-3d p-5 bg-white border border-gray-100 flex flex-col items-center gap-2 hover:bg-rose-50 focus:bg-rose-100"><span class="text-3xl">😫</span><span class="text-xs font-bold text-rose-600">Rough</span></button></div><div class="mt-8 space-y-3"><h3 class="font-bold text-xs uppercase tracking-wider text-gray-400 mb-2">History</h3>`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Morale")}</h2></div><div class="grid grid-cols-3 gap-3 max-w-2xl"><button onclick="MoodTrackerModule.sub('great')" class="btn-3d p-5 bg-white border border-gray-100 flex flex-col items-center gap-2 hover:bg-emerald-50 focus:bg-emerald-100"><span class="text-4xl">😁</span><span class="text-xs font-bold text-emerald-600">Great</span></button><button onclick="MoodTrackerModule.sub('okay')" class="btn-3d p-5 bg-white border border-gray-100 flex flex-col items-center gap-2 hover:bg-amber-50 focus:bg-amber-100"><span class="text-4xl">😐</span><span class="text-xs font-bold text-amber-600">Okay</span></button><button onclick="MoodTrackerModule.sub('rough')" class="btn-3d p-5 bg-white border border-gray-100 flex flex-col items-center gap-2 hover:bg-rose-50 focus:bg-rose-100"><span class="text-4xl">😫</span><span class="text-xs font-bold text-rose-600">Rough</span></button></div><div class="mt-8"><h3 class="font-bold text-xs uppercase tracking-wider text-gray-400 mb-3">History</h3><div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">`;
                 const myMoods = db.moods.filter(m=>m.userId===state.currentUser.id).sort((a,b)=>new Date(b.date)-new Date(a.date));
-                if(myMoods.length===0) html += `<p class="text-center text-gray-400 text-sm py-4">No mood logged yet.</p>`;
+                if(myMoods.length===0) html += `<p class="text-center text-gray-400 text-sm py-4 col-span-full">No mood logged yet.</p>`;
                 myMoods.forEach(m => { 
                     let emoji = '😐', color = 'text-amber-500';
                     if(m.type==='great') { emoji='😁'; color='text-emerald-500'; }
                     if(m.type==='rough') { emoji='😫'; color='text-rose-500'; }
-                    html += `<div class="card-3d p-3 bg-white flex justify-between items-center"><span class="text-sm font-medium text-gray-600">${new Date(m.date).toLocaleDateString()}</span><span class="text-lg ${color} font-bold flex items-center gap-2 uppercase text-[10px] tracking-wider">${m.type} ${emoji}</span></div>`; 
+                    html += `<div class="card-3d p-4 bg-white flex justify-between items-center mb-0"><span class="text-sm font-medium text-gray-600">${new Date(m.date).toLocaleDateString()}</span><span class="text-lg ${color} font-bold flex items-center gap-2 uppercase text-[10px] tracking-wider">${m.type} ${emoji}</span></div>`; 
                 });
-                return html + `</div></div>`; 
+                return html + `</div></div></div>`; 
             }, 
             sub: function(t_type) { DB.add('moods', {userId:state.currentUser.id, type:t_type, date:new Date().toISOString()}); App.showToast(t("Action completed successfully")); },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-sky-50/50 border-sky-100"><h3 class="font-bold text-sm text-sky-800 flex items-center gap-2"><i class="ph-fill ph-smiley text-sky-500"></i> Team Morale</h3><p class="text-xs text-sky-600 mt-1">${db.moods.length} total logs</p></div>`; } 
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-sky-50/50 border-sky-100"><h3 class="font-bold text-sm text-sky-800 flex items-center gap-2"><i class="ph-fill ph-smiley text-sky-500"></i> Team Morale</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-sky-600">${db.moods.length} <span class="text-xs font-medium text-sky-700/60 uppercase tracking-wider block">Logs</span></p></div></div>`; } 
         };
 
         const HelpDeskModule = { 
             id: 'helpDesk', name: 'Support', description: 'Submit maintenance or IT support tickets.', icon: 'ph-lifebuoy', hasUserTab: true, 
             renderUserView: function() { 
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Support")}</h2></div><div class="card-3d p-4 bg-white"><input type="text" id="hd-t" placeholder="Describe the issue..." class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm outline-none focus:border-cyan-400"><button onclick="HelpDeskModule.sub()" class="btn-sm-3d w-full py-3 bg-cyan-500 text-white border-cyan-600">Submit Ticket</button></div><div class="space-y-3">`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Support")}</h2></div><div class="card-3d p-5 bg-white max-w-2xl"><input type="text" id="hd-t" placeholder="Describe the issue..." class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm outline-none focus:border-cyan-400"><button onclick="HelpDeskModule.sub()" class="btn-sm-3d w-full py-3 bg-cyan-500 text-white border-cyan-600">Submit Ticket</button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
                 const myTkts = db.tickets.filter(t=>t.userId===state.currentUser.id).sort((a,b)=>new Date(b.date)-new Date(a.date));
-                if(myTkts.length===0) html += `<p class="text-center text-gray-400 py-4 text-sm">No tickets submitted.</p>`;
-                myTkts.forEach(tk => { html += `<div class="card-3d p-4 flex justify-between items-center bg-white"><span class="font-medium text-sm text-gray-800">${tk.title}</span><span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md ${tk.status==='open'?'bg-amber-100 text-amber-700':'bg-emerald-100 text-emerald-700'}">${tk.status}</span></div>`; });
+                if(myTkts.length===0) html += `<p class="text-center text-gray-400 py-4 text-sm col-span-full">No tickets submitted.</p>`;
+                myTkts.forEach(tk => { html += `<div class="card-3d p-4 flex justify-between items-center bg-white mb-0"><span class="font-medium text-sm text-gray-800">${tk.title}</span><span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${tk.status==='open'?'bg-amber-100 text-amber-700':'bg-emerald-100 text-emerald-700'}">${tk.status}</span></div>`; });
                 return html + `</div></div>`; 
             }, 
             sub: function() { const t_input=document.getElementById('hd-t').value; if(t_input){ DB.add('tickets', {userId:state.currentUser.id, title:t_input, status:'open', date:new Date().toISOString()}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } },
             renderAdminWidget: function() { 
-                let html = `<div class="card-3d p-4 bg-cyan-50/50 border-cyan-100"><h3 class="font-bold text-sm mb-3 flex items-center gap-2 text-cyan-800"><i class="ph-fill ph-lifebuoy text-cyan-500"></i> Open Tickets</h3>`;
+                let html = `<div class="card-3d p-4 bg-cyan-50/50 border-cyan-100"><h3 class="font-bold text-sm mb-3 flex items-center gap-2 text-cyan-800"><i class="ph-fill ph-lifebuoy text-cyan-500"></i> Open Tickets</h3><div class="overflow-y-auto flex-1 pr-1">`;
                 const openTkts = db.tickets.filter(t=>t.status==='open');
                 if(openTkts.length === 0) html += `<p class="text-xs text-cyan-600/60 text-center py-2">Inbox zero!</p>`;
                 openTkts.forEach(tk => { const u = db.users.find(x=>x.id===tk.userId); html += `<div class="bg-white p-3 border border-cyan-100 rounded-xl mb-2 flex justify-between items-center shadow-sm"><div class="text-xs text-gray-800"><span class="font-bold">${u.name}</span><br><span class="text-gray-500">${tk.title}</span></div><button onclick="HelpDeskModule.res('${tk.id}')" class="btn-sm-3d bg-cyan-500 text-white px-3 py-1.5 text-xs border-cyan-600">Resolve</button></div>`; });
-                return html + `</div>`; 
+                return html + `</div></div>`; 
             },
             res: function(id) { DB.update('tickets', id, {status: 'resolved'}); App.showToast(t("Action completed successfully")); }
         };
@@ -610,133 +637,133 @@
         const SuggestionsModule = { 
             id: 'suggestions', name: 'Ideas', description: 'Submit and vote on company improvements.', icon: 'ph-lightbulb', hasUserTab: true, 
             renderUserView: function() { 
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Ideas")}</h2></div><div class="card-3d p-4 bg-white"><input type="text" id="sg-t" placeholder="What's your idea?" class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm outline-none focus:border-yellow-400"><button onclick="SuggestionsModule.sub()" class="btn-sm-3d w-full py-3 bg-yellow-400 text-yellow-900 border-yellow-500 font-bold">Post Idea</button></div><div class="space-y-3">`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Ideas")}</h2></div><div class="card-3d p-5 bg-white max-w-2xl"><input type="text" id="sg-t" placeholder="What's your idea?" class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm outline-none focus:border-yellow-400"><button onclick="SuggestionsModule.sub()" class="btn-sm-3d w-full py-3 bg-yellow-400 text-yellow-900 border-yellow-500 font-bold">Post Idea</button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">`;
                 const sortedSg = [...db.suggestions].sort((a,b)=>b.votes.length - a.votes.length);
-                if(sortedSg.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm">No ideas yet. Brainstorm!</p>`;
+                if(sortedSg.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm col-span-full">No ideas yet. Brainstorm!</p>`;
                 sortedSg.forEach(sg => { 
                     const isVoted = sg.votes.includes(state.currentUser.id);
-                    html += `<div class="card-3d p-4 flex justify-between items-start bg-white"><div class="pr-3"><div class="font-bold text-sm text-gray-800 leading-tight mb-1">${sg.title}</div></div><button onclick="SuggestionsModule.vote('${sg.id}')" class="btn-sm-3d px-3 py-2 flex flex-col items-center justify-center min-w-[50px] ${isVoted?'bg-yellow-100 text-yellow-700 border-yellow-300':'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'}"><i class="ph-bold ph-caret-up mb-0.5"></i><span class="text-[10px] leading-none">${sg.votes.length}</span></button></div>`; 
+                    html += `<div class="card-3d p-5 flex justify-between items-start bg-white mb-0"><div class="pr-4"><div class="font-bold text-base text-gray-800 leading-tight mb-2">${sg.title}</div></div><button onclick="SuggestionsModule.vote('${sg.id}')" class="btn-sm-3d px-3 py-2 flex flex-col items-center justify-center min-w-[50px] ${isVoted?'bg-yellow-100 text-yellow-700 border-yellow-300':'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'}"><i class="ph-bold ph-caret-up mb-1 text-lg"></i><span class="text-xs font-bold leading-none">${sg.votes.length}</span></button></div>`; 
                 });
                 return html + `</div></div>`; 
             }, 
             sub: function() { const t_input=document.getElementById('sg-t').value; if(t_input){ DB.add('suggestions', {userId:state.currentUser.id, title:t_input, description:'', votes:[state.currentUser.id], status:'open', date:new Date().toISOString()}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } },
             vote: function(id) { const sg=db.suggestions.find(s=>s.id===id); if(sg){ let v=[...sg.votes]; if(v.includes(state.currentUser.id)) v=v.filter(x=>x!==state.currentUser.id); else v.push(state.currentUser.id); DB.update('suggestions', id, {votes: v}); } },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-yellow-50/50 border-yellow-100"><h3 class="font-bold text-sm text-yellow-800 flex items-center gap-2"><i class="ph-fill ph-lightbulb text-yellow-500"></i> Top Ideas</h3><p class="text-xs text-yellow-700 mt-1">${db.suggestions.length} ideas pitched</p></div>`; } 
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-yellow-50/50 border-yellow-100"><h3 class="font-bold text-sm text-yellow-800 flex items-center gap-2"><i class="ph-fill ph-lightbulb text-yellow-500"></i> Top Ideas</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-yellow-600">${db.suggestions.length} <span class="text-xs font-medium text-yellow-700/60 uppercase tracking-wider block">Pitched</span></p></div></div>`; } 
         };
 
         const PollsModule = { 
             id: 'polls', name: 'Polls', description: 'Create and vote on team surveys.', icon: 'ph-chart-bar', hasUserTab: true, 
             renderUserView: function() { 
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Polls")}</h2></div><div class="space-y-5">`;
-                if(db.polls.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm">No active polls.</p>`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Polls")}</h2></div><div class="grid grid-cols-1 md:grid-cols-2 gap-6">`;
+                if(db.polls.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm col-span-full">No active polls.</p>`;
                 db.polls.slice().reverse().forEach(p => { 
                     const hasVoted = p.options.some(o=>o.votes.includes(state.currentUser.id));
                     let totalVotes = 0; p.options.forEach(o=>totalVotes+=o.votes.length);
-                    html += `<div class="card-3d p-5 bg-white border border-indigo-100"><h3 class="font-bold text-gray-800 mb-4 leading-tight">${p.question}</h3><div class="space-y-2">`; 
+                    html += `<div class="card-3d p-6 bg-white border border-indigo-100 mb-0 flex flex-col"><h3 class="font-bold text-lg text-gray-800 mb-5 leading-tight">${p.question}</h3><div class="space-y-3 flex-1">`; 
                     p.options.forEach((opt,idx)=>{ 
                         const pct = totalVotes > 0 ? Math.round((opt.votes.length/totalVotes)*100) : 0;
                         const isMyVote = opt.votes.includes(state.currentUser.id);
                         if(hasVoted) {
-                            html += `<div class="relative w-full h-10 bg-gray-50 rounded-lg overflow-hidden border border-gray-200 flex items-center px-3 z-0"><div class="absolute top-0 left-0 h-full ${isMyVote?'bg-indigo-100':'bg-gray-200'} transition-all duration-1000 -z-10" style="width: ${pct}%"></div><div class="flex justify-between w-full text-xs font-medium z-10 ${isMyVote?'text-indigo-800':'text-gray-600'}"><span>${opt.text} ${isMyVote?'<i class="ph-bold ph-check ml-1"></i>':''}</span><span class="font-bold">${pct}%</span></div></div>`;
+                            html += `<div class="relative w-full h-11 bg-gray-50 rounded-xl overflow-hidden border border-gray-200 flex items-center px-4 z-0"><div class="absolute top-0 left-0 h-full ${isMyVote?'bg-indigo-100':'bg-gray-200'} transition-all duration-1000 -z-10" style="width: ${pct}%"></div><div class="flex justify-between w-full text-sm font-medium z-10 ${isMyVote?'text-indigo-800 font-bold':'text-gray-600'}"><span>${opt.text} ${isMyVote?'<i class="ph-bold ph-check ml-1"></i>':''}</span><span class="font-bold">${pct}%</span></div></div>`;
                         } else {
-                            html+=`<button onclick="PollsModule.vote('${p.id}', ${idx})" class="btn-sm-3d w-full py-3 bg-white text-left px-4 text-sm font-medium border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-colors">${opt.text}</button>`; 
+                            html+=`<button onclick="PollsModule.vote('${p.id}', ${idx})" class="btn-sm-3d w-full py-3 bg-white text-left px-5 text-sm font-medium border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-colors">${opt.text}</button>`; 
                         }
                     }); 
-                    html+=`<div class="text-[10px] text-gray-400 mt-3 font-medium uppercase tracking-wider">${totalVotes} votes total</div></div></div>`; 
+                    html+=`</div><div class="text-[10px] text-gray-400 mt-4 font-bold uppercase tracking-wider">${totalVotes} votes total</div></div>`; 
                 });
                 return html + `</div></div>`; 
             }, 
             vote: function(pId, oId) { const p=db.polls.find(x=>x.id===pId); if(p && !p.options.some(o=>o.votes.includes(state.currentUser.id))) { let opts=[...p.options]; opts[oId].votes.push(state.currentUser.id); DB.update('polls', pId, {options: opts}); App.showToast("Voted!"); } },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-indigo-50/50 border-indigo-100"><h3 class="font-bold text-sm mb-3 flex items-center gap-2 text-indigo-800"><i class="ph-fill ph-chart-bar text-indigo-500"></i> Create Poll</h3><input type="text" id="pl-q" placeholder="Question" class="w-full mb-3 p-2.5 border border-indigo-200 rounded-xl bg-white text-sm outline-none focus:border-indigo-400"><input type="text" id="pl-o" placeholder="Options (comma separated)" class="w-full mb-3 p-2.5 border border-indigo-200 rounded-xl bg-white text-sm outline-none focus:border-indigo-400"><button onclick="PollsModule.add()" class="btn-sm-3d w-full py-2.5 bg-indigo-500 text-white border-indigo-600">Post Poll</button></div>`; },
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-indigo-50/50 border-indigo-100"><h3 class="font-bold text-sm mb-3 flex items-center gap-2 text-indigo-800"><i class="ph-fill ph-chart-bar text-indigo-500"></i> Create Poll</h3><div class="flex flex-col h-full"><input type="text" id="pl-q" placeholder="Question" class="w-full mb-3 p-2.5 border border-indigo-200 rounded-xl bg-white text-sm outline-none focus:border-indigo-400"><input type="text" id="pl-o" placeholder="Options (comma separated)" class="w-full mb-3 p-2.5 border border-indigo-200 rounded-xl bg-white text-sm outline-none focus:border-indigo-400"><button onclick="PollsModule.add()" class="btn-sm-3d w-full py-2.5 bg-indigo-500 text-white border-indigo-600 mt-auto">Post Poll</button></div></div>`; },
             add: function() { const q=document.getElementById('pl-q').value; const o=document.getElementById('pl-o').value; if(q&&o){ const opts=o.split(',').map(x=>({text:x.trim(), votes:[]})); DB.add('polls', {question:q, options:opts, status:'active', date:new Date().toISOString()}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } }
         };
 
         const EventsModule = { 
             id: 'events', name: 'Events', description: 'Company calendar and event RSVPs.', icon: 'ph-calendar-star', hasUserTab: true, 
             renderUserView: function() { 
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Events")}</h2></div><div class="space-y-4">`;
-                if(db.events.length===0) html+=`<p class="text-center text-gray-400 py-4 text-sm">No upcoming events.</p>`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Events")}</h2></div><div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">`;
+                if(db.events.length===0) html+=`<p class="text-center text-gray-400 py-4 text-sm col-span-full">No upcoming events.</p>`;
                 db.events.sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(e => { 
                     const rsvp = e.attendees.includes(state.currentUser.id); 
                     const eventDate = new Date(e.date);
                     const month = eventDate.toLocaleString('default', { month: 'short' }).toUpperCase();
                     const day = eventDate.getDate();
-                    html += `<div class="card-3d p-0 overflow-hidden bg-white flex border border-gray-100"><div class="bg-gray-50 border-r border-gray-100 p-4 flex flex-col items-center justify-center min-w-[70px]"><span class="text-[10px] font-bold text-red-500 tracking-wider">${month}</span><span class="text-xl font-bold text-gray-800 leading-none">${day}</span></div><div class="p-4 flex-1 flex flex-col justify-between"><div><h3 class="font-bold text-base text-gray-800 leading-tight mb-1">${e.title}</h3><p class="text-[10px] text-gray-500 font-bold mb-3 uppercase tracking-wider"><i class="ph-fill ph-users"></i> ${e.attendees.length} attending</p></div><button onclick="EventsModule.rsvp('${e.id}')" class="btn-sm-3d w-full py-2 text-xs transition-colors ${rsvp?'bg-teal-50 text-teal-700 border-teal-200':'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}">${rsvp?'<i class="ph-bold ph-check"></i> Attending':'RSVP'}</button></div></div>`; 
+                    html += `<div class="card-3d p-0 overflow-hidden bg-white flex border border-gray-100 mb-0"><div class="bg-gray-50 border-r border-gray-100 p-5 flex flex-col items-center justify-center min-w-[80px]"><span class="text-xs font-bold text-red-500 tracking-wider mb-1">${month}</span><span class="text-3xl font-bold text-gray-800 leading-none">${day}</span></div><div class="p-5 flex-1 flex flex-col justify-between"><div><h3 class="font-bold text-lg text-gray-800 leading-tight mb-1">${e.title}</h3><p class="text-xs text-gray-500 font-bold mb-4 uppercase tracking-wider"><i class="ph-fill ph-users"></i> ${e.attendees.length} attending</p></div><button onclick="EventsModule.rsvp('${e.id}')" class="btn-sm-3d w-full py-2.5 text-xs font-bold transition-colors ${rsvp?'bg-teal-50 text-teal-700 border-teal-200':'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}">${rsvp?'<i class="ph-bold ph-check text-sm"></i> Attending':'RSVP'}</button></div></div>`; 
                 });
                 return html + `</div></div>`; 
             }, 
             rsvp: function(id) { const e=db.events.find(x=>x.id===id); if(e){ let att=[...e.attendees]; if(att.includes(state.currentUser.id)) att=att.filter(x=>x!==state.currentUser.id); else att.push(state.currentUser.id); DB.update('events', id, {attendees: att}); } },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-teal-50/50 border-teal-100"><h3 class="font-bold text-sm text-teal-800 flex items-center gap-2"><i class="ph-fill ph-calendar-star text-teal-500"></i> Events</h3><p class="text-xs text-teal-600 mt-1">${db.events.length} Upcoming</p></div>`; } 
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-teal-50/50 border-teal-100"><h3 class="font-bold text-sm text-teal-800 flex items-center gap-2"><i class="ph-fill ph-calendar-star text-teal-500"></i> Events</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-teal-600">${db.events.length} <span class="text-xs font-medium text-teal-700/60 uppercase tracking-wider block">Upcoming</span></p></div></div>`; } 
         };
 
         const DirectoryModule = { 
             id: 'directory', name: 'Team', description: 'Company directory and contact roster.', icon: 'ph-address-book', hasUserTab: true, 
             renderUserView: function() { 
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Team")}</h2></div><div class="space-y-3">`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Team")}</h2></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">`;
                 db.users.forEach(u => { 
                     const online = isClockedIn(u.id);
-                    html += `<div class="card-3d p-4 flex items-center gap-4 bg-white"><div class="relative"><div class="w-12 h-12 rounded-full border border-gray-200 ${u.color} flex items-center justify-center font-bold shadow-sm">${u.initials}</div>${online?'<div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>':''}</div><div class="flex-1 min-w-0"><div class="font-bold text-sm text-gray-800 truncate">${u.name}</div><div class="text-[11px] text-gray-500 truncate">${u.email}</div></div><a href="mailto:${u.email}" class="w-8 h-8 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"><i class="ph-fill ph-envelope-simple"></i></a></div>`; 
+                    html += `<div class="card-3d p-5 flex items-center gap-4 bg-white mb-0"><div class="relative"><div class="w-14 h-14 rounded-full border border-gray-200 ${u.color} flex items-center justify-center text-lg font-bold shadow-sm">${u.initials}</div>${online?'<div class="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>':''}</div><div class="flex-1 min-w-0"><div class="font-bold text-base text-gray-800 truncate">${u.name}</div><div class="text-xs text-gray-500 truncate mt-0.5">${u.email}</div></div><a href="mailto:${u.email}" class="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors flex-shrink-0"><i class="ph-fill ph-envelope-simple text-lg"></i></a></div>`; 
                 });
                 return html + `</div></div>`; 
             }, 
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-gray-100 border-gray-200"><h3 class="font-bold text-sm text-gray-800 flex items-center gap-2"><i class="ph-fill ph-users text-gray-500"></i> ${t("Team")}</h3><p class="text-xs text-gray-600 mt-1">${db.users.length} members total</p></div>`; } 
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-gray-100/50 border-gray-200"><h3 class="font-bold text-sm text-gray-800 flex items-center gap-2"><i class="ph-fill ph-users text-gray-500"></i> ${t("Team")}</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-gray-700">${db.users.length} <span class="text-xs font-medium text-gray-500 uppercase tracking-wider block">Members</span></p></div></div>`; } 
         };
 
         const GoalsModule = { 
             id: 'goals', name: 'Goals', description: 'Track company-wide targets and milestones.', icon: 'ph-target', hasUserTab: true, 
             renderUserView: function() { 
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Goals")}</h2></div><div class="space-y-5">`;
-                if(db.goals.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm">No active goals.</p>`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Goals")}</h2></div><div class="grid grid-cols-1 md:grid-cols-2 gap-5">`;
+                if(db.goals.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm col-span-full">No active goals.</p>`;
                 db.goals.forEach(g => { 
                     const pct=Math.min(100, Math.round((g.current/g.target)*100)); 
-                    html += `<div class="card-3d p-5 bg-white border border-gray-100"><div class="flex justify-between items-end mb-3"><div><h3 class="font-bold text-gray-800 leading-tight">${g.title}</h3><p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">Target: ${g.prefix?g.unit:''}${g.target.toLocaleString()}${!g.prefix?g.unit:''}</p></div><span class="font-bold ${pct>=100?'text-emerald-500':'text-blue-500'}">${pct}%</span></div><div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden shadow-inner"><div class="${g.color} h-full transition-all duration-1000 ease-out" style="width:${pct}%"></div></div></div>`; 
+                    html += `<div class="card-3d p-6 bg-white border border-gray-100 mb-0 flex flex-col justify-center"><div class="flex justify-between items-end mb-4"><div><h3 class="font-bold text-lg text-gray-800 leading-tight mb-1">${g.title}</h3><p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Target: ${g.prefix?g.unit:''}${g.target.toLocaleString()}${!g.prefix?g.unit:''}</p></div><span class="font-bold text-xl ${pct>=100?'text-emerald-500':'text-blue-500'}">${pct}%</span></div><div class="w-full bg-gray-100 rounded-full h-4 overflow-hidden shadow-inner"><div class="${g.color} h-full transition-all duration-1000 ease-out" style="width:${pct}%"></div></div></div>`; 
                 });
                 return html + `</div></div>`; 
             }, 
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-purple-50/50 border-purple-100"><h3 class="font-bold text-sm text-purple-800 flex items-center gap-2"><i class="ph-fill ph-target text-purple-500"></i> ${t("Goals")}</h3><p class="text-xs text-purple-600 mt-1">${db.goals.length} active targets</p></div>`; } 
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-purple-50/50 border-purple-100"><h3 class="font-bold text-sm text-purple-800 flex items-center gap-2"><i class="ph-fill ph-target text-purple-500"></i> ${t("Goals")}</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-purple-600">${db.goals.length} <span class="text-xs font-medium text-purple-700/60 uppercase tracking-wider block">Active</span></p></div></div>`; } 
         };
 
         const ResourcesModule = {
             id: 'resources', name: 'Resources', description: 'Access company policies and training materials.', icon: 'ph-folder-open', hasUserTab: true,
             renderUserView: function() {
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Company Documents")}</h2></div><div class="space-y-3">`;
-                if(db.resources.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm">No documents available.</p>`;
-                db.resources.forEach(res => { html += `<button onclick="App.showToast(t('Feature coming soon!'), 'info')" class="w-full card-3d p-4 flex items-center gap-4 bg-white hover:bg-gray-50 border border-gray-100 transition-colors"><div class="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0"><i class="ph-fill ${res.icon} ${res.color} text-2xl"></i></div><div class="flex-1 text-left min-w-0"><div class="font-bold text-sm text-gray-800 truncate">${res.title}</div><div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">${res.category}</div></div><i class="ph-bold ph-caret-right text-gray-300"></i></button>`; });
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Company Documents")}</h2></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
+                if(db.resources.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm col-span-full">No documents available.</p>`;
+                db.resources.forEach(res => { html += `<button onclick="App.showToast(t('Feature coming soon!'), 'info')" class="w-full card-3d p-5 flex items-center gap-4 bg-white hover:bg-gray-50 border border-gray-100 transition-colors mb-0"><div class="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0"><i class="ph-fill ${res.icon} ${res.color} text-3xl"></i></div><div class="flex-1 text-left min-w-0"><div class="font-bold text-base text-gray-800 truncate">${res.title}</div><div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-1">${res.category}</div></div><i class="ph-bold ph-caret-right text-gray-300 text-lg"></i></button>`; });
                 return html + `</div></div>`;
             },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-blue-50/50 border-blue-100"><h3 class="font-bold text-sm text-blue-800 flex items-center gap-2"><i class="ph-fill ph-folder-open text-blue-500"></i> ${t("Company Documents")}</h3><p class="text-xs text-blue-600 mt-1">${db.resources.length} files available</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-blue-50/50 border-blue-100"><h3 class="font-bold text-sm text-blue-800 flex items-center gap-2"><i class="ph-fill ph-folder-open text-blue-500"></i> ${t("Company Documents")}</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-blue-600">${db.resources.length} <span class="text-xs font-medium text-blue-700/60 uppercase tracking-wider block">Files</span></p></div></div>`; }
         };
 
         const BookingsModule = {
             id: 'bookings', name: 'Bookings', description: 'Book workspace and meeting rooms.', icon: 'ph-door', hasUserTab: true,
             renderUserView: function() {
                 const myBookings = db.bookings.filter(b => b.userId === state.currentUser.id).sort((a,b) => new Date(a.date+'T'+a.time) - new Date(b.date+'T'+b.time));
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Meeting Rooms")}</h2></div><div class="card-3d p-5 bg-white border border-gray-100"><h3 class="font-bold text-sm mb-4 flex items-center gap-2 text-gray-800"><i class="ph-fill ph-calendar-plus text-orange-500 text-lg"></i> ${t("Book Room")}</h3><div class="space-y-3"><select id="bk-room" class="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm font-medium outline-none focus:border-orange-400"><option value="Boardroom A">Boardroom A (10 pax)</option><option value="Creative Studio">Creative Studio (4 pax)</option><option value="Focus Pod">Focus Pod (1 pax)</option></select><div class="flex gap-3"><input type="date" id="bk-date" class="flex-1 border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm outline-none focus:border-orange-400"><input type="time" id="bk-time" class="w-1/3 border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm outline-none focus:border-orange-400"></div><button onclick="BookingsModule.submit()" class="btn-sm-3d w-full py-3 bg-orange-500 text-white border-orange-600 font-bold">${t("Book Room")}</button></div></div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-3 ml-1">Your Bookings</h3><div class="space-y-3">`;
-                if(myBookings.length===0) html+=`<p class="text-gray-400 text-center text-sm py-4 bg-white rounded-2xl border border-gray-100 border-dashed">No upcoming bookings</p>`;
-                myBookings.forEach(b => { html += `<div class="card-3d p-4 flex justify-between items-center bg-white border border-gray-100"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center"><i class="ph-fill ph-door text-xl"></i></div><div><div class="font-bold text-sm text-gray-800 leading-tight">${b.room}</div><div class="text-[11px] text-gray-500 font-medium mt-0.5">${b.date} @ ${b.time}</div></div></div><button onclick="BookingsModule.cancel('${b.id}')" class="w-8 h-8 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-100 transition-colors"><i class="ph-bold ph-x"></i></button></div>`; });
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Meeting Rooms")}</h2></div><div class="card-3d p-6 bg-white border border-gray-100 max-w-2xl"><h3 class="font-bold text-base mb-5 flex items-center gap-2 text-gray-800"><i class="ph-fill ph-calendar-plus text-orange-500 text-xl"></i> ${t("Book Room")}</h3><div class="space-y-4"><select id="bk-room" class="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 text-sm font-medium outline-none focus:border-orange-400"><option value="Boardroom A">Boardroom A (10 pax)</option><option value="Creative Studio">Creative Studio (4 pax)</option><option value="Focus Pod">Focus Pod (1 pax)</option></select><div class="flex gap-4"><input type="date" id="bk-date" class="flex-1 border border-gray-200 rounded-xl p-3.5 bg-gray-50 text-sm outline-none focus:border-orange-400"><input type="time" id="bk-time" class="w-1/3 border border-gray-200 rounded-xl p-3.5 bg-gray-50 text-sm outline-none focus:border-orange-400"></div><button onclick="BookingsModule.submit()" class="btn-sm-3d w-full py-3.5 bg-orange-500 text-white border-orange-600 font-bold text-sm">${t("Book Room")}</button></div></div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-4 ml-1">Your Bookings</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
+                if(myBookings.length===0) html+=`<p class="text-gray-400 text-center text-sm py-4 bg-white rounded-2xl border border-gray-100 border-dashed col-span-full">No upcoming bookings</p>`;
+                myBookings.forEach(b => { html += `<div class="card-3d p-5 flex justify-between items-center bg-white border border-gray-100 mb-0"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center"><i class="ph-fill ph-door text-2xl"></i></div><div><div class="font-bold text-base text-gray-800 leading-tight">${b.room}</div><div class="text-xs text-gray-500 font-medium mt-1">${b.date} @ ${b.time}</div></div></div><button onclick="BookingsModule.cancel('${b.id}')" class="w-10 h-10 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-100 transition-colors"><i class="ph-bold ph-x text-lg"></i></button></div>`; });
                 return html + `</div></div></div>`;
             },
             submit: function() { const r=document.getElementById('bk-room').value; const d=document.getElementById('bk-date').value; const tUser=document.getElementById('bk-time').value; if(r&&d&&tUser){ DB.add('bookings', {userId:state.currentUser.id, room:r, date:d, time:tUser}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } },
             cancel: function(id) { DB.delete('bookings', id); App.showToast(t("Action completed successfully")); },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-orange-50/50 border-orange-100"><h3 class="font-bold text-sm text-orange-800 flex items-center gap-2"><i class="ph-fill ph-door text-orange-500"></i> Room Bookings</h3><p class="text-xs text-orange-600 mt-1">${db.bookings.length} total active</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-orange-50/50 border-orange-100"><h3 class="font-bold text-sm text-orange-800 flex items-center gap-2"><i class="ph-fill ph-door text-orange-500"></i> Room Bookings</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-orange-600">${db.bookings.length} <span class="text-xs font-medium text-orange-700/60 uppercase tracking-wider block">Active</span></p></div></div>`; }
         };
 
         const VisitorsModule = {
             id: 'visitors', name: 'Visitors', description: 'Pre-register office guests and visitors.', icon: 'ph-identification-badge', hasUserTab: true,
             renderUserView: function() {
                 const myVisitors = db.visitors.filter(v => v.userId === state.currentUser.id).sort((a,b) => new Date(b.date) - new Date(a.date));
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Visitors")}</h2></div><div class="card-3d p-5 bg-white border border-gray-100"><h3 class="font-bold text-sm mb-4 flex items-center gap-2 text-gray-800"><i class="ph-fill ph-user-plus text-rose-500 text-lg"></i> ${t("Register Guest")}</h3><div class="space-y-3"><input type="text" id="vs-name" placeholder="Guest Name" class="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm font-medium outline-none focus:border-rose-400"><input type="date" id="vs-date" class="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm outline-none focus:border-rose-400"><button onclick="VisitorsModule.submit()" class="btn-sm-3d w-full py-3 bg-rose-500 text-white border-rose-600 font-bold">${t("Register Guest")}</button></div></div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-3 ml-1">Your Guests</h3><div class="space-y-3">`;
-                if(myVisitors.length===0) html+=`<p class="text-gray-400 text-center text-sm py-4 bg-white rounded-2xl border border-gray-100 border-dashed">No guests registered</p>`;
-                myVisitors.forEach(v => { html += `<div class="card-3d p-4 flex justify-between items-center bg-white border border-gray-100"><div><div class="font-bold text-sm text-gray-800">${v.guestName}</div><div class="text-[11px] text-gray-500 mt-0.5">${v.date}</div></div><span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${v.status==='arrived'?'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700'}">${v.status}</span></div>`; });
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Visitors")}</h2></div><div class="card-3d p-6 bg-white border border-gray-100 max-w-2xl"><h3 class="font-bold text-base mb-5 flex items-center gap-2 text-gray-800"><i class="ph-fill ph-user-plus text-rose-500 text-xl"></i> ${t("Register Guest")}</h3><div class="space-y-4"><input type="text" id="vs-name" placeholder="Guest Name" class="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 text-sm font-medium outline-none focus:border-rose-400"><input type="date" id="vs-date" class="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 text-sm outline-none focus:border-rose-400"><button onclick="VisitorsModule.submit()" class="btn-sm-3d w-full py-3.5 bg-rose-500 text-white border-rose-600 font-bold text-sm">${t("Register Guest")}</button></div></div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-4 ml-1">Your Guests</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
+                if(myVisitors.length===0) html+=`<p class="text-gray-400 text-center text-sm py-4 bg-white rounded-2xl border border-gray-100 border-dashed col-span-full">No guests registered</p>`;
+                myVisitors.forEach(v => { html += `<div class="card-3d p-5 flex justify-between items-center bg-white border border-gray-100 mb-0"><div><div class="font-bold text-base text-gray-800">${v.guestName}</div><div class="text-xs text-gray-500 mt-1">${v.date}</div></div><span class="px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${v.status==='arrived'?'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700'}">${v.status}</span></div>`; });
                 return html + `</div></div></div>`;
             },
             submit: function() { const n=document.getElementById('vs-name').value; const d=document.getElementById('vs-date').value; if(n&&d){ DB.add('visitors', {userId:state.currentUser.id, guestName:n, date:d, status:'expected'}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } },
             renderAdminWidget: function() { 
-                let html=`<div class="card-3d p-4 bg-rose-50/50 border-rose-100"><h3 class="font-bold text-sm mb-3 flex items-center gap-2 text-rose-800"><i class="ph-fill ph-identification-badge text-rose-500"></i> ${t("Expected Today")}</h3>`;
+                let html=`<div class="card-3d p-4 bg-rose-50/50 border-rose-100"><h3 class="font-bold text-sm mb-3 flex items-center gap-2 text-rose-800"><i class="ph-fill ph-identification-badge text-rose-500"></i> ${t("Expected Today")}</h3><div class="overflow-y-auto flex-1 pr-1">`;
                 const expected = db.visitors.filter(v=>v.status==='expected');
                 if(expected.length === 0) html += `<p class="text-xs text-rose-600/60 text-center py-2">No visitors expected.</p>`;
                 expected.forEach(v=>{ html+=`<div class="bg-white border border-rose-100 rounded-xl p-3 mb-2 flex justify-between items-center shadow-sm"><span class="text-xs font-bold text-gray-800">${v.guestName}</span><button onclick="VisitorsModule.checkIn('${v.id}')" class="btn-sm-3d bg-rose-500 text-white px-3 py-1.5 text-xs border-rose-600">Check In</button></div>`; });
-                return html+`</div>`;
+                return html+`</div></div>`;
             },
             checkIn: function(id) { DB.update('visitors', id, {status: 'arrived'}); App.showToast(t("Action completed successfully")); }
         };
@@ -745,99 +772,99 @@
             id: 'cafeteria', name: 'Cafeteria', description: 'Order daily office lunch.', icon: 'ph-fork-knife', hasUserTab: true,
             renderUserView: function() {
                 const today = new Date().toISOString().split('T')[0]; const myOrder = db.lunchOrders.find(o => o.userId === state.currentUser.id && o.date === today);
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Cafeteria")}</h2><p class="text-gray-500 text-sm">${t("Today's Menu")}</p></div>`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Cafeteria")}</h2><p class="text-gray-500 text-sm">${t("Today's Menu")}</p></div>`;
                 if(myOrder) { 
                     const it = db.menuItems.find(m=>m.id===myOrder.itemId); 
-                    html += `<div class="card-3d p-8 bg-gradient-to-br from-amber-50 to-orange-50 border-amber-100 text-center relative overflow-hidden"><div class="absolute -right-6 -top-6 text-8xl opacity-10 transform rotate-12">${it.emoji}</div><div class="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-3">${t("Your Order")}</div><div class="text-6xl mb-3 relative z-10">${it.emoji}</div><div class="font-bold text-xl text-gray-800 mb-6 relative z-10">${it.name.split(' / ')[state.lang === 'th' ? 1 : 0] || it.name}</div><button onclick="CafeteriaModule.cancel('${myOrder.id}')" class="btn-sm-3d py-2.5 px-6 bg-white text-rose-500 border-gray-200 relative z-10 mx-auto block">${t("Cancel Order")}</button></div>`; 
+                    html += `<div class="card-3d p-10 bg-gradient-to-br from-amber-50 to-orange-50 border-amber-100 text-center relative overflow-hidden max-w-2xl mx-auto"><div class="absolute -right-6 -top-6 text-9xl opacity-10 transform rotate-12">${it.emoji}</div><div class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-4">${t("Your Order")}</div><div class="text-7xl mb-4 relative z-10">${it.emoji}</div><div class="font-bold text-2xl text-gray-800 mb-8 relative z-10">${it.name.split(' / ')[state.lang === 'th' ? 1 : 0] || it.name}</div><button onclick="CafeteriaModule.cancel('${myOrder.id}')" class="btn-sm-3d py-3 px-8 bg-white text-rose-500 border-gray-200 relative z-10 mx-auto block text-sm">${t("Cancel Order")}</button></div>`; 
                 } 
                 else { 
-                    html += `<div class="grid grid-cols-2 gap-4">`; 
-                    db.menuItems.forEach(item => { html += `<button onclick="CafeteriaModule.order(${item.id})" class="card-3d flex flex-col items-center justify-center p-6 bg-white border border-gray-100 hover:border-amber-300 hover:shadow-md transition-all active:scale-95 outline-none"><div class="text-5xl mb-3">${item.emoji}</div><span class="font-bold text-sm text-gray-800 text-center leading-tight">${item.name.split(' / ')[state.lang === 'th' ? 1 : 0] || item.name}</span></button>`; }); 
+                    html += `<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">`; 
+                    db.menuItems.forEach(item => { html += `<button onclick="CafeteriaModule.order(${item.id})" class="card-3d flex flex-col items-center justify-center p-8 bg-white border border-gray-100 hover:border-amber-300 hover:shadow-md transition-all active:scale-95 outline-none mb-0"><div class="text-6xl mb-4">${item.emoji}</div><span class="font-bold text-sm text-gray-800 text-center leading-tight">${item.name.split(' / ')[state.lang === 'th' ? 1 : 0] || item.name}</span></button>`; }); 
                     html += `</div>`; 
                 }
                 return html + `</div>`;
             },
             order: function(id) { DB.add('lunchOrders', {userId:state.currentUser.id, itemId:id, date:new Date().toISOString().split('T')[0]}); App.showToast(t("Action completed successfully")); },
             cancel: function(id) { DB.delete('lunchOrders', id); App.showToast(t("Action completed successfully")); },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-amber-50/50 border-amber-100"><h3 class="font-bold text-sm text-amber-800 flex items-center gap-2"><i class="ph-fill ph-fork-knife text-amber-500"></i> ${t("Lunch Orders Summary")}</h3><p class="text-xs text-amber-700 mt-1">${db.lunchOrders.length} orders today.</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-amber-50/50 border-amber-100"><h3 class="font-bold text-sm text-amber-800 flex items-center gap-2"><i class="ph-fill ph-fork-knife text-amber-500"></i> ${t("Lunch Orders Summary")}</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-amber-600">${db.lunchOrders.length} <span class="text-xs font-medium text-amber-700/60 uppercase tracking-wider block">Today</span></p></div></div>`; }
         };
 
         const EquipmentModule = {
             id: 'equipment', name: 'Equipment', description: 'Borrow office equipment and devices.', icon: 'ph-laptop', hasUserTab: true,
             renderUserView: function() {
                 const myLoans = db.loans.filter(l => l.userId === state.currentUser.id && l.status === 'borrowed');
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Equipment")}</h2></div>`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Equipment")}</h2></div>`;
                 if(myLoans.length>0) { 
-                    html+=`<div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-3 ml-1">${t("Active Loans")}</h3><div class="space-y-3">`; 
-                    myLoans.forEach(l=>{ const it=db.inventory.find(i=>i.id===l.equipmentId); html+=`<div class="card-3d p-4 flex justify-between items-center bg-indigo-50 border-indigo-100"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-white text-indigo-500 flex items-center justify-center shadow-sm"><i class="ph-fill ${it.icon} text-lg"></i></div><div><div class="font-bold text-sm text-indigo-900">${it.name}</div><div class="text-[10px] text-indigo-600/70 mt-0.5">Borrowed</div></div></div><button onclick="EquipmentModule.ret('${l.id}')" class="btn-sm-3d bg-indigo-500 text-white border-indigo-600 px-3 py-1.5 text-xs">Return</button></div>`; }); 
+                    html+=`<div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-4 ml-1">${t("Active Loans")}</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`; 
+                    myLoans.forEach(l=>{ const it=db.inventory.find(i=>i.id===l.equipmentId); html+=`<div class="card-3d p-5 flex justify-between items-center bg-indigo-50 border-indigo-100 mb-0"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-white text-indigo-500 flex items-center justify-center shadow-sm"><i class="ph-fill ${it.icon} text-xl"></i></div><div><div class="font-bold text-base text-indigo-900">${it.name}</div><div class="text-xs text-indigo-600/70 mt-1">Borrowed</div></div></div><button onclick="EquipmentModule.ret('${l.id}')" class="btn-sm-3d bg-indigo-500 text-white border-indigo-600 px-4 py-2 text-xs">Return</button></div>`; }); 
                     html+=`</div></div>`; 
                 }
-                html += `<div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-3 ml-1">${t("Available Items")}</h3><div class="space-y-3">`; 
+                html += `<div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-4 ml-1">${t("Available Items")}</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`; 
                 db.inventory.forEach(i=>{ 
                     const outCount = db.loans.filter(l => l.equipmentId === i.id && l.status === 'borrowed').length;
                     const available = i.total - outCount;
-                    html+=`<div class="card-3d p-4 flex justify-between items-center bg-white border border-gray-100"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center"><i class="ph-fill ${i.icon} text-lg"></i></div><div><div class="font-bold text-sm text-gray-800">${i.name}</div><div class="text-[11px] font-medium mt-0.5 ${available>0?'text-emerald-500':'text-rose-500'}">${available} left</div></div></div><button onclick="EquipmentModule.bor(${i.id})" class="btn-sm-3d bg-gray-800 text-white border-gray-900 px-4 py-2 text-xs transition-opacity ${available<=0?'opacity-30 pointer-events-none':''}" ${available<=0?'disabled':''}>Borrow</button></div>`; 
+                    html+=`<div class="card-3d p-5 flex justify-between items-center bg-white border border-gray-100 mb-0"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center"><i class="ph-fill ${i.icon} text-xl"></i></div><div><div class="font-bold text-base text-gray-800">${i.name}</div><div class="text-xs font-medium mt-1 ${available>0?'text-emerald-500':'text-rose-500'}">${available} left</div></div></div><button onclick="EquipmentModule.bor(${i.id})" class="btn-sm-3d bg-gray-800 text-white border-gray-900 px-5 py-2.5 text-xs transition-opacity ${available<=0?'opacity-30 pointer-events-none':''}" ${available<=0?'disabled':''}>Borrow</button></div>`; 
                 });
                 return html + `</div></div></div>`;
             },
             bor: function(id) { const outCount = db.loans.filter(l => l.equipmentId === id && l.status === 'borrowed').length; const it=db.inventory.find(x=>x.id===id); if(it&& (it.total-outCount)>0){ DB.add('loans', {userId:state.currentUser.id, equipmentId:id, status:'borrowed', date:new Date().toISOString().split('T')[0]}); App.showToast(t("Action completed successfully"));} },
             ret: function(id) { DB.update('loans', id, {status:'returned'}); App.showToast(t("Action completed successfully")); },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-indigo-50/50 border-indigo-100"><h3 class="font-bold text-sm text-indigo-800 flex items-center gap-2"><i class="ph-fill ph-laptop text-indigo-500"></i> Equipment Loans</h3><p class="text-xs text-indigo-600 mt-1">${db.loans.filter(x=>x.status==='borrowed').length} active loans</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-indigo-50/50 border-indigo-100"><h3 class="font-bold text-sm text-indigo-800 flex items-center gap-2"><i class="ph-fill ph-laptop text-indigo-500"></i> Equipment Loans</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-indigo-600">${db.loans.filter(x=>x.status==='borrowed').length} <span class="text-xs font-medium text-indigo-700/60 uppercase tracking-wider block">Active</span></p></div></div>`; }
         };
 
         const RewardsModule = {
             id: 'rewards', name: 'Rewards', description: 'Redeem points for company perks.', icon: 'ph-gift', hasUserTab: true,
             renderUserView: function() {
                 const ptsDoc = db.userPoints.find(p => p.userId === state.currentUser.id);
-                const pts = ptsDoc ? ptsDoc.points : 500; // default points for demo if not in db
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Rewards")}</h2></div><div class="card-3d p-8 bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-center shadow-lg border-none relative overflow-hidden"><i class="ph-fill ph-star absolute -right-4 -bottom-4 text-8xl text-white/10"></i><div class="text-[10px] font-bold uppercase tracking-widest text-purple-100 mb-2">${t("Points")} Balance</div><div class="text-5xl font-bold tracking-tight">${pts.toLocaleString()}</div></div><div class="space-y-3">`;
-                db.rewardItems.forEach(r => { html += `<div class="card-3d p-4 flex justify-between items-center bg-white border border-gray-100"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center"><i class="ph-fill ${r.icon} text-lg"></i></div><div><div class="font-bold text-sm text-gray-800">${r.name}</div><div class="text-xs font-bold text-purple-600 mt-0.5 flex items-center gap-1"><i class="ph-fill ph-star text-[10px]"></i> ${r.cost.toLocaleString()} pts</div></div></div><button onclick="RewardsModule.red(${r.id}, ${pts})" class="btn-sm-3d px-4 py-2 text-xs transition-opacity ${pts>=r.cost?'bg-purple-500 text-white border-purple-600':'bg-gray-100 text-gray-400 border-gray-200 pointer-events-none'}" ${pts<r.cost?'disabled':''}>Redeem</button></div>`; });
+                const pts = ptsDoc ? ptsDoc.points : 500; 
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Rewards")}</h2></div><div class="card-3d p-10 bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-center shadow-lg border-none relative overflow-hidden max-w-2xl mx-auto"><i class="ph-fill ph-star absolute -right-4 -bottom-4 text-8xl text-white/10"></i><div class="text-[11px] font-bold uppercase tracking-widest text-purple-100 mb-3">${t("Points")} Balance</div><div class="text-6xl font-bold tracking-tight">${pts.toLocaleString()}</div></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
+                db.rewardItems.forEach(r => { html += `<div class="card-3d p-5 flex justify-between items-center bg-white border border-gray-100 mb-0"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center"><i class="ph-fill ${r.icon} text-xl"></i></div><div><div class="font-bold text-base text-gray-800">${r.name}</div><div class="text-xs font-bold text-purple-600 mt-1 flex items-center gap-1"><i class="ph-fill ph-star text-[10px]"></i> ${r.cost.toLocaleString()} pts</div></div></div><button onclick="RewardsModule.red(${r.id}, ${pts})" class="btn-sm-3d px-5 py-2.5 text-xs transition-opacity ${pts>=r.cost?'bg-purple-500 text-white border-purple-600':'bg-gray-100 text-gray-400 border-gray-200 pointer-events-none'}" ${pts<r.cost?'disabled':''}>Redeem</button></div>`; });
                 return html + `</div></div>`;
             },
             red: function(id, currentPts) { const it=db.rewardItems.find(x=>x.id===id); if(it && currentPts>=it.cost){ const ptsDoc = db.userPoints.find(p => p.userId === state.currentUser.id); if (ptsDoc) DB.update('userPoints', ptsDoc.id, {points: ptsDoc.points - it.cost}); else DB.add('userPoints', {userId: state.currentUser.id, points: 500 - it.cost}); DB.add('redemptions', {userId:state.currentUser.id, itemId:id, status:'pending', date:new Date().toISOString().split('T')[0]}); App.showToast(t("Action completed successfully")); } },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-purple-50/50 border-purple-100"><h3 class="font-bold text-sm text-purple-800 flex items-center gap-2"><i class="ph-fill ph-gift text-purple-500"></i> Rewards</h3><p class="text-xs text-purple-600 mt-1">${db.redemptions.filter(x=>x.status==='pending').length} pending</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-purple-50/50 border-purple-100"><h3 class="font-bold text-sm text-purple-800 flex items-center gap-2"><i class="ph-fill ph-gift text-purple-500"></i> Rewards</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-purple-600">${db.redemptions.filter(x=>x.status==='pending').length} <span class="text-xs font-medium text-purple-700/60 uppercase tracking-wider block">Pending</span></p></div></div>`; }
         };
 
         const LostFoundModule = {
             id: 'lostFound', name: 'Lost & Found', description: 'Report lost items or claim found items.', icon: 'ph-magnifying-glass', hasUserTab: true,
             renderUserView: function() {
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Lost & Found")}</h2></div><div class="card-3d p-5 bg-white border border-gray-100"><input type="text" id="lf-name" placeholder="What did you lose/find?" class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm outline-none focus:border-sky-400"><button onclick="LostFoundModule.sub()" class="btn-sm-3d w-full py-3 bg-sky-500 text-white border-sky-600 font-bold">Report Item</button></div><div class="space-y-3">`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Lost & Found")}</h2></div><div class="card-3d p-6 bg-white border border-gray-100 max-w-2xl"><input type="text" id="lf-name" placeholder="What did you lose/find?" class="w-full mb-4 p-3.5 border border-gray-200 rounded-xl bg-gray-50 text-sm outline-none focus:border-sky-400"><button onclick="LostFoundModule.sub()" class="btn-sm-3d w-full py-3.5 bg-sky-500 text-white border-sky-600 font-bold text-sm">Report Item</button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
                 const openItems = db.lostFound.filter(x=>x.status==='open').sort((a,b)=>new Date(b.date)-new Date(a.date));
-                if(openItems.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm">No active reports.</p>`;
-                openItems.forEach(lf => { html += `<div class="card-3d p-4 flex justify-between items-center bg-white border border-gray-100"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-sky-50 text-sky-500 flex items-center justify-center"><i class="ph-fill ph-magnifying-glass text-lg"></i></div><div><div class="font-bold text-sm text-gray-800">${lf.itemName}</div><div class="text-[10px] text-gray-500 mt-0.5 uppercase tracking-wider">${lf.type}</div></div></div><button onclick="LostFoundModule.res('${lf.id}')" class="btn-sm-3d bg-sky-100 text-sky-700 border-sky-200 px-3 py-1.5 text-xs hover:bg-sky-200 transition-colors">Resolve</button></div>`; });
+                if(openItems.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm col-span-full">No active reports.</p>`;
+                openItems.forEach(lf => { html += `<div class="card-3d p-5 flex justify-between items-center bg-white border border-gray-100 mb-0"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-sky-50 text-sky-500 flex items-center justify-center"><i class="ph-fill ph-magnifying-glass text-xl"></i></div><div><div class="font-bold text-base text-gray-800">${lf.itemName}</div><div class="text-[11px] text-gray-500 mt-1 uppercase tracking-wider">${lf.type}</div></div></div><button onclick="LostFoundModule.res('${lf.id}')" class="btn-sm-3d bg-sky-50 text-sky-700 border-sky-200 px-4 py-2 text-xs hover:bg-sky-100 transition-colors">Resolve</button></div>`; });
                 return html + `</div></div>`;
             },
             sub: function() { const n=document.getElementById('lf-name').value; if(n){ DB.add('lostFound', {userId:state.currentUser.id, type:'lost', itemName:n, status:'open', date:new Date().toISOString()}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } },
             res: function(id) { DB.update('lostFound', id, {status: 'resolved'}); App.showToast(t("Action completed successfully")); },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-sky-50/50 border-sky-100"><h3 class="font-bold text-sm text-sky-800 flex items-center gap-2"><i class="ph-fill ph-magnifying-glass text-sky-500"></i> Lost & Found</h3><p class="text-xs text-sky-600 mt-1">${db.lostFound.filter(x=>x.status==='open').length} open</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-sky-50/50 border-sky-100"><h3 class="font-bold text-sm text-sky-800 flex items-center gap-2"><i class="ph-fill ph-magnifying-glass text-sky-500"></i> Lost & Found</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-sky-600">${db.lostFound.filter(x=>x.status==='open').length} <span class="text-xs font-medium text-sky-700/60 uppercase tracking-wider block">Open</span></p></div></div>`; }
         };
 
         const ShiftSwapModule = {
             id: 'shiftSwap', name: 'Shift Swap', description: 'Trade or cover shifts with coworkers.', icon: 'ph-arrows-left-right', hasUserTab: true,
             renderUserView: function() {
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Shift Swap")}</h2></div><div class="card-3d p-5 bg-white border border-gray-100"><div class="flex gap-2 mb-3"><input type="date" id="ss-date" class="w-1/3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm outline-none focus:border-emerald-400"><input type="text" id="ss-info" placeholder="Shift Info (e.g. 9-5)" class="flex-1 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm outline-none focus:border-emerald-400"></div><button onclick="ShiftSwapModule.sub()" class="btn-sm-3d w-full py-3 bg-emerald-500 text-white border-emerald-600 font-bold">Offer Shift</button></div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-3 ml-1">${t("Available Shifts")}</h3><div class="space-y-3">`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Shift Swap")}</h2></div><div class="card-3d p-6 bg-white border border-gray-100 max-w-2xl"><div class="flex gap-3 mb-4"><input type="date" id="ss-date" class="w-1/3 p-3.5 border border-gray-200 rounded-xl bg-gray-50 text-sm outline-none focus:border-emerald-400"><input type="text" id="ss-info" placeholder="Shift Info (e.g. 9-5)" class="flex-1 p-3.5 border border-gray-200 rounded-xl bg-gray-50 text-sm outline-none focus:border-emerald-400"></div><button onclick="ShiftSwapModule.sub()" class="btn-sm-3d w-full py-3.5 bg-emerald-500 text-white border-emerald-600 font-bold text-sm">Offer Shift</button></div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-4 ml-1">${t("Available Shifts")}</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
                 const openShifts = db.shifts.filter(s=>s.status==='open').sort((a,b)=>new Date(a.date)-new Date(b.date));
-                if(openShifts.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm">No shifts available to cover.</p>`;
-                openShifts.forEach(s => { html += `<div class="card-3d p-4 flex justify-between items-center bg-white border border-gray-100"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center"><i class="ph-fill ph-clock text-lg"></i></div><div><div class="font-bold text-sm text-gray-800">${s.date}</div><div class="text-[11px] text-gray-500 mt-0.5">${s.info}</div></div></div><button onclick="ShiftSwapModule.cov('${s.id}')" class="btn-sm-3d bg-emerald-500 text-white border-emerald-600 px-4 py-2 text-xs">Cover</button></div>`; });
+                if(openShifts.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm col-span-full bg-white rounded-2xl border border-gray-100 border-dashed">No shifts available to cover.</p>`;
+                openShifts.forEach(s => { html += `<div class="card-3d p-5 flex justify-between items-center bg-white border border-gray-100 mb-0"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center"><i class="ph-fill ph-clock text-xl"></i></div><div><div class="font-bold text-base text-gray-800">${s.date}</div><div class="text-xs text-gray-500 mt-1">${s.info}</div></div></div><button onclick="ShiftSwapModule.cov('${s.id}')" class="btn-sm-3d bg-emerald-500 text-white border-emerald-600 px-5 py-2.5 text-xs">Cover</button></div>`; });
                 return html + `</div></div></div>`;
             },
             sub: function() { const d=document.getElementById('ss-date').value; const i=document.getElementById('ss-info').value; if(d&&i){ DB.add('shifts', {userId:state.currentUser.id, date:d, info:i, status:'open', coveredBy:null}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } },
             cov: function(id) { DB.update('shifts', id, {status:'covered', coveredBy:state.currentUser.id}); App.showToast(t("Action completed successfully")); },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-emerald-50/50 border-emerald-100"><h3 class="font-bold text-sm text-emerald-800 flex items-center gap-2"><i class="ph-fill ph-arrows-left-right text-emerald-500"></i> Open Shifts</h3><p class="text-xs text-emerald-600 mt-1">${db.shifts.filter(x=>x.status==='open').length} unstaffed</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-emerald-50/50 border-emerald-100"><h3 class="font-bold text-sm text-emerald-800 flex items-center gap-2"><i class="ph-fill ph-arrows-left-right text-emerald-500"></i> Open Shifts</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-emerald-600">${db.shifts.filter(x=>x.status==='open').length} <span class="text-xs font-medium text-emerald-700/60 uppercase tracking-wider block">Unstaffed</span></p></div></div>`; }
         };
 
         const CarpoolModule = {
             id: 'carpool', name: 'Carpool', description: 'Share rides to the office.', icon: 'ph-car-profile', hasUserTab: true,
             renderUserView: function() {
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Carpool")}</h2></div><div class="card-3d p-5 bg-white border border-gray-100"><input type="text" id="cp-from" placeholder="From Location" class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm outline-none focus:border-teal-400"><button onclick="CarpoolModule.sub()" class="btn-sm-3d w-full py-3 bg-teal-500 text-white border-teal-600 font-bold">Offer Ride</button></div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-3 ml-1">${t("Available Rides")}</h3><div class="space-y-3">`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Carpool")}</h2></div><div class="card-3d p-6 bg-white border border-gray-100 max-w-2xl"><input type="text" id="cp-from" placeholder="From Location" class="w-full mb-4 p-3.5 border border-gray-200 rounded-xl bg-gray-50 text-sm outline-none focus:border-teal-400"><button onclick="CarpoolModule.sub()" class="btn-sm-3d w-full py-3.5 bg-teal-500 text-white border-teal-600 font-bold text-sm">Offer Ride</button></div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-4 ml-1">${t("Available Rides")}</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
                 const activeRides = db.carpools.sort((a,b)=>new Date(a.date)-new Date(b.date));
-                if(activeRides.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm">No rides offered yet.</p>`;
-                activeRides.forEach(c => { html += `<div class="card-3d p-4 flex justify-between items-center bg-white border border-gray-100"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-teal-50 text-teal-500 flex items-center justify-center"><i class="ph-fill ph-car-profile text-lg"></i></div><div><div class="font-bold text-sm text-gray-800">${c.from}</div><div class="text-[11px] text-gray-500 mt-0.5">${c.passengers.length}/${c.seats} passengers</div></div></div><button onclick="CarpoolModule.join('${c.id}')" class="btn-sm-3d bg-teal-500 text-white border-teal-600 px-4 py-2 text-xs transition-opacity ${c.passengers.length>=c.seats||c.passengers.includes(state.currentUser.id)?'opacity-30 pointer-events-none':''}" ${c.passengers.length>=c.seats||c.passengers.includes(state.currentUser.id)?'disabled':''}>Join</button></div>`; });
+                if(activeRides.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm col-span-full bg-white rounded-2xl border border-gray-100 border-dashed">No rides offered yet.</p>`;
+                activeRides.forEach(c => { html += `<div class="card-3d p-5 flex justify-between items-center bg-white border border-gray-100 mb-0"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-teal-50 text-teal-500 flex items-center justify-center"><i class="ph-fill ph-car-profile text-xl"></i></div><div><div class="font-bold text-base text-gray-800">${c.from}</div><div class="text-xs text-gray-500 mt-1">${c.passengers.length}/${c.seats} passengers</div></div></div><button onclick="CarpoolModule.join('${c.id}')" class="btn-sm-3d bg-teal-500 text-white border-teal-600 px-5 py-2.5 text-xs transition-opacity ${c.passengers.length>=c.seats||c.passengers.includes(state.currentUser.id)?'opacity-30 pointer-events-none':''}" ${c.passengers.length>=c.seats||c.passengers.includes(state.currentUser.id)?'disabled':''}>Join</button></div>`; });
                 return html + `</div></div></div>`;
             },
             sub: function() { const f=document.getElementById('cp-from').value; if(f){ DB.add('carpools', {driverId:state.currentUser.id, from:f, seats:3, passengers:[], date:new Date().toISOString().split('T')[0], time:'08:00'}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } },
             join: function(id) { const c=db.carpools.find(x=>x.id===id); if(c && !c.passengers.includes(state.currentUser.id)){ let p = [...c.passengers]; p.push(state.currentUser.id); DB.update('carpools', id, {passengers: p}); App.showToast(t("Action completed successfully"));} },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-teal-50/50 border-teal-100"><h3 class="font-bold text-sm text-teal-800 flex items-center gap-2"><i class="ph-fill ph-car-profile text-teal-500"></i> Carpools</h3><p class="text-xs text-teal-600 mt-1">${db.carpools.length} rides today</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-teal-50/50 border-teal-100"><h3 class="font-bold text-sm text-teal-800 flex items-center gap-2"><i class="ph-fill ph-car-profile text-teal-500"></i> Carpools</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-teal-600">${db.carpools.length} <span class="text-xs font-medium text-teal-700/60 uppercase tracking-wider block">Today</span></p></div></div>`; }
         };
 
         const WellnessModule = {
@@ -846,7 +873,7 @@
                 const today = new Date().toISOString().split('T')[0];
                 let myWell = db.wellness.find(w => w.userId === state.currentUser.id && w.date === today);
                 if (!myWell) { myWell = { id: null, userId: state.currentUser.id, date: today, water: 0, steps: 0 }; }
-                return `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Wellness")}</h2><p class="text-gray-500 text-sm">Stay healthy!</p></div><div class="grid grid-cols-2 gap-4"><div class="card-3d p-6 bg-white border border-gray-100 text-center"><div class="w-12 h-12 mx-auto bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-3"><i class="ph-fill ph-drop text-2xl"></i></div><div class="text-4xl font-bold text-gray-800 mb-4">${myWell.water}</div><button onclick="WellnessModule.addWater('${myWell.id}')" class="btn-sm-3d w-full py-2.5 bg-blue-50 text-blue-600 border-blue-200 text-xs font-bold hover:bg-blue-100 transition-colors">${t("Add Glass")}</button></div><div class="card-3d p-6 bg-white border border-gray-100 text-center"><div class="w-12 h-12 mx-auto bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-3"><i class="ph-fill ph-sneaker text-2xl"></i></div><input type="number" id="well-steps" value="${myWell.steps}" class="w-full text-center text-3xl font-bold p-1 bg-transparent outline-none mb-4 text-gray-800"><button onclick="WellnessModule.updateSteps('${myWell.id}')" class="btn-sm-3d w-full py-2.5 bg-emerald-50 text-emerald-600 border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition-colors">${t("Log Steps")}</button></div></div></div>`;
+                return `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Wellness")}</h2><p class="text-gray-500 text-sm">Stay healthy!</p></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl"><div class="card-3d p-8 bg-white border border-gray-100 text-center"><div class="w-14 h-14 mx-auto bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4"><i class="ph-fill ph-drop text-3xl"></i></div><div class="text-5xl font-bold text-gray-800 mb-5">${myWell.water}</div><button onclick="WellnessModule.addWater('${myWell.id}')" class="btn-sm-3d w-full py-3 bg-blue-50 text-blue-600 border-blue-200 text-sm font-bold hover:bg-blue-100 transition-colors">${t("Add Glass")}</button></div><div class="card-3d p-8 bg-white border border-gray-100 text-center"><div class="w-14 h-14 mx-auto bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-4"><i class="ph-fill ph-sneaker text-3xl"></i></div><input type="number" id="well-steps" value="${myWell.steps}" class="w-full text-center text-4xl font-bold p-1 bg-transparent outline-none mb-5 text-gray-800"><button onclick="WellnessModule.updateSteps('${myWell.id}')" class="btn-sm-3d w-full py-3 bg-emerald-50 text-emerald-600 border-emerald-200 text-sm font-bold hover:bg-emerald-100 transition-colors">${t("Log Steps")}</button></div></div></div>`;
             },
             addWater: function(id) { 
                 const today = new Date().toISOString().split('T')[0];
@@ -859,7 +886,7 @@
                 if(id && id !== 'null') { DB.update('wellness', id, {steps: val}); App.showToast(t("Action completed successfully")); } 
                 else { DB.add('wellness', {userId: state.currentUser.id, date: today, water: 0, steps: val}); App.showToast(t("Action completed successfully")); } 
             },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-rose-50/50 border-rose-100"><h3 class="font-bold text-sm text-rose-800 flex items-center gap-2"><i class="ph-fill ph-heartbeat text-rose-500"></i> Team Wellness</h3></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-rose-50/50 border-rose-100"><h3 class="font-bold text-sm text-rose-800 flex items-center gap-2"><i class="ph-fill ph-heartbeat text-rose-500"></i> Team Wellness</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-rose-600">Active</p></div></div>`; }
         };
 
         const JukeboxModule = {
@@ -867,46 +894,46 @@
             renderUserView: function() {
                 const queue = db.jukebox.filter(s => s.status === 'queued').sort((a,b) => b.votes.length - a.votes.length);
                 let html = `
-                    <div class="space-y-6 pb-20">
+                    <div class="space-y-6 pb-20 max-w-7xl mx-auto w-full">
                         <div><h2 class="text-2xl font-bold">${t("Jukebox")}</h2><p class="text-gray-500 text-sm">${t("Suggest and vote on office music.")}</p></div>
-                        <div class="card-3d p-5 bg-white border border-gray-100">
-                            <input type="text" id="jk-song" placeholder="${t("Song Name & Artist")}" class="w-full mb-3 p-3 border border-gray-200 rounded-xl bg-gray-50 text-sm font-medium outline-none focus:border-fuchsia-400">
-                            <button onclick="JukeboxModule.sub()" class="btn-sm-3d w-full py-3 bg-fuchsia-500 text-white border-fuchsia-600 font-bold flex items-center justify-center gap-2"><i class="ph-bold ph-music-notes-plus text-lg"></i> ${t("Suggest Song")}</button>
+                        <div class="card-3d p-6 bg-white border border-gray-100 max-w-2xl">
+                            <input type="text" id="jk-song" placeholder="${t("Song Name & Artist")}" class="w-full mb-4 p-3.5 border border-gray-200 rounded-xl bg-gray-50 text-sm font-medium outline-none focus:border-fuchsia-400">
+                            <button onclick="JukeboxModule.sub()" class="btn-sm-3d w-full py-3.5 bg-fuchsia-500 text-white border-fuchsia-600 font-bold flex items-center justify-center gap-2 text-sm"><i class="ph-bold ph-music-notes-plus text-lg"></i> ${t("Suggest Song")}</button>
                         </div>
-                        <div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-3 ml-1">${t("Queue")}</h3><div class="space-y-3">
+                        <div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-4 ml-1">${t("Queue")}</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 `;
-                if(queue.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm bg-white rounded-2xl border border-gray-100 border-dashed">No songs in queue.</p>`;
+                if(queue.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm bg-white rounded-2xl border border-gray-100 border-dashed col-span-full">No songs in queue.</p>`;
                 queue.forEach(song => {
                     const isVoted = song.votes.includes(state.currentUser.id);
-                    html += `<div class="card-3d p-4 flex justify-between items-center bg-white border border-gray-100"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-fuchsia-50 text-fuchsia-500 flex items-center justify-center"><i class="ph-fill ph-music-notes text-lg"></i></div><div><div class="font-bold text-sm text-gray-800 leading-tight pr-2">${song.song}</div><div class="text-[10px] text-gray-500 font-medium mt-0.5">${song.votes.length} votes</div></div></div><button onclick="JukeboxModule.vote('${song.id}')" class="btn-sm-3d px-3 py-2 text-xs flex items-center gap-1 transition-colors ${isVoted ? 'bg-fuchsia-50 text-fuchsia-600 border-fuchsia-200' : 'bg-white text-gray-500 hover:bg-gray-50'}"><i class="ph-bold ph-caret-up"></i></button></div>`;
+                    html += `<div class="card-3d p-5 flex justify-between items-center bg-white border border-gray-100 mb-0"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-fuchsia-50 text-fuchsia-500 flex items-center justify-center"><i class="ph-fill ph-music-notes text-xl"></i></div><div><div class="font-bold text-base text-gray-800 leading-tight pr-2">${song.song}</div><div class="text-xs text-gray-500 font-medium mt-1">${song.votes.length} votes</div></div></div><button onclick="JukeboxModule.vote('${song.id}')" class="btn-sm-3d px-4 py-2.5 text-xs flex items-center gap-1 transition-colors ${isVoted ? 'bg-fuchsia-50 text-fuchsia-600 border-fuchsia-200' : 'bg-white text-gray-500 hover:bg-gray-50'}"><i class="ph-bold ph-caret-up text-sm"></i></button></div>`;
                 });
                 return html + `</div></div></div>`;
             },
             sub: function() { const s = document.getElementById('jk-song').value; if(s) { DB.add('jukebox', {userId:state.currentUser.id, song:s, votes:[state.currentUser.id], status:'queued'}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } },
             vote: function(id) { const s = db.jukebox.find(x => x.id === id); if(s) { let v = [...s.votes]; const idx = v.indexOf(state.currentUser.id); if(idx > -1) v.splice(idx, 1); else v.push(state.currentUser.id); DB.update('jukebox', id, {votes: v}); } },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-fuchsia-50/50 border-fuchsia-100"><h3 class="font-bold text-sm text-fuchsia-800 flex items-center gap-2"><i class="ph-fill ph-music-notes text-fuchsia-500"></i> ${t("Top Requested")}</h3><p class="text-xs text-fuchsia-600 mt-1">${db.jukebox.filter(s=>s.status==='queued').length} queued</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-fuchsia-50/50 border-fuchsia-100"><h3 class="font-bold text-sm text-fuchsia-800 flex items-center gap-2"><i class="ph-fill ph-music-notes text-fuchsia-500"></i> ${t("Top Requested")}</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-fuchsia-600">${db.jukebox.filter(s=>s.status==='queued').length} <span class="text-xs font-medium text-fuchsia-700/60 uppercase tracking-wider block">Queued</span></p></div></div>`; }
         };
 
         const StandupsModule = {
             id: 'standups', name: 'Standups', description: 'Share daily updates with the team.', icon: 'ph-chat-teardrop-text', hasUserTab: true,
             renderUserView: function() {
                 const today = new Date().toISOString().split('T')[0]; const myUpdate = db.standups.find(s => s.userId === state.currentUser.id && s.date === today); const teamUpdates = db.standups.filter(s => s.date === today && s.userId !== state.currentUser.id);
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Standups")}</h2><p class="text-gray-500 text-sm">${t("Share daily updates with the team.")}</p></div>`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Standups")}</h2><p class="text-gray-500 text-sm">${t("Share daily updates with the team.")}</p></div>`;
                 if (myUpdate) {
-                    html += `<div class="card-3d p-5 bg-lime-50 border-lime-200"><h3 class="font-bold text-lime-800 mb-3 flex items-center gap-2 text-sm"><i class="ph-fill ph-check-circle text-lg"></i> Update Submitted</h3><div class="text-xs space-y-2 bg-white/60 p-4 rounded-xl"><div class="flex gap-2"><span class="font-bold text-gray-500 w-16">${t("Yesterday")}:</span> <span class="text-gray-800 flex-1">${myUpdate.yesterday}</span></div><div class="flex gap-2"><span class="font-bold text-lime-700 w-16">${t("Today")}:</span> <span class="text-gray-800 font-bold flex-1">${myUpdate.today}</span></div><div class="flex gap-2"><span class="font-bold text-rose-500 w-16">${t("Blockers")}:</span> <span class="text-rose-600 flex-1">${myUpdate.blockers || 'None'}</span></div></div></div>`;
+                    html += `<div class="card-3d p-6 bg-lime-50 border-lime-200 max-w-2xl"><h3 class="font-bold text-lime-800 mb-4 flex items-center gap-2 text-base"><i class="ph-fill ph-check-circle text-xl"></i> Update Submitted</h3><div class="text-sm space-y-3 bg-white/60 p-5 rounded-xl"><div class="flex gap-3"><span class="font-bold text-gray-500 w-20">${t("Yesterday")}:</span> <span class="text-gray-800 flex-1">${myUpdate.yesterday}</span></div><div class="flex gap-3"><span class="font-bold text-lime-700 w-20">${t("Today")}:</span> <span class="text-gray-800 font-bold flex-1">${myUpdate.today}</span></div><div class="flex gap-3"><span class="font-bold text-rose-500 w-20">${t("Blockers")}:</span> <span class="text-rose-600 flex-1">${myUpdate.blockers || 'None'}</span></div></div></div>`;
                 } else {
-                    html += `<div class="card-3d p-5 bg-white border border-gray-100"><div class="space-y-3"><input type="text" id="su-yesterday" placeholder="${t("Yesterday")}..." class="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm font-medium outline-none focus:border-lime-400"><input type="text" id="su-today" placeholder="${t("Today")}..." class="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm font-bold outline-none focus:border-lime-400"><input type="text" id="su-blockers" placeholder="${t("Blockers")} (Optional)" class="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm outline-none focus:border-lime-400"><button onclick="StandupsModule.submit()" class="btn-sm-3d w-full py-3 bg-lime-500 text-white border-lime-600 font-bold">${t("Submit Update")}</button></div></div>`;
+                    html += `<div class="card-3d p-6 bg-white border border-gray-100 max-w-2xl"><div class="space-y-4"><input type="text" id="su-yesterday" placeholder="${t("Yesterday")}..." class="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 text-sm font-medium outline-none focus:border-lime-400"><input type="text" id="su-today" placeholder="${t("Today")}..." class="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 text-sm font-bold outline-none focus:border-lime-400"><input type="text" id="su-blockers" placeholder="${t("Blockers")} (Optional)" class="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 text-sm outline-none focus:border-lime-400"><button onclick="StandupsModule.submit()" class="btn-sm-3d w-full py-3.5 bg-lime-500 text-white border-lime-600 font-bold text-sm">${t("Submit Update")}</button></div></div>`;
                 }
-                html += `<div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-3 ml-1">${t("Team Updates")}</h3><div class="space-y-3">`;
-                if (teamUpdates.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm bg-white rounded-2xl border border-gray-100 border-dashed">${t("No updates yet.")}</p>`;
+                html += `<div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-4 ml-1">${t("Team Updates")}</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">`;
+                if (teamUpdates.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm bg-white rounded-2xl border border-gray-100 border-dashed col-span-full">${t("No updates yet.")}</p>`;
                 teamUpdates.forEach(su => {
                     const user = db.users.find(u => u.id === su.userId);
-                    html += `<div class="card-3d p-5 bg-white border border-gray-100"><div class="flex items-center gap-3 mb-3 pb-3 border-b border-gray-50"><div class="w-8 h-8 rounded-full ${user.color} flex items-center justify-center text-xs font-bold">${user.initials}</div><div class="font-bold text-sm text-gray-800">${user.name}</div></div><div class="text-xs space-y-2"><div class="flex gap-2"><span class="font-bold text-gray-400 w-16">${t("Yesterday")}:</span> <span class="text-gray-700 flex-1">${su.yesterday}</span></div><div class="flex gap-2"><span class="font-bold text-lime-600 w-16">${t("Today")}:</span> <span class="text-gray-800 font-bold flex-1">${su.today}</span></div>${su.blockers ? `<div class="flex gap-2"><span class="font-bold text-rose-500 w-16">${t("Blockers")}:</span> <span class="text-rose-600 flex-1 font-bold">${su.blockers}</span></div>` : ''}</div></div>`;
+                    html += `<div class="card-3d p-6 bg-white border border-gray-100 mb-0 flex flex-col"><div class="flex items-center gap-3 mb-4 pb-4 border-b border-gray-50"><div class="w-10 h-10 rounded-full ${user.color} flex items-center justify-center text-sm font-bold">${user.initials}</div><div class="font-bold text-base text-gray-800">${user.name}</div></div><div class="text-xs space-y-2.5 flex-1"><div class="flex gap-2"><span class="font-bold text-gray-400 w-16">${t("Yesterday")}:</span> <span class="text-gray-700 flex-1">${su.yesterday}</span></div><div class="flex gap-2"><span class="font-bold text-lime-600 w-16">${t("Today")}:</span> <span class="text-gray-800 font-bold flex-1">${su.today}</span></div>${su.blockers ? `<div class="flex gap-2"><span class="font-bold text-rose-500 w-16">${t("Blockers")}:</span> <span class="text-rose-600 flex-1 font-bold">${su.blockers}</span></div>` : ''}</div></div>`;
                 });
                 return html + `</div></div></div>`;
             },
             submit: function() { const y = document.getElementById('su-yesterday').value.trim(); const t_input = document.getElementById('su-today').value.trim(); const b = document.getElementById('su-blockers').value.trim(); if (y && t_input) { const today = new Date().toISOString().split('T')[0]; DB.add('standups', { userId: state.currentUser.id, date: today, yesterday: y, today: t_input, blockers: b }); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-lime-50/50 border-lime-100"><h3 class="font-bold text-sm text-lime-800 flex items-center gap-2"><i class="ph-fill ph-chat-teardrop-text text-lime-500"></i> Team Updates</h3><p class="text-xs text-lime-600 mt-1">${db.standups.filter(s=>s.date===new Date().toISOString().split('T')[0]).length} today</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-lime-50/50 border-lime-100"><h3 class="font-bold text-sm text-lime-800 flex items-center gap-2"><i class="ph-fill ph-chat-teardrop-text text-lime-500"></i> Team Updates</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-lime-600">${db.standups.filter(s=>s.date===new Date().toISOString().split('T')[0]).length} <span class="text-xs font-medium text-lime-700/60 uppercase tracking-wider block">Today</span></p></div></div>`; }
         };
 
         const MarketplaceModule = {
@@ -914,55 +941,57 @@
             renderUserView: function() {
                 const listings = [...db.marketplace].sort((a,b) => new Date(b.date) - new Date(a.date));
                 let html = `
-                    <div class="space-y-6 pb-20">
+                    <div class="space-y-6 pb-20 max-w-7xl mx-auto w-full">
                         <div>
                             <h2 class="text-2xl font-bold">${t("Marketplace")}</h2>
                             <p class="text-gray-500 text-sm">${t("Buy, sell, or trade with coworkers.")}</p>
                         </div>
-                        <div class="card-3d p-5 bg-white border border-gray-100">
-                            <div class="flex gap-2 mb-4 p-1 bg-gray-50 rounded-xl border border-gray-200">
-                                <label class="flex-1 flex items-center justify-center py-2 rounded-lg cursor-pointer transition-colors relative">
+                        <div class="card-3d p-6 bg-white border border-gray-100 max-w-2xl">
+                            <div class="flex gap-2 mb-5 p-1 bg-gray-50 rounded-xl border border-gray-200">
+                                <label class="flex-1 flex items-center justify-center py-2.5 rounded-lg cursor-pointer transition-colors relative">
                                     <input type="radio" name="mk-type" value="selling" checked class="peer sr-only">
                                     <div class="absolute inset-0 bg-white rounded-lg shadow-sm border border-gray-200 opacity-0 peer-checked:opacity-100 transition-opacity"></div>
                                     <span class="text-xs font-bold text-gray-500 peer-checked:text-violet-600 relative z-10">${t("Selling")}</span>
                                 </label>
-                                <label class="flex-1 flex items-center justify-center py-2 rounded-lg cursor-pointer transition-colors relative">
+                                <label class="flex-1 flex items-center justify-center py-2.5 rounded-lg cursor-pointer transition-colors relative">
                                     <input type="radio" name="mk-type" value="looking" class="peer sr-only">
                                     <div class="absolute inset-0 bg-white rounded-lg shadow-sm border border-gray-200 opacity-0 peer-checked:opacity-100 transition-opacity"></div>
                                     <span class="text-xs font-bold text-gray-500 peer-checked:text-violet-600 relative z-10">${t("Looking For")}</span>
                                 </label>
                             </div>
-                            <div class="space-y-3">
-                                <input type="text" id="mk-title" placeholder="${t("Item Name")}" class="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm font-bold outline-none focus:border-violet-400">
-                                <input type="text" id="mk-price" placeholder="${t("Price (Optional)")}" class="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm outline-none focus:border-violet-400">
-                                <button onclick="MarketplaceModule.submit()" class="btn-sm-3d w-full py-3 bg-violet-500 text-white border-violet-600 font-bold flex items-center justify-center gap-2">
+                            <div class="space-y-4">
+                                <input type="text" id="mk-title" placeholder="${t("Item Name")}" class="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 text-sm font-bold outline-none focus:border-violet-400">
+                                <input type="text" id="mk-price" placeholder="${t("Price (Optional)")}" class="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 text-sm outline-none focus:border-violet-400">
+                                <button onclick="MarketplaceModule.submit()" class="btn-sm-3d w-full py-3.5 bg-violet-500 text-white border-violet-600 font-bold flex items-center justify-center gap-2 text-sm">
                                     <i class="ph-bold ph-storefront text-lg"></i> ${t("Post an Item")}
                                 </button>
                             </div>
                         </div>
                         <div>
-                            <h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-3 ml-1">${t("Latest Listings")}</h3>
-                            <div class="space-y-3">
+                            <h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-4 ml-1">${t("Latest Listings")}</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 `;
-                if (listings.length === 0) { html += `<p class="text-center text-gray-400 py-4 text-sm bg-white rounded-2xl border border-gray-100 border-dashed">No items listed yet.</p>`; }
+                if (listings.length === 0) { html += `<p class="text-center text-gray-400 py-4 text-sm bg-white rounded-2xl border border-gray-100 border-dashed col-span-full">No items listed yet.</p>`; }
                 listings.forEach(item => {
                     const user = db.users.find(u => u.id === item.userId);
                     const isSelling = item.type === 'selling';
                     const badgeColor = isSelling ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-blue-50 text-blue-600 border-blue-200';
                     const badgeText = isSelling ? t('Selling') : t('Looking For');
                     html += `
-                        <div class="card-3d p-5 bg-white border border-gray-100">
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="px-2.5 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider ${badgeColor}">${badgeText}</span>
-                                <span class="font-bold text-violet-600 text-sm bg-violet-50 px-2 py-0.5 rounded">${item.price || 'Free / Offer'}</span>
+                        <div class="card-3d p-6 bg-white border border-gray-100 mb-0 flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-start mb-3">
+                                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider ${badgeColor}">${badgeText}</span>
+                                    <span class="font-bold text-violet-600 text-sm bg-violet-50 px-2.5 py-1 rounded-md">${item.price || 'Free / Offer'}</span>
+                                </div>
+                                <h4 class="font-bold text-lg text-gray-800 leading-tight mb-5 mt-2">${item.title}</h4>
                             </div>
-                            <h4 class="font-bold text-base text-gray-800 leading-tight mb-4 mt-2">${item.title}</h4>
-                            <div class="flex items-center justify-between border-t border-gray-50 pt-4">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-7 h-7 rounded-full ${user.color} flex items-center justify-center text-[10px] font-bold">${user.initials}</div>
+                            <div class="flex items-center justify-between border-t border-gray-50 pt-4 mt-auto">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-full ${user.color} flex items-center justify-center text-xs font-bold">${user.initials}</div>
                                     <span class="text-xs font-medium text-gray-500">${user.name}</span>
                                 </div>
-                                <a href="mailto:${user.email}?subject=Marketplace: ${item.title}" class="btn-sm-3d px-4 py-2 bg-violet-50 text-violet-700 border-violet-200 text-[11px] flex items-center gap-1.5 hover:bg-violet-100 transition-colors">
+                                <a href="mailto:${user.email}?subject=Marketplace: ${item.title}" class="btn-sm-3d px-4 py-2 bg-violet-50 text-violet-700 border-violet-200 text-xs flex items-center gap-1.5 hover:bg-violet-100 transition-colors">
                                     <i class="ph-bold ph-envelope-simple text-sm"></i> ${t("Contact")}
                                 </a>
                             </div>
@@ -973,37 +1002,37 @@
                 return html;
             },
             submit: function() { const type = document.querySelector('input[name="mk-type"]:checked').value; const title = document.getElementById('mk-title').value.trim(); const price = document.getElementById('mk-price').value.trim(); if (title) { DB.add('marketplace', {userId: state.currentUser.id, type: type, title: title, price: price, date: new Date().toISOString()}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-violet-50/50 border-violet-100"><h3 class="font-bold text-sm text-violet-800 flex items-center gap-2"><i class="ph-fill ph-storefront text-violet-500"></i> Marketplace</h3><p class="text-xs text-violet-600 mt-1">${db.marketplace.length} listings</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-violet-50/50 border-violet-100"><h3 class="font-bold text-sm text-violet-800 flex items-center gap-2"><i class="ph-fill ph-storefront text-violet-500"></i> Marketplace</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-violet-600">${db.marketplace.length} <span class="text-xs font-medium text-violet-700/60 uppercase tracking-wider block">Listings</span></p></div></div>`; }
         };
 
         const CelebrationsModule = {
             id: 'celebrations', name: 'Celebrations', description: 'Track team birthdays and work anniversaries.', icon: 'ph-confetti', hasUserTab: true,
             renderUserView: function() {
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Celebrations")}</h2></div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-3 ml-1">${t("Upcoming Celebrations")}</h3><div class="space-y-3">`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Celebrations")}</h2></div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-4 ml-1">${t("Upcoming Celebrations")}</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
                 db.celebrations.forEach(c => {
                     const user = db.users.find(u => u.id === c.userId);
                     const hasCheered = c.cheers.includes(state.currentUser.id);
-                    html += `<div class="card-3d p-4 bg-white border border-gray-100 flex flex-col gap-3"><div class="flex items-center gap-3"><div class="w-12 h-12 rounded-full ${user.color} flex items-center justify-center text-xl font-bold shadow-sm flex-shrink-0">${c.type === 'birthday' ? '🎂' : '🏆'}</div><div class="flex-1"><div class="font-bold text-gray-800 leading-tight">${user.name}</div><div class="text-xs text-gray-500 mt-0.5">${t(c.title)} • <span class="font-bold text-pink-500">${c.dateStr}</span></div></div></div><button onclick="CelebrationsModule.cheer('${c.id}')" class="btn-sm-3d w-full py-2.5 flex items-center justify-center gap-2 text-xs font-bold transition-colors ${hasCheered ? 'bg-pink-50 text-pink-600 border-pink-200' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}"><i class="ph-bold ph-hands-clapping text-pink-500 text-sm"></i> ${hasCheered ? t("Cheered!") : t("Cheer")} (${c.cheers.length})</button></div>`;
+                    html += `<div class="card-3d p-5 bg-white border border-gray-100 flex flex-col gap-4 mb-0"><div class="flex items-center gap-4"><div class="w-14 h-14 rounded-full ${user.color} flex items-center justify-center text-2xl font-bold shadow-sm flex-shrink-0">${c.type === 'birthday' ? '🎂' : '🏆'}</div><div class="flex-1"><div class="font-bold text-lg text-gray-800 leading-tight">${user.name}</div><div class="text-xs text-gray-500 mt-1">${t(c.title)} • <span class="font-bold text-pink-500">${c.dateStr}</span></div></div></div><button onclick="CelebrationsModule.cheer('${c.id}')" class="btn-sm-3d w-full py-3 flex items-center justify-center gap-2 text-xs font-bold transition-colors ${hasCheered ? 'bg-pink-50 text-pink-600 border-pink-200' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}"><i class="ph-bold ph-hands-clapping text-pink-500 text-base"></i> ${hasCheered ? t("Cheered!") : t("Cheer")} (${c.cheers.length})</button></div>`;
                 });
                 return html + `</div></div></div>`;
             },
             cheer: function(id) { const c = db.celebrations.find(x => x.id === id); if(c) { let ch = [...c.cheers]; const idx = ch.indexOf(state.currentUser.id); if(idx > -1) ch.splice(idx, 1); else ch.push(state.currentUser.id); DB.update('celebrations', id, {cheers: ch}); } },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-pink-50/50 border-pink-100"><h3 class="font-bold text-sm text-pink-800 flex items-center gap-2"><i class="ph-fill ph-confetti text-pink-500"></i> Celebrations</h3><p class="text-xs text-pink-600 mt-1">${db.celebrations.length} upcoming</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-pink-50/50 border-pink-100"><h3 class="font-bold text-sm text-pink-800 flex items-center gap-2"><i class="ph-fill ph-confetti text-pink-500"></i> Celebrations</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-pink-600">${db.celebrations.length} <span class="text-xs font-medium text-pink-700/60 uppercase tracking-wider block">Upcoming</span></p></div></div>`; }
         };
 
         const TrainingModule = {
             id: 'training', name: 'Training', description: 'Complete mandatory training and courses.', icon: 'ph-graduation-cap', hasUserTab: true,
             renderUserView: function() {
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Training")}</h2></div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-3 ml-1">${t("Assigned Courses")}</h3><div class="space-y-3">`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Training")}</h2></div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-4 ml-1">${t("Assigned Courses")}</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">`;
                 db.courses.forEach(course => {
                     const log = db.trainingLogs.find(l => l.courseId === course.id && l.userId === state.currentUser.id);
                     const isDone = !!log;
-                    html += `<div class="card-3d p-4 bg-white border ${isDone?'border-emerald-100 bg-emerald-50/20':'border-gray-100'} flex flex-col gap-4"><div class="flex justify-between items-start"><div class="pr-2"><div class="font-bold text-sm text-gray-800 leading-tight mb-1">${course.title}</div><div class="text-[11px] text-gray-500 flex items-center gap-1 font-medium"><i class="ph-fill ph-clock text-blue-400"></i> ${course.duration}</div></div><span class="px-2 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider whitespace-nowrap ${isDone ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-600 border-gray-200'}">${isDone ? t('Completed') : t('Pending')}</span></div><button onclick="TrainingModule.start(${course.id})" class="btn-sm-3d w-full py-2.5 flex items-center justify-center gap-2 text-xs transition-colors ${isDone ? 'bg-gray-50 text-gray-400 border-gray-200 pointer-events-none' : 'bg-blue-500 text-white border-blue-600'}" ${isDone ? 'disabled' : ''}><i class="ph-bold ${isDone ? 'ph-check' : 'ph-play'}"></i> ${isDone ? t("Completed") : t("Start Course")}</button></div>`;
+                    html += `<div class="card-3d p-6 bg-white border ${isDone?'border-emerald-100 bg-emerald-50/20':'border-gray-100'} flex flex-col gap-5 mb-0"><div class="flex justify-between items-start"><div class="pr-3"><div class="font-bold text-base text-gray-800 leading-tight mb-2">${course.title}</div><div class="text-xs text-gray-500 flex items-center gap-1.5 font-medium"><i class="ph-fill ph-clock text-blue-400 text-sm"></i> ${course.duration}</div></div><span class="px-2.5 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider whitespace-nowrap ${isDone ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-600 border-gray-200'}">${isDone ? t('Completed') : t('Pending')}</span></div><button onclick="TrainingModule.start(${course.id})" class="btn-sm-3d w-full py-3 flex items-center justify-center gap-2 text-sm font-bold transition-colors ${isDone ? 'bg-gray-50 text-gray-400 border-gray-200 pointer-events-none' : 'bg-blue-500 text-white border-blue-600'}" ${isDone ? 'disabled' : ''}><i class="ph-bold ${isDone ? 'ph-check' : 'ph-play'} text-lg"></i> ${isDone ? t("Completed") : t("Start Course")}</button></div>`;
                 });
                 return html + `</div></div></div>`;
             },
             start: async function(id) { await App.showLoader(800); DB.add('trainingLogs', {userId: state.currentUser.id, courseId: id, status: 'completed', date: new Date().toISOString()}); App.showToast("Course Completed!"); },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-blue-50/50 border-blue-100"><h3 class="font-bold text-sm text-blue-800 flex items-center gap-2"><i class="ph-fill ph-graduation-cap text-blue-500"></i> Training</h3><p class="text-xs text-blue-600 mt-1">${db.courses.length} mandatory courses</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-blue-50/50 border-blue-100"><h3 class="font-bold text-sm text-blue-800 flex items-center gap-2"><i class="ph-fill ph-graduation-cap text-blue-500"></i> Training</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-blue-600">${db.courses.length} <span class="text-xs font-medium text-blue-700/60 uppercase tracking-wider block">Courses</span></p></div></div>`; }
         };
 
         const WorkLocationModule = {
@@ -1013,50 +1042,50 @@
                 const myLoc = db.workLocations.find(l => l.userId === state.currentUser.id && l.date === today);
                 const teamLocs = db.workLocations.filter(l => l.date === today && l.userId !== state.currentUser.id);
                 
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Work Location")}</h2><p class="text-gray-500 text-sm">${t("Where are you working today?")}</p></div><div class="grid grid-cols-3 gap-3">`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Work Location")}</h2><p class="text-gray-500 text-sm">${t("Where are you working today?")}</p></div><div class="grid grid-cols-3 gap-3 max-w-2xl">`;
                 
                 const locs = [{id:'office', icon:'🏢', text:t('Office'), color:'blue'}, {id:'home', icon:'🏠', text:t('Home'), color:'orange'}, {id:'remote', icon:'☕', text:t('Remote'), color:'emerald'}];
                 locs.forEach(l => {
                     const isSel = myLoc?.location === l.id;
-                    html += `<button onclick="WorkLocationModule.setLocation('${l.id}')" class="btn-3d p-4 flex flex-col items-center justify-center transition-all border ${isSel ? `bg-${l.color}-50 border-${l.color}-200 shadow-inner scale-95` : 'bg-white border-gray-100 hover:bg-gray-50'}"><div class="text-3xl mb-2">${l.icon}</div><span class="font-bold text-[11px] ${isSel ? `text-${l.color}-700` : 'text-gray-600'}">${l.text}</span></button>`;
+                    html += `<button onclick="WorkLocationModule.setLocation('${l.id}')" class="btn-3d p-5 flex flex-col items-center justify-center transition-all border ${isSel ? `bg-${l.color}-50 border-${l.color}-200 shadow-inner scale-95` : 'bg-white border-gray-100 hover:bg-gray-50'}"><div class="text-4xl mb-2">${l.icon}</div><span class="font-bold text-xs ${isSel ? `text-${l.color}-700` : 'text-gray-600'}">${l.text}</span></button>`;
                 });
 
-                html += `</div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-3 ml-1 mt-4">${t("Team Locations")}</h3><div class="space-y-3">`;
-                if (teamLocs.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm bg-white rounded-2xl border border-gray-100 border-dashed">No locations set yet.</p>`;
+                html += `</div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-4 ml-1 mt-6">${t("Team Locations")}</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
+                if (teamLocs.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm bg-white rounded-2xl border border-gray-100 border-dashed col-span-full">No locations set yet.</p>`;
                 teamLocs.forEach(loc => {
                     const user = db.users.find(u => u.id === loc.userId);
                     let icon = '🏢', badge = 'bg-blue-50 text-blue-700 border-blue-200', label = t('Office');
                     if (loc.location === 'home') { icon = '🏠'; badge = 'bg-orange-50 text-orange-700 border-orange-200'; label = t('Home'); }
                     if (loc.location === 'remote') { icon = '☕'; badge = 'bg-emerald-50 text-emerald-700 border-emerald-200'; label = t('Remote'); }
-                    html += `<div class="card-3d p-4 flex items-center justify-between mb-0 bg-white border border-gray-100"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full ${user.color} flex items-center justify-center text-sm font-bold">${user.initials}</div><span class="font-bold text-sm text-gray-800">${user.name}</span></div><div class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold border flex items-center gap-1.5 uppercase tracking-wider ${badge}"><span>${icon}</span> ${label}</div></div>`;
+                    html += `<div class="card-3d p-4 flex items-center justify-between mb-0 bg-white border border-gray-100"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full ${user.color} flex items-center justify-center text-sm font-bold">${user.initials}</div><span class="font-bold text-sm text-gray-800">${user.name}</span></div><div class="px-3 py-1.5 rounded-lg text-[10px] font-bold border flex items-center gap-1.5 uppercase tracking-wider ${badge}"><span class="text-base">${icon}</span> ${label}</div></div>`;
                 });
                 return html + `</div></div></div>`;
             },
             setLocation: function(loc) { const today = new Date().toISOString().split('T')[0]; const myLoc = db.workLocations.find(l => l.userId === state.currentUser.id && l.date === today); if (myLoc) { DB.update('workLocations', myLoc.id, {location: loc}); } else { DB.add('workLocations', {userId: state.currentUser.id, date: today, location: loc}); } App.showToast(t("Action completed successfully")); },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-sky-50/50 border-sky-100"><h3 class="font-bold text-sm text-sky-800 flex items-center gap-2"><i class="ph-fill ph-map-pin text-sky-500"></i> Locations</h3><p class="text-xs text-sky-600 mt-1">${db.workLocations.filter(l=>l.date===new Date().toISOString().split('T')[0]).length} checked in today</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-sky-50/50 border-sky-100"><h3 class="font-bold text-sm text-sky-800 flex items-center gap-2"><i class="ph-fill ph-map-pin text-sky-500"></i> Locations</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-sky-600">${db.workLocations.filter(l=>l.date===new Date().toISOString().split('T')[0]).length} <span class="text-xs font-medium text-sky-700/60 uppercase tracking-wider block">Checked In</span></p></div></div>`; }
         };
 
         const ReferralsModule = {
             id: 'referrals', name: 'Referrals', description: 'Refer friends for open positions and earn bonuses.', icon: 'ph-handshake', hasUserTab: true,
             renderUserView: function() {
                 const myRefs = db.referrals.filter(r => r.userId === state.currentUser.id).sort((a,b) => new Date(b.date) - new Date(a.date));
-                let html = `<div class="space-y-6 pb-20"><div><h2 class="text-2xl font-bold">${t("Referrals")}</h2></div><div class="card-3d p-5 bg-white border border-gray-100"><h3 class="font-bold text-sm mb-4 flex items-center gap-2 text-gray-800"><i class="ph-bold ph-user-plus text-emerald-500 text-lg"></i> ${t("Refer Someone")}</h3><div class="space-y-3"><select id="ref-role" class="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm font-medium outline-none focus:border-emerald-400"><option value="" disabled selected>-- Select Role --</option>`;
+                let html = `<div class="space-y-6 pb-20 max-w-7xl mx-auto w-full"><div><h2 class="text-2xl font-bold">${t("Referrals")}</h2></div><div class="card-3d p-6 bg-white border border-gray-100 max-w-2xl"><h3 class="font-bold text-base mb-5 flex items-center gap-2 text-gray-800"><i class="ph-bold ph-user-plus text-emerald-500 text-xl"></i> ${t("Refer Someone")}</h3><div class="space-y-4"><select id="ref-role" class="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 text-sm font-medium outline-none focus:border-emerald-400"><option value="" disabled selected>-- Select Role --</option>`;
                 db.openRoles.forEach(r => { html += `<option value="${r.id}">${r.title} (${r.bonus})</option>`; });
-                html += `</select><input type="text" id="ref-name" placeholder="${t("Candidate Name")}" class="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm font-medium outline-none focus:border-emerald-400"><button onclick="ReferralsModule.submit()" class="btn-sm-3d w-full py-3 bg-emerald-500 text-white border-emerald-600 font-bold">${t("Refer Someone")}</button></div></div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-3 ml-1">${t("Open Positions")}</h3><div class="space-y-3">`;
-                db.openRoles.forEach(role => { html += `<div class="card-3d p-4 bg-white border border-gray-100 flex justify-between items-center mb-0"><div><div class="font-bold text-sm text-gray-800 leading-tight">${role.title}</div><div class="text-[10px] text-gray-500 uppercase tracking-wider font-bold mt-1">${role.dept}</div></div><div class="text-right"><div class="text-[10px] uppercase font-bold tracking-wider text-gray-400 mb-0.5">${t("Bonus")}</div><div class="font-bold text-emerald-600 text-sm bg-emerald-50 px-2 py-0.5 rounded">${role.bonus}</div></div></div>`; });
-                html += `</div></div><div class="mt-6"><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-3 ml-1">${t("My Referrals")}</h3><div class="space-y-3">`;
-                if (myRefs.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm bg-white rounded-2xl border border-gray-100 border-dashed">No referrals yet.</p>`;
+                html += `</select><input type="text" id="ref-name" placeholder="${t("Candidate Name")}" class="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 text-sm font-medium outline-none focus:border-emerald-400"><button onclick="ReferralsModule.submit()" class="btn-sm-3d w-full py-3.5 bg-emerald-500 text-white border-emerald-600 font-bold text-sm">${t("Refer Someone")}</button></div></div><div><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-4 ml-1">${t("Open Positions")}</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
+                db.openRoles.forEach(role => { html += `<div class="card-3d p-5 bg-white border border-gray-100 flex justify-between items-center mb-0"><div><div class="font-bold text-base text-gray-800 leading-tight">${role.title}</div><div class="text-[11px] text-gray-500 uppercase tracking-wider font-bold mt-1.5">${role.dept}</div></div><div class="text-right"><div class="text-[10px] uppercase font-bold tracking-wider text-gray-400 mb-0.5">${t("Bonus")}</div><div class="font-bold text-emerald-600 text-base bg-emerald-50 px-2.5 py-1 rounded-md">${role.bonus}</div></div></div>`; });
+                html += `</div></div><div class="mt-8"><h3 class="font-bold text-gray-400 uppercase tracking-wider text-[11px] mb-4 ml-1">${t("My Referrals")}</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
+                if (myRefs.length === 0) html += `<p class="text-center text-gray-400 py-4 text-sm bg-white rounded-2xl border border-gray-100 border-dashed col-span-full">No referrals yet.</p>`;
                 myRefs.forEach(ref => {
                     const role = db.openRoles.find(r => r.id === parseInt(ref.roleId));
                     let statusColor = 'bg-gray-100 text-gray-600 border-gray-200';
                     if (ref.status === 'Interviewing') statusColor = 'bg-blue-100 text-blue-700 border-blue-200';
                     if (ref.status === 'Hired') statusColor = 'bg-emerald-100 text-emerald-700 border-emerald-200';
-                    html += `<div class="card-3d p-4 flex items-center justify-between mb-0 bg-white border border-gray-100"><div><div class="font-bold text-sm text-gray-800">${ref.candidateName}</div><div class="text-[11px] font-medium text-gray-500 mt-0.5">${role ? role.title : 'Unknown Role'}</div></div><div class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${statusColor}">${t(ref.status)}</div></div>`;
+                    html += `<div class="card-3d p-5 flex items-center justify-between mb-0 bg-white border border-gray-100"><div><div class="font-bold text-sm text-gray-800">${ref.candidateName}</div><div class="text-xs font-medium text-gray-500 mt-1">${role ? role.title : 'Unknown Role'}</div></div><div class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${statusColor}">${t(ref.status)}</div></div>`;
                 });
                 return html + `</div></div></div>`;
             },
             submit: function() { const roleId = document.getElementById('ref-role').value; const name = document.getElementById('ref-name').value.trim(); if (roleId && name) { DB.add('referrals', {userId: state.currentUser.id, candidateName: name, roleId: roleId, status: 'Pending', date: new Date().toISOString().split('T')[0]}); App.showToast(t("Action completed successfully")); } else { App.showToast(t("Please fill all required fields"), "error"); } },
-            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-emerald-50/50 border-emerald-100"><h3 class="font-bold text-sm text-emerald-800 flex items-center gap-2"><i class="ph-fill ph-handshake text-emerald-500"></i> ${t("Referrals")}</h3><p class="text-xs text-emerald-600 mt-1">${db.referrals.length} total active</p></div>`; }
+            renderAdminWidget: function() { return `<div class="card-3d p-4 bg-emerald-50/50 border-emerald-100"><h3 class="font-bold text-sm text-emerald-800 flex items-center gap-2"><i class="ph-fill ph-handshake text-emerald-500"></i> ${t("Referrals")}</h3><div class="flex-1 flex items-center justify-center"><p class="text-2xl font-bold text-emerald-600">${db.referrals.length} <span class="text-xs font-medium text-emerald-700/60 uppercase tracking-wider block">Active</span></p></div></div>`; }
         };
 
         // =========================================
