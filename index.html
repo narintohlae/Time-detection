@@ -321,6 +321,50 @@
         initAuth();
 
         // --- Utility ---
+        async function hashPIN(pin) {
+            const msgBuffer = new TextEncoder().encode(pin);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+        }
+
+        let failedAttempts = parseInt(localStorage.getItem('failedAttempts') || '0');
+        let lockUntil = parseInt(localStorage.getItem('lockUntil') || '0');
+
+        function checkLockout() {
+            if (Date.now() < lockUntil) {
+                const remaining = Math.ceil((lockUntil - Date.now()) / 1000);
+                showModal('ระบบถูกล็อกชั่วคราว', `พยายามเข้าสู่ระบบผิดพลาดหลายครั้ง กรุณารอ ${remaining} วินาที`);
+                return true;
+            }
+            return false;
+        }
+
+        function handleFailedAttempt() {
+            failedAttempts++;
+            localStorage.setItem('failedAttempts', failedAttempts);
+            if (failedAttempts >= 5) {
+                lockUntil = Date.now() + 30000; // ล็อก 30 วินาที
+                localStorage.setItem('lockUntil', lockUntil);
+                failedAttempts = 0;
+                localStorage.setItem('failedAttempts', 0);
+                showModal('ระงับการใช้งาน', 'กรอกรหัสผิดเกิน 5 ครั้ง ระบบถูกล็อก 30 วินาทีเพื่อความปลอดภัย');
+            } else {
+                showModal('รหัสผิดพลาด', `PIN ไม่ถูกต้อง (พยายามผิด ${failedAttempts}/5 ครั้ง)`);
+            }
+        }
+
+        function resetFailedAttempts() {
+            failedAttempts = 0;
+            localStorage.removeItem('failedAttempts');
+            localStorage.removeItem('lockUntil');
+        }
+
         function formatDate(timestamp) {
             if (!timestamp) return '-';
             const d = new Date(timestamp);
@@ -828,7 +872,7 @@
                             <h4 class="font-bold mb-3 text-yellow-800 border-b border-yellow-200 pb-1">แก้ไขข้อมูลพนักงาน</h4>
                             <input type="hidden" id="edit-emp-id">
                             <input type="text" id="edit-emp-name" placeholder="ชื่อพนักงาน" class="iso-input mb-3 text-sm">
-                            <input type="text" id="edit-emp-pin" placeholder="PIN ล็อกอิน 4 หลัก" class="iso-input mb-3 text-sm" maxlength="4" inputmode="numeric">
+                            <input type="password" id="edit-emp-pin" placeholder="PIN ใหม่ (ปล่อยว่างหากใช้รหัสเดิม)" class="iso-input mb-3 text-sm" maxlength="4" inputmode="numeric">
                             <select id="edit-emp-wage-type" class="iso-input mb-3 text-sm bg-white">
                                 <option value="daily">รับค่าแรง: แบบรายวัน</option>
                                 <option value="hourly">รับค่าแรง: แบบรายชั่วโมง</option>
@@ -847,9 +891,9 @@
                         ${employees.map(emp => `
                             <div class="iso-card p-3 flex justify-between items-center">
                                 <div class="flex-grow">
-                                    <h4 class="font-bold">${emp.name}</h4>
+                                    <h4 class="font-bold">${escapeHTML(emp.name)}</h4>
                                     <div class="text-xs text-gray-500 mt-1 flex flex-wrap gap-2">
-                                        <span class="bg-gray-100 px-1 rounded border">PIN: ${emp.pin}</span>
+                                        <span class="bg-gray-100 px-1 rounded border text-green-700"><i class="fas fa-shield-alt"></i> เข้ารหัสแล้ว</span>
                                         <span class="bg-blue-100 text-blue-700 px-1 rounded border">${emp.wageType==='hourly'?'รายชั่วโมง':emp.wageType==='weekly'?'รายสัปดาห์':'รายวัน'}</span>
                                         <span class="bg-orange-100 text-orange-700 px-1 rounded border">฿${emp.baseRate || 0} | OT ฿${emp.otRate || 0}</span>
                                     </div>
@@ -937,19 +981,29 @@
                     const pin = e.target.value;
                     const empSelect = document.getElementById('emp-select');
                     if (pin.length === 4) {
+                        if (checkLockout()) { e.target.value = ''; return; }
+
                         const empId = empSelect.value;
                         if (!empId) {
                             showModal('แจ้งเตือน', 'กรุณาเลือกชื่อพนักงานก่อนใส่รหัส');
                             e.target.value = ''; return;
                         }
                         const emp = employees.find(e => e.id === empId);
-                        if (emp && emp.pin === pin) {
-                            activeEmployee = emp; empTab = 'time'; 
-                            await setDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}/config`, 'session'), { role: 'employee', empId: emp.id });
-                            changeView('emp-dash'); startClock();
-                        } else {
-                            showModal('รหัสผิดพลาด', 'PIN ไม่ถูกต้อง กรุณาลองใหม่');
-                            e.target.value = '';
+                        if (emp) {
+                            const hashedInput = await hashPIN(pin);
+                            // รองรับทั้งระบบเก่า(ตัวเลขดิบ) และ ระบบใหม่(ที่เข้ารหัสแล้ว) 
+                            if (emp.pin === pin || emp.pin === hashedInput) {
+                                resetFailedAttempts();
+                                // ทยอยอัปเกรดรหัสผ่านเก่าให้เป็น Hash แบบแนบเนียน
+                                if (emp.pin === pin) await updateDoc(doc(db, `artifacts/${appId}/public/data/employees`, emp.id), { pin: hashedInput });
+                                
+                                activeEmployee = emp; empTab = 'time'; 
+                                await setDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}/config`, 'session'), { role: 'employee', empId: emp.id });
+                                changeView('emp-dash'); startClock();
+                            } else {
+                                handleFailedAttempt();
+                                e.target.value = '';
+                            }
                         }
                     }
                 });
@@ -966,11 +1020,18 @@
                 ownerPinInput.addEventListener('input', async (e) => {
                     const pin = e.target.value;
                     if (pin.length >= 4) {
-                        if (pin === appSettings.ownerPin) {
+                        if (checkLockout()) { e.target.value = ''; return; }
+
+                        const hashedInput = await hashPIN(pin);
+                        if (pin === appSettings.ownerPin || hashedInput === appSettings.ownerPin) {
+                            resetFailedAttempts();
+                            if (pin === appSettings.ownerPin) {
+                                await updateDoc(doc(db, `artifacts/${appId}/public/data`, 'config', 'appSettings'), { ownerPin: hashedInput });
+                            }
                             await setDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}/config`, 'session'), { role: 'owner' });
                             changeView('owner-dash');
-                        } else if (pin.length === appSettings.ownerPin.length) {
-                             showModal('ปฏิเสธ', 'รหัสไม่ถูกต้อง');
+                        } else if (pin.length >= 4) {
+                             handleFailedAttempt();
                              e.target.value = '';
                         }
                     }
@@ -1004,8 +1065,9 @@
 
                     isProcessing = true;
                     try {
+                        const hashedPin = await hashPIN(pin);
                         await addDoc(collection(db, `artifacts/${appId}/public/data`, 'employees'), { 
-                            name, pin, wageType, baseRate, otRate 
+                            name: escapeHTML(name), pin: hashedPin, wageType, baseRate, otRate 
                         });
                         document.getElementById('add-emp-form').classList.add('hidden');
                         showModal('สำเร็จ', 'เพิ่มข้อมูลพนักงานเรียบร้อย');
@@ -1026,7 +1088,7 @@
                         document.getElementById('edit-emp-form').classList.remove('hidden');
                         document.getElementById('edit-emp-id').value = emp.id;
                         document.getElementById('edit-emp-name').value = emp.name;
-                        document.getElementById('edit-emp-pin').value = emp.pin || '';
+                        document.getElementById('edit-emp-pin').value = ''; // ป้องกันการแสดงรหัส Hash 
                         document.getElementById('edit-emp-wage-type').value = emp.wageType || 'daily';
                         document.getElementById('edit-emp-base').value = emp.baseRate || '';
                         document.getElementById('edit-emp-ot').value = emp.otRate || '';
@@ -1044,12 +1106,20 @@
 
                     const id = document.getElementById('edit-emp-id').value;
                     const name = document.getElementById('edit-emp-name').value.trim();
-                    const pin = document.getElementById('edit-emp-pin').value.trim();
+                    const pinRaw = document.getElementById('edit-emp-pin').value.trim();
                     const wageType = document.getElementById('edit-emp-wage-type').value;
                     const baseRate = parseFloat(document.getElementById('edit-emp-base').value) || 0;
                     const otRate = parseFloat(document.getElementById('edit-emp-ot').value) || 0;
 
-                    if (!name || pin.length < 4) return showModal('แจ้งเตือน', 'กรอกชื่อและ PIN อย่างน้อย 4 หลัก');
+                    if (!name) return showModal('แจ้งเตือน', 'กรุณากรอกชื่อพนักงาน');
+                    
+                    const empTarget = employees.find(e => e.id === id);
+                    let finalPin = empTarget.pin; // ใช้ PIN Hash เดิมถ้าไม่ได้พิมพ์ใหม่
+
+                    if (pinRaw) {
+                        if (pinRaw.length < 4) return showModal('แจ้งเตือน', 'รหัสผ่านใหม่ต้องมีอย่างน้อย 4 หลัก');
+                        finalPin = await hashPIN(pinRaw);
+                    }
                     
                     // เช็คชื่อซ้ำ (แต่ข้ามชื่อตัวเองที่กำลังแก้)
                     const isDuplicate = employees.some(e => e.id !== id && e.name.toLowerCase() === name.toLowerCase());
@@ -1058,7 +1128,7 @@
                     isProcessing = true;
                     try {
                         await updateDoc(doc(db, `artifacts/${appId}/public/data/employees`, id), { 
-                            name, pin, wageType, baseRate, otRate 
+                            name: escapeHTML(name), pin: finalPin, wageType, baseRate, otRate 
                         });
                         document.getElementById('edit-emp-form').classList.add('hidden');
                         showModal('สำเร็จ', 'แก้ไขข้อมูลพนักงานเรียบร้อย');
@@ -1112,7 +1182,8 @@
                         { text: 'ยืนยัน', type: 'danger', action: async () => {
                             isProcessing = true;
                             try {
-                                await saveSettings({ ownerPin: newPin });
+                                const hashedNewPin = await hashPIN(newPin);
+                                await saveSettings({ ownerPin: hashedNewPin });
                                 closeModal();
                                 showModal('สำเร็จ', 'เปลี่ยนรหัสเรียบร้อยแล้ว');
                                 document.getElementById('new-owner-pin').value = '';
