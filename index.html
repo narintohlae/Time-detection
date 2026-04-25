@@ -2,7 +2,8 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ป้องกันการซูมหน้าจอเวลาพิมพ์บนมือถือ และใช้พื้นที่ได้เต็มจอขึ้น -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ระบบบันทึกเวลาทำงาน 2026</title>
     
     <!-- Google Fonts: Prompt สำหรับภาษาไทยที่ดูทันสมัย -->
@@ -34,6 +35,7 @@
                     boxShadow: {
                         'glass': '0 10px 40px -10px rgba(0,0,0,0.08)',
                         'soft': '0 20px 40px -15px rgba(0,0,0,0.05)',
+                        'nav': '0 -4px 20px -5px rgba(0,0,0,0.05)',
                     }
                 }
             }
@@ -64,7 +66,7 @@
         }
 
         .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.5);
@@ -78,32 +80,34 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* สำหรับ iPhone Safe Area ด้านล่าง */
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
     </style>
 </head>
 <body class="text-slate-800 antialiased h-screen overflow-hidden flex flex-col md:flex-row">
 
     <!-- Mobile Header -->
-    <div class="md:hidden glass-panel border-b border-slate-200 p-4 flex justify-between items-center z-20 shadow-sm">
+    <div class="md:hidden glass-panel border-b border-slate-200 p-4 flex justify-center items-center z-20 shadow-sm relative">
         <div class="flex items-center gap-2 text-brand-600 font-bold text-xl">
             <i class="ph-fill ph-clock-user text-2xl"></i>
             <span>TimeFlow</span>
         </div>
-        <button id="mobileMenuBtn" class="text-slate-500 hover:text-slate-800 p-2">
-            <i class="ph ph-list text-2xl"></i>
-        </button>
     </div>
 
-    <!-- Sidebar Navigation -->
-    <nav id="sidebar" class="glass-panel w-full md:w-72 h-auto md:h-full flex-shrink-0 border-r border-slate-200 flex flex-col transition-all duration-300 absolute md:relative z-10 -translate-y-full md:translate-y-0 shadow-lg md:shadow-none bg-white md:bg-white/70">
-        <div class="p-6 hidden md:flex items-center gap-3 text-brand-600 font-bold text-2xl tracking-tight">
+    <!-- Desktop Sidebar Navigation -->
+    <nav id="sidebar" class="hidden md:flex glass-panel w-72 h-full flex-shrink-0 border-r border-slate-200 flex-col z-10 shadow-none bg-white/70">
+        <div class="p-6 flex items-center gap-3 text-brand-600 font-bold text-2xl tracking-tight">
             <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 text-white flex items-center justify-center shadow-lg shadow-brand-500/30">
                 <i class="ph-bold ph-clock-user text-xl"></i>
             </div>
             <span>TimeFlow</span>
         </div>
 
-        <div class="flex-1 px-4 py-4 md:py-0 overflow-y-auto flex flex-col gap-2">
-            <p class="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-4 hidden md:block">เมนูหลัก</p>
+        <div class="flex-1 px-4 py-0 overflow-y-auto flex flex-col gap-2">
+            <p class="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-4">เมนูหลัก</p>
             
             <button onclick="switchView('dashboard')" id="nav-dashboard" class="nav-btn flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left transition-all duration-200 bg-brand-50 text-brand-600 font-medium">
                 <i class="ph ph-squares-four text-xl"></i>
@@ -128,7 +132,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-semibold text-slate-800">บัญชีเจ้าของร้าน</p>
-                    <p class="text-xs text-slate-500" id="connectionStatus">กำลังเชื่อมต่อ...</p>
+                    <p class="text-xs text-slate-500" id="connectionStatusDesktop">กำลังเชื่อมต่อ...</p>
                 </div>
             </div>
         </div>
@@ -136,18 +140,19 @@
 
     <!-- Main Content Area -->
     <main class="flex-1 h-full overflow-y-auto bg-slate-50/50 relative">
-        <div class="max-w-6xl mx-auto p-4 md:p-8">
+        <!-- เพิ่ม pb-24 สำหรับมือถือกันไม่ให้ Bottom Nav บังเนื้อหาด้านล่างสุด -->
+        <div class="max-w-6xl mx-auto p-4 pb-24 md:p-8 md:pb-8">
             
             <!-- Header / Real-time Clock -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4">
                 <div>
                     <h1 class="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight" id="pageTitle">แดชบอร์ด</h1>
-                    <p class="text-slate-500 mt-1" id="currentDateDisplay">วันจันทร์ที่ 1 มกราคม 2026</p>
+                    <p class="text-sm md:text-base text-slate-500 mt-1" id="currentDateDisplay">วันจันทร์ที่ 1 มกราคม 2026</p>
                 </div>
                 
                 <div class="glass-panel px-6 py-4 rounded-3xl shadow-soft flex items-center gap-4 w-full md:w-auto justify-center">
-                    <i class="ph-duotone ph-clock text-4xl text-brand-500"></i>
-                    <div class="text-4xl md:text-5xl font-bold text-slate-800 tracking-tighter" id="clockDisplay">
+                    <i class="ph-duotone ph-clock text-3xl md:text-4xl text-brand-500"></i>
+                    <div class="text-3xl md:text-5xl font-bold text-slate-800 tracking-tighter" id="clockDisplay">
                         00:00:00
                     </div>
                 </div>
@@ -155,19 +160,19 @@
 
             <!-- View: Dashboard (Clock In/Out) -->
             <div id="view-dashboard" class="view-section fade-in">
-                <div class="mb-6 flex justify-between items-center">
-                    <h2 class="text-lg font-semibold text-slate-800">เลือกพนักงานเพื่อลงเวลา</h2>
+                <div class="mb-4 md:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <h2 class="text-base md:text-lg font-semibold text-slate-800">เลือกพนักงานเพื่อลงเวลา</h2>
                     <div class="flex gap-2">
-                        <span class="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
+                        <span class="flex items-center gap-1 text-[10px] md:text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
                             <span class="w-2 h-2 rounded-full bg-emerald-500"></span> กำลังทำงาน (<span id="countIn">0</span>)
                         </span>
-                        <span class="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                        <span class="flex items-center gap-1 text-[10px] md:text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
                             <span class="w-2 h-2 rounded-full bg-slate-400"></span> ออกงานแล้ว (<span id="countOut">0</span>)
                         </span>
                     </div>
                 </div>
 
-                <div id="employeeGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                <div id="employeeGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                     <!-- Employee Cards will be rendered here -->
                     <div class="col-span-full text-center py-12 text-slate-400">
                         <i class="ph-duotone ph-spinner-gap animate-spin text-4xl mb-3"></i>
@@ -178,24 +183,24 @@
 
             <!-- View: Manage Employees -->
             <div id="view-employees" class="view-section hidden fade-in">
-                <div class="bg-white rounded-3xl shadow-soft border border-slate-100 overflow-hidden">
-                    <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                        <h2 class="text-lg font-semibold text-slate-800">รายชื่อพนักงานทั้งหมด</h2>
-                        <button onclick="openEmployeeModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2">
-                            <i class="ph-bold ph-plus"></i> เพิ่มพนักงาน
+                <div class="bg-white rounded-2xl md:rounded-3xl shadow-soft border border-slate-100 overflow-hidden">
+                    <div class="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center">
+                        <h2 class="text-base md:text-lg font-semibold text-slate-800">รายชื่อพนักงานทั้งหมด</h2>
+                        <button onclick="openEmployeeModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-medium transition-colors flex items-center gap-1 md:gap-2">
+                            <i class="ph-bold ph-plus"></i> <span class="hidden sm:inline">เพิ่มพนักงาน</span><span class="sm:hidden">เพิ่ม</span>
                         </button>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                    <div class="overflow-x-auto pb-2">
+                        <table class="w-full text-left border-collapse min-w-[500px]">
                             <thead>
-                                <tr class="bg-slate-50 text-slate-500 text-sm">
-                                    <th class="px-6 py-4 font-medium">ชื่อ-นามสกุล</th>
-                                    <th class="px-6 py-4 font-medium">ตำแหน่ง</th>
-                                    <th class="px-6 py-4 font-medium">สถานะปัจจุบัน</th>
-                                    <th class="px-6 py-4 font-medium text-right">จัดการ</th>
+                                <tr class="bg-slate-50 text-slate-500 text-xs md:text-sm">
+                                    <th class="px-4 md:px-6 py-3 md:py-4 font-medium whitespace-nowrap">ชื่อ-นามสกุล</th>
+                                    <th class="px-4 md:px-6 py-3 md:py-4 font-medium whitespace-nowrap">ตำแหน่ง</th>
+                                    <th class="px-4 md:px-6 py-3 md:py-4 font-medium whitespace-nowrap">สถานะปัจจุบัน</th>
+                                    <th class="px-4 md:px-6 py-3 md:py-4 font-medium text-right whitespace-nowrap">จัดการ</th>
                                 </tr>
                             </thead>
-                            <tbody id="employeeTableBody" class="divide-y divide-slate-100 text-sm">
+                            <tbody id="employeeTableBody" class="divide-y divide-slate-100 text-xs md:text-sm">
                                 <!-- Employee rows here -->
                             </tbody>
                         </table>
@@ -205,22 +210,22 @@
 
             <!-- View: Logs -->
             <div id="view-logs" class="view-section hidden fade-in">
-                <div class="bg-white rounded-3xl shadow-soft border border-slate-100 overflow-hidden">
-                    <div class="p-6 border-b border-slate-100">
-                        <h2 class="text-lg font-semibold text-slate-800">ประวัติการลงเวลาล่าสุด</h2>
-                        <p class="text-sm text-slate-500">แสดงข้อมูลการเข้า-ออกงานเรียงตามเวลาล่าสุด</p>
+                <div class="bg-white rounded-2xl md:rounded-3xl shadow-soft border border-slate-100 overflow-hidden">
+                    <div class="p-4 md:p-6 border-b border-slate-100 flex flex-col gap-1">
+                        <h2 class="text-base md:text-lg font-semibold text-slate-800">ประวัติการลงเวลาล่าสุด</h2>
+                        <p class="text-xs md:text-sm text-slate-500">แสดงข้อมูลการเข้า-ออกงานเรียงตามเวลาล่าสุด</p>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                    <div class="overflow-x-auto pb-2">
+                        <table class="w-full text-left border-collapse min-w-[500px]">
                             <thead>
-                                <tr class="bg-slate-50 text-slate-500 text-sm">
-                                    <th class="px-6 py-4 font-medium">วันที่-เวลา</th>
-                                    <th class="px-6 py-4 font-medium">พนักงาน</th>
-                                    <th class="px-6 py-4 font-medium">ประเภท</th>
-                                    <th class="px-6 py-4 font-medium text-right">จัดการ</th>
+                                <tr class="bg-slate-50 text-slate-500 text-xs md:text-sm">
+                                    <th class="px-4 md:px-6 py-3 md:py-4 font-medium whitespace-nowrap">วันที่-เวลา</th>
+                                    <th class="px-4 md:px-6 py-3 md:py-4 font-medium whitespace-nowrap">พนักงาน</th>
+                                    <th class="px-4 md:px-6 py-3 md:py-4 font-medium whitespace-nowrap">ประเภท</th>
+                                    <th class="px-4 md:px-6 py-3 md:py-4 font-medium text-right whitespace-nowrap">จัดการ</th>
                                 </tr>
                             </thead>
-                            <tbody id="logsTableBody" class="divide-y divide-slate-100 text-sm">
+                            <tbody id="logsTableBody" class="divide-y divide-slate-100 text-xs md:text-sm">
                                 <!-- Logs rows here -->
                             </tbody>
                         </table>
@@ -231,45 +236,65 @@
         </div>
     </main>
 
+    <!-- Mobile Bottom Navigation -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-white/90 backdrop-blur-xl border-t border-slate-200 z-30 flex justify-around items-center pb-safe shadow-nav">
+        <button onclick="switchView('dashboard')" id="mobile-nav-dashboard" class="mobile-nav-btn flex-1 py-3 flex flex-col items-center gap-1 text-brand-600 transition-colors">
+            <i class="ph-fill ph-squares-four text-2xl"></i>
+            <span class="text-[10px] font-medium">ลงเวลา</span>
+        </button>
+        <button onclick="switchView('employees')" id="mobile-nav-employees" class="mobile-nav-btn flex-1 py-3 flex flex-col items-center gap-1 text-slate-400 transition-colors">
+            <i class="ph-fill ph-users text-2xl"></i>
+            <span class="text-[10px] font-medium">พนักงาน</span>
+        </button>
+        <button onclick="switchView('logs')" id="mobile-nav-logs" class="mobile-nav-btn flex-1 py-3 flex flex-col items-center gap-1 text-slate-400 transition-colors">
+            <i class="ph-fill ph-list-dashes text-2xl"></i>
+            <span class="text-[10px] font-medium">ประวัติ</span>
+        </button>
+        <!-- Mobile Status Indicator -->
+        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white px-3 py-0.5 rounded-full shadow-sm border border-slate-100 text-[9px] flex items-center gap-1 hidden" id="mobileConnectionStatus">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> เชื่อมต่อแล้ว
+        </div>
+    </nav>
+
     <!-- Modals -->
     <!-- Overlay -->
     <div id="modalOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
 
     <!-- Clock Action Modal -->
     <div id="actionModal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-sm bg-white rounded-3xl shadow-2xl z-50 hidden opacity-0 scale-95 transition-all duration-300 overflow-hidden">
-        <div class="p-6 text-center relative">
+        <div class="p-5 md:p-6 text-center relative">
             <button onclick="closeModal('actionModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-full p-1.5 transition-colors">
                 <i class="ph-bold ph-x text-lg"></i>
             </button>
             
-            <div class="w-20 h-20 mx-auto rounded-full bg-slate-100 border-4 border-white shadow-md flex items-center justify-center text-3xl font-bold text-slate-400 mb-4" id="actionAvatar">
+            <div class="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full bg-slate-100 border-4 border-white shadow-md flex items-center justify-center text-2xl md:text-3xl font-bold text-slate-400 mb-3" id="actionAvatar">
                 A
             </div>
             
-            <h3 class="text-xl font-bold text-slate-800" id="actionName">ชื่อพนักงาน</h3>
-            <p class="text-slate-500 text-sm mb-6" id="actionPosition">ตำแหน่ง</p>
+            <h3 class="text-lg md:text-xl font-bold text-slate-800" id="actionName">ชื่อพนักงาน</h3>
+            <p class="text-slate-500 text-xs md:text-sm mb-5" id="actionPosition">ตำแหน่ง</p>
 
-            <div class="bg-slate-50 rounded-2xl p-4 mb-6">
-                <p class="text-xs text-slate-500 mb-1">เวลาปัจจุบัน</p>
-                <p class="text-2xl font-bold text-brand-600" id="actionClock">00:00</p>
+            <div class="bg-slate-50 rounded-2xl p-3 md:p-4 mb-5">
+                <p class="text-[10px] md:text-xs text-slate-500 mb-1">เวลาปัจจุบัน</p>
+                <p class="text-xl md:text-2xl font-bold text-brand-600" id="actionClock">00:00</p>
             </div>
 
-            <div class="flex gap-3">
-                <button id="btnClockIn" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-2xl font-medium shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 flex items-center justify-center gap-2">
-                    <i class="ph-bold ph-sign-in"></i> เข้างาน
+            <div class="flex gap-2 md:gap-3">
+                <button id="btnClockIn" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-2xl font-medium shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 flex items-center justify-center gap-1.5 text-sm md:text-base">
+                    <i class="ph-bold ph-sign-in text-lg"></i> เข้างาน
                 </button>
-                <button id="btnClockOut" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3.5 rounded-2xl font-medium shadow-lg shadow-amber-500/30 transition-transform active:scale-95 flex items-center justify-center gap-2">
-                    <i class="ph-bold ph-sign-out"></i> ออกงาน
+                <button id="btnClockOut" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-2xl font-medium shadow-lg shadow-amber-500/30 transition-transform active:scale-95 flex items-center justify-center gap-1.5 text-sm md:text-base">
+                    <i class="ph-bold ph-sign-out text-lg"></i> ออกงาน
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Add Employee Modal -->
-    <div id="addEmployeeModal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-lg bg-white rounded-3xl shadow-2xl z-50 hidden opacity-0 scale-95 transition-all duration-300 max-h-[90vh] overflow-y-auto">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-slate-800" id="employeeModalTitle">เพิ่มพนักงานใหม่</h3>
+    <div id="addEmployeeModal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-lg bg-white rounded-3xl shadow-2xl z-50 hidden opacity-0 scale-95 transition-all duration-300 max-h-[85vh] overflow-y-auto">
+        <div class="p-5 md:p-6 pb-safe">
+            <div class="flex justify-between items-center mb-4 md:mb-6">
+                <h3 class="text-lg md:text-xl font-bold text-slate-800" id="employeeModalTitle">เพิ่มพนักงานใหม่</h3>
                 <button onclick="closeModal('addEmployeeModal')" class="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-full p-1.5 transition-colors">
                     <i class="ph-bold ph-x text-lg"></i>
                 </button>
@@ -277,32 +302,32 @@
             
             <form id="addEmployeeForm" onsubmit="handleFormSubmit(event)">
                 <div class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อ-นามสกุล</label>
-                            <input type="text" id="empName" required class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow bg-slate-50 focus:bg-white" placeholder="เช่น สมชาย ใจดี">
+                            <label class="block text-xs md:text-sm font-medium text-slate-700 mb-1">ชื่อ-นามสกุล</label>
+                            <input type="text" id="empName" required class="w-full px-4 py-2.5 md:py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow bg-slate-50 focus:bg-white text-sm md:text-base" placeholder="เช่น สมชาย ใจดี">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">ตำแหน่ง</label>
-                            <input type="text" id="empPosition" required class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow bg-slate-50 focus:bg-white" placeholder="เช่น พนักงานขาย">
+                            <label class="block text-xs md:text-sm font-medium text-slate-700 mb-1">ตำแหน่ง</label>
+                            <input type="text" id="empPosition" required class="w-full px-4 py-2.5 md:py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow bg-slate-50 focus:bg-white text-sm md:text-base" placeholder="เช่น พนักงานขาย">
                         </div>
                     </div>
                     
-                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-4">
-                        <h4 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="ph-fill ph-clock-user"></i> ตั้งค่าเวลาทำงานและวันหยุด</h4>
-                        <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-50 p-3 md:p-4 rounded-2xl border border-slate-100 space-y-3 md:space-y-4">
+                        <h4 class="text-xs md:text-sm font-bold text-slate-800 flex items-center gap-2"><i class="ph-fill ph-clock-user"></i> ตั้งค่าเวลาทำงานและวันหยุด</h4>
+                        <div class="grid grid-cols-2 gap-3 md:gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 mb-1">เวลาเข้างาน</label>
-                                <input type="time" id="empStartTime" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-shadow bg-white">
+                                <label class="block text-[10px] md:text-xs font-medium text-slate-500 mb-1">เวลาเข้างาน</label>
+                                <input type="time" id="empStartTime" class="w-full px-3 md:px-4 py-2 md:py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-shadow bg-white text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 mb-1">เวลาเลิกงาน</label>
-                                <input type="time" id="empEndTime" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-shadow bg-white">
+                                <label class="block text-[10px] md:text-xs font-medium text-slate-500 mb-1">เวลาเลิกงาน</label>
+                                <input type="time" id="empEndTime" class="w-full px-3 md:px-4 py-2 md:py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-shadow bg-white text-sm">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-500 mb-1">วันหยุดประจำสัปดาห์</label>
-                            <select id="empDayOff" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-shadow bg-white appearance-none">
+                            <label class="block text-[10px] md:text-xs font-medium text-slate-500 mb-1">วันหยุดประจำสัปดาห์</label>
+                            <select id="empDayOff" class="w-full px-3 md:px-4 py-2 md:py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-shadow bg-white appearance-none text-sm">
                                 <option value="">ไม่มีวันหยุดประจำ</option>
                                 <option value="Monday">วันจันทร์</option>
                                 <option value="Tuesday">วันอังคาร</option>
@@ -315,26 +340,26 @@
                         </div>
                     </div>
 
-                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-4">
-                        <h4 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="ph-fill ph-money"></i> ตั้งค่าผลตอบแทน</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-50 p-3 md:p-4 rounded-2xl border border-slate-100 space-y-3 md:space-y-4">
+                        <h4 class="text-xs md:text-sm font-bold text-slate-800 flex items-center gap-2"><i class="ph-fill ph-money"></i> ตั้งค่าผลตอบแทน</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 mb-1">เงินเดือนรายสัปดาห์ (บาท)</label>
-                                <input type="number" id="empWeeklySalary" min="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-shadow bg-white" placeholder="0">
+                                <label class="block text-[10px] md:text-xs font-medium text-slate-500 mb-1">เงินเดือนรายสัปดาห์ (บาท)</label>
+                                <input type="number" id="empWeeklySalary" min="0" class="w-full px-3 md:px-4 py-2 md:py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-shadow bg-white text-sm" placeholder="0">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 mb-1">อัตราโอที (บาท/ชั่วโมง)</label>
-                                <input type="number" id="empOtRate" min="0" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-shadow bg-white" placeholder="0">
+                                <label class="block text-[10px] md:text-xs font-medium text-slate-500 mb-1">อัตราโอที (บาท/ชั่วโมง)</label>
+                                <input type="number" id="empOtRate" min="0" class="w-full px-3 md:px-4 py-2 md:py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-shadow bg-white text-sm" placeholder="0">
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="mt-8 flex gap-3">
-                    <button type="button" onclick="closeModal('addEmployeeModal')" class="flex-1 px-4 py-3 rounded-2xl font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                <div class="mt-6 md:mt-8 flex gap-2 md:gap-3">
+                    <button type="button" onclick="closeModal('addEmployeeModal')" class="flex-1 px-4 py-2.5 md:py-3 rounded-2xl font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors text-sm md:text-base">
                         ยกเลิก
                     </button>
-                    <button type="submit" id="saveEmpBtn" class="flex-1 px-4 py-3 rounded-2xl font-medium text-white bg-slate-800 hover:bg-slate-700 shadow-lg shadow-slate-800/20 transition-all flex justify-center items-center gap-2">
+                    <button type="submit" id="saveEmpBtn" class="flex-1 px-4 py-2.5 md:py-3 rounded-2xl font-medium text-white bg-slate-800 hover:bg-slate-700 shadow-lg shadow-slate-800/20 transition-all flex justify-center items-center gap-2 text-sm md:text-base">
                         บันทึกข้อมูล
                     </button>
                 </div>
@@ -344,9 +369,9 @@
 
     <!-- Edit Log Modal -->
     <div id="editLogModal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-sm bg-white rounded-3xl shadow-2xl z-50 hidden opacity-0 scale-95 transition-all duration-300">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-slate-800">แก้ไขเวลาลงงาน</h3>
+        <div class="p-5 md:p-6 pb-safe">
+            <div class="flex justify-between items-center mb-4 md:mb-6">
+                <h3 class="text-lg md:text-xl font-bold text-slate-800">แก้ไขเวลาลงงาน</h3>
                 <button onclick="closeModal('editLogModal')" class="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-full p-1.5 transition-colors">
                     <i class="ph-bold ph-x text-lg"></i>
                 </button>
@@ -355,20 +380,20 @@
             <form id="editLogForm" onsubmit="handleEditLogSubmit(event)">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">วันที่</label>
-                        <input type="date" id="editLogDate" required class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 focus:bg-white">
+                        <label class="block text-xs md:text-sm font-medium text-slate-700 mb-1">วันที่</label>
+                        <input type="date" id="editLogDate" required class="w-full px-4 py-2.5 md:py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 focus:bg-white text-sm md:text-base">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">เวลา</label>
-                        <input type="time" id="editLogTime" required class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 focus:bg-white">
+                        <label class="block text-xs md:text-sm font-medium text-slate-700 mb-1">เวลา</label>
+                        <input type="time" id="editLogTime" required class="w-full px-4 py-2.5 md:py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 focus:bg-white text-sm md:text-base">
                     </div>
                 </div>
                 
-                <div class="mt-8 flex gap-3">
-                    <button type="button" onclick="closeModal('editLogModal')" class="flex-1 px-4 py-3 rounded-2xl font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                <div class="mt-6 md:mt-8 flex gap-2 md:gap-3">
+                    <button type="button" onclick="closeModal('editLogModal')" class="flex-1 px-4 py-2.5 md:py-3 rounded-2xl font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors text-sm md:text-base">
                         ยกเลิก
                     </button>
-                    <button type="submit" id="saveLogBtn" class="flex-1 px-4 py-3 rounded-2xl font-medium text-white bg-brand-600 hover:bg-brand-700 shadow-lg shadow-brand-500/20 transition-all flex justify-center items-center gap-2">
+                    <button type="submit" id="saveLogBtn" class="flex-1 px-4 py-2.5 md:py-3 rounded-2xl font-medium text-white bg-brand-600 hover:bg-brand-700 shadow-lg shadow-brand-500/20 transition-all flex justify-center items-center gap-2 text-sm md:text-base">
                         บันทึกเวลาใหม่
                     </button>
                 </div>
@@ -377,7 +402,8 @@
     </div>
 
     <!-- Toast Notification -->
-    <div id="toastContainer" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <!-- ปรับตำแหน่ง Toast บนมือถือให้อยู่เหนือ Bottom Nav -->
+    <div id="toastContainer" class="fixed bottom-20 md:bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-[90%] md:w-auto items-center"></div>
 
     <!-- Firebase SDK Setup -->
     <script type="module">
@@ -418,8 +444,8 @@
             const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
             const icon = type === 'success' ? 'ph-check-circle' : 'ph-warning-circle';
             
-            toast.className = `${bgColor} text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 transform translate-y-10 opacity-0 transition-all duration-300`;
-            toast.innerHTML = `<i class="ph-bold ${icon} text-xl"></i><span class="font-medium">${message}</span>`;
+            toast.className = `${bgColor} text-white px-4 py-2.5 md:px-6 md:py-3 rounded-2xl shadow-xl flex items-center justify-center gap-2 transform translate-y-10 opacity-0 transition-all duration-300 w-full md:w-max text-sm md:text-base`;
+            toast.innerHTML = `<i class="ph-bold ${icon} text-lg md:text-xl"></i><span class="font-medium">${message}</span>`;
             
             container.appendChild(toast);
             
@@ -438,21 +464,25 @@
         // Setup Authentication (Required before Firestore access)
         async function initAuth() {
             try {
-                // Use Anonymous Auth so owners don't have to login just to record time initially
-                // Note: Ensure Anonymous Auth is enabled in Firebase Console!
                 await signInAnonymously(auth);
             } catch (error) {
                 console.error("Auth Error:", error);
                 showToast("ไม่สามารถเชื่อมต่อระบบได้ กรุณาตรวจสอบ Firebase Auth", "error");
-                document.getElementById('connectionStatus').innerText = "เชื่อมต่อล้มเหลว";
-                document.getElementById('connectionStatus').classList.add('text-red-500');
+                document.getElementById('connectionStatusDesktop').innerText = "เชื่อมต่อล้มเหลว";
+                document.getElementById('connectionStatusDesktop').classList.add('text-red-500');
             }
         }
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                document.getElementById('connectionStatus').innerHTML = '<span class="flex items-center gap-1 text-emerald-600"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> เชื่อมต่อฐานข้อมูลแล้ว</span>';
+                document.getElementById('connectionStatusDesktop').innerHTML = '<span class="flex items-center gap-1 text-emerald-600"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> เชื่อมต่อฐานข้อมูลแล้ว</span>';
+                
+                // Show tiny indicator on mobile briefly
+                const mobileStatus = document.getElementById('mobileConnectionStatus');
+                mobileStatus.classList.remove('hidden');
+                setTimeout(() => mobileStatus.classList.add('hidden'), 3000);
+
                 // Load data after auth
                 setupRealtimeListeners();
             }
@@ -462,7 +492,6 @@
         function setupRealtimeListeners() {
             if (!currentUser) return;
 
-            // Define collections (Using standard root collections for user's DB)
             const empCollection = collection(db, 'employees');
             const logsCollection = collection(db, 'time_logs');
 
@@ -489,7 +518,6 @@
                     id: doc.id,
                     ...doc.data()
                 }));
-                // Sort by timestamp descending locally (avoids needing composite index)
                 logsData.sort((a, b) => {
                     const timeA = a.timestamp?.toMillis() || 0;
                     const timeB = b.timestamp?.toMillis() || 0;
@@ -506,10 +534,10 @@
             if (employeesData.length === 0) {
                 container.innerHTML = `
                     <div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-3xl border border-slate-100 border-dashed">
-                        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">👻</div>
-                        <p class="font-medium text-slate-600">ยังไม่มีข้อมูลพนักงาน</p>
-                        <p class="text-sm mt-1">เพิ่มพนักงานในเมนู "จัดการพนักงาน"</p>
-                        <button onclick="switchView('employees'); setTimeout(()=>openModal('addEmployeeModal'), 300)" class="mt-4 text-brand-600 text-sm font-medium hover:underline">เพิ่มพนักงานใหม่</button>
+                        <div class="w-12 h-12 md:w-16 md:h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-xl md:text-2xl">👻</div>
+                        <p class="font-medium text-slate-600 text-sm md:text-base">ยังไม่มีข้อมูลพนักงาน</p>
+                        <p class="text-xs md:text-sm mt-1">เพิ่มพนักงานในเมนู "จัดการพนักงาน"</p>
+                        <button onclick="switchView('employees'); setTimeout(()=>openModal('addEmployeeModal'), 300)" class="mt-4 text-brand-600 text-xs md:text-sm font-medium hover:underline">เพิ่มพนักงานใหม่</button>
                     </div>`;
                 document.getElementById('countIn').innerText = 0;
                 document.getElementById('countOut').innerText = 0;
@@ -527,30 +555,30 @@
                 
                 const initials = emp.name.substring(0, 1);
                 
-                // Card styling based on status
                 const cardClass = isWorking 
                     ? "bg-white border-brand-200 shadow-lg shadow-brand-100/50 hover:shadow-brand-200/50 ring-1 ring-brand-100" 
                     : "bg-white border-slate-100 shadow-soft hover:shadow-lg hover:border-slate-200 opacity-90";
                 
                 const statusDot = isWorking 
-                    ? '<span class="absolute top-4 right-4 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-50"></span>'
-                    : '<span class="absolute top-4 right-4 w-3 h-3 rounded-full bg-slate-300"></span>';
+                    ? '<span class="absolute top-3 right-3 md:top-4 md:right-4 w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-50"></span>'
+                    : '<span class="absolute top-3 right-3 md:top-4 md:right-4 w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-slate-300"></span>';
 
                 const avatarClass = isWorking
                     ? "bg-gradient-to-br from-brand-400 to-brand-600 text-white shadow-md shadow-brand-500/30"
                     : "bg-slate-100 text-slate-500";
 
+                // ปรับขนาด Padding และ Avatar ให้เหมาะกับมือถือ
                 html += `
-                    <div onclick="openActionModal('${emp.id}')" class="${cardClass} rounded-3xl p-5 cursor-pointer transition-all duration-300 transform hover:-translate-y-1 relative group">
+                    <div onclick="openActionModal('${emp.id}')" class="${cardClass} rounded-2xl md:rounded-3xl p-4 md:p-5 cursor-pointer transition-all duration-300 transform hover:-translate-y-1 relative group">
                         ${statusDot}
-                        <div class="w-14 h-14 rounded-2xl ${avatarClass} flex items-center justify-center text-2xl font-bold mb-4 mx-auto md:mx-0 transition-transform group-hover:scale-105">
+                        <div class="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl ${avatarClass} flex items-center justify-center text-lg md:text-2xl font-bold mb-3 mx-auto md:mx-0 transition-transform group-hover:scale-105">
                             ${initials}
                         </div>
                         <div class="text-center md:text-left">
-                            <h3 class="font-bold text-slate-800 truncate">${emp.name}</h3>
-                            <p class="text-xs text-slate-500 truncate mt-0.5">${emp.position}</p>
+                            <h3 class="font-bold text-slate-800 text-sm md:text-base truncate">${emp.name}</h3>
+                            <p class="text-[10px] md:text-xs text-slate-500 truncate mt-0.5">${emp.position}</p>
                             
-                            <div class="mt-4 flex items-center justify-center md:justify-start gap-1.5 text-xs font-medium">
+                            <div class="mt-2 md:mt-4 flex items-center justify-center md:justify-start gap-1 text-[10px] md:text-xs font-medium">
                                 ${isWorking 
                                     ? `<i class="ph-fill ph-briefcase text-emerald-500"></i> <span class="text-emerald-600">กำลังทำงาน</span>` 
                                     : `<i class="ph-fill ph-house text-slate-400"></i> <span class="text-slate-500">ออกงานแล้ว</span>`}
@@ -572,39 +600,42 @@
             
             employeesData.forEach(emp => {
                 const statusText = emp.status === 'in' 
-                    ? '<span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-medium border border-emerald-100">กำลังทำงาน</span>' 
-                    : '<span class="px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 text-xs font-medium border border-slate-200">ออกงานแล้ว</span>';
+                    ? '<span class="px-2 py-0.5 md:px-2.5 md:py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] md:text-xs font-medium border border-emerald-100">กำลังทำงาน</span>' 
+                    : '<span class="px-2 py-0.5 md:px-2.5 md:py-1 rounded-full bg-slate-50 text-slate-600 text-[10px] md:text-xs font-medium border border-slate-200">ออกงานแล้ว</span>';
 
                 const workTimeStr = (emp.workStartTime && emp.workEndTime) ? `${emp.workStartTime} - ${emp.workEndTime}` : 'ไม่ได้ตั้งค่าเวลา';
                 
                 html += `
-                    <tr class="hover:bg-slate-50 transition-colors group">
-                        <td class="px-6 py-4 font-medium text-slate-800">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs">
+                    <tr class="hover:bg-slate-50 transition-colors group border-b border-slate-50 md:border-none">
+                        <td class="px-4 md:px-6 py-3 md:py-4 font-medium text-slate-800 whitespace-nowrap">
+                            <div class="flex items-center gap-2 md:gap-3">
+                                <div class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs">
                                     ${emp.name.substring(0,1)}
                                 </div>
                                 <div>
                                     ${emp.name}
-                                    <div class="text-[10px] text-slate-400 font-normal mt-0.5"><i class="ph-fill ph-clock"></i> ${workTimeStr}</div>
+                                    <div class="text-[9px] md:text-[10px] text-slate-400 font-normal mt-0.5"><i class="ph-fill ph-clock"></i> ${workTimeStr}</div>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-slate-500">${emp.position}</td>
-                        <td class="px-6 py-4">${statusText}</td>
-                        <td class="px-6 py-4 text-right">
-                            <button onclick="editEmployee('${emp.id}')" class="text-slate-400 hover:text-brand-600 p-2 rounded-lg hover:bg-brand-50 transition-colors opacity-0 group-hover:opacity-100" title="แก้ไขข้อมูล">
-                                <i class="ph-bold ph-pencil-simple"></i>
-                            </button>
-                            <button onclick="deleteEmployee('${emp.id}')" class="text-slate-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100" title="ลบพนักงาน">
-                                <i class="ph-bold ph-trash"></i>
-                            </button>
+                        <td class="px-4 md:px-6 py-3 md:py-4 text-slate-500 whitespace-nowrap">${emp.position}</td>
+                        <td class="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">${statusText}</td>
+                        <td class="px-4 md:px-6 py-3 md:py-4 text-right whitespace-nowrap">
+                            <!-- บนมือถือให้ปุ่มแสดงตลอดเวลา (opacity-100 md:opacity-0) -->
+                            <div class="flex justify-end gap-1">
+                                <button onclick="editEmployee('${emp.id}')" class="text-slate-400 hover:text-brand-600 p-2 md:p-2 rounded-lg hover:bg-brand-50 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100" title="แก้ไขข้อมูล">
+                                    <i class="ph-bold ph-pencil-simple text-base"></i>
+                                </button>
+                                <button onclick="deleteEmployee('${emp.id}')" class="text-slate-400 hover:text-red-500 p-2 md:p-2 rounded-lg hover:bg-red-50 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100" title="ลบพนักงาน">
+                                    <i class="ph-bold ph-trash text-base"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `;
             });
             
-            if(!html) html = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">ไม่มีข้อมูลพนักงาน</td></tr>`;
+            if(!html) html = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400 text-sm">ไม่มีข้อมูลพนักงาน</td></tr>`;
             tbody.innerHTML = html;
         }
 
@@ -613,11 +644,9 @@
             const tbody = document.getElementById('logsTableBody');
             let html = '';
             
-            // Show only last 50 logs for performance
             const displayLogs = logsData.slice(0, 50);
             
             displayLogs.forEach(log => {
-                // Format Timestamp safely
                 let dateStr = 'ไม่ระบุเวลา';
                 if (log.timestamp) {
                     const date = log.timestamp.toDate();
@@ -629,24 +658,25 @@
 
                 const isClockIn = log.action === 'in';
                 const actionBadge = isClockIn
-                    ? '<span class="flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-medium"><i class="ph-bold ph-sign-in"></i> เข้างาน</span>'
-                    : '<span class="flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 text-xs font-medium"><i class="ph-bold ph-sign-out"></i> ออกงาน</span>';
+                    ? '<span class="flex w-fit items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] md:text-xs font-medium"><i class="ph-bold ph-sign-in"></i> เข้างาน</span>'
+                    : '<span class="flex w-fit items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full bg-amber-50 text-amber-600 text-[10px] md:text-xs font-medium"><i class="ph-bold ph-sign-out"></i> ออกงาน</span>';
 
                 html += `
-                    <tr class="hover:bg-slate-50 transition-colors group">
-                        <td class="px-6 py-4 text-slate-500 text-xs whitespace-nowrap">${dateStr}</td>
-                        <td class="px-6 py-4 font-medium text-slate-800">${log.employeeName}</td>
-                        <td class="px-6 py-4">${actionBadge}</td>
-                        <td class="px-6 py-4 text-right">
-                            <button onclick="editLogTime('${log.id}')" class="text-slate-400 hover:text-brand-600 p-2 rounded-lg hover:bg-brand-50 transition-colors opacity-0 group-hover:opacity-100" title="แก้ไขเวลา">
-                                <i class="ph-bold ph-pencil-simple"></i>
+                    <tr class="hover:bg-slate-50 transition-colors group border-b border-slate-50 md:border-none">
+                        <td class="px-4 md:px-6 py-3 md:py-4 text-slate-500 text-[10px] md:text-xs whitespace-nowrap">${dateStr}</td>
+                        <td class="px-4 md:px-6 py-3 md:py-4 font-medium text-slate-800 whitespace-nowrap">${log.employeeName}</td>
+                        <td class="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap">${actionBadge}</td>
+                        <td class="px-4 md:px-6 py-3 md:py-4 text-right whitespace-nowrap">
+                            <!-- บนมือถือให้ปุ่มแสดงตลอดเวลา (opacity-100 md:opacity-0) -->
+                            <button onclick="editLogTime('${log.id}')" class="text-slate-400 hover:text-brand-600 p-2 rounded-lg hover:bg-brand-50 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100" title="แก้ไขเวลา">
+                                <i class="ph-bold ph-pencil-simple text-base"></i>
                             </button>
                         </td>
                     </tr>
                 `;
             });
             
-            if(!html) html = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">ยังไม่มีประวัติการลงเวลา</td></tr>`;
+            if(!html) html = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400 text-sm">ยังไม่มีประวัติการลงเวลา</td></tr>`;
             tbody.innerHTML = html;
         }
 
@@ -700,15 +730,13 @@
             if(!data.name || !data.position) return;
 
             try {
-                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> กำลังบันทึก...';
+                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> บันทึก...';
                 btn.disabled = true;
 
                 if (editingEmployeeId) {
-                    // Update existing
                     await updateDoc(doc(db, 'employees', editingEmployeeId), data);
                     showToast('อัปเดตข้อมูลพนักงานสำเร็จ');
                 } else {
-                    // Add new
                     data.status = 'out';
                     data.createdAt = serverTimestamp();
                     await addDoc(collection(db, 'employees'), data);
@@ -740,7 +768,6 @@
             const btnIn = document.getElementById('btnClockIn');
             const btnOut = document.getElementById('btnClockOut');
 
-            // UI Logic: Dim the illogical button
             if (emp.status === 'in') {
                 btnIn.classList.replace('bg-emerald-500', 'bg-slate-200');
                 btnIn.classList.replace('text-white', 'text-slate-400');
@@ -769,14 +796,12 @@
         window.recordTime = async function(action) {
             if(!selectedEmployee || !currentUser) return;
             
-            // Prevent double clocking
             if(selectedEmployee.status === action) {
                 showToast(action === 'in' ? 'พนักงานเข้างานอยู่แล้ว' : 'พนักงานออกงานไปแล้ว', 'error');
                 return;
             }
 
             try {
-                // 1. Create Log Entry
                 await addDoc(collection(db, 'time_logs'), {
                     employeeId: selectedEmployee.id,
                     employeeName: selectedEmployee.name,
@@ -784,7 +809,6 @@
                     timestamp: serverTimestamp()
                 });
 
-                // 2. Update Employee Status
                 const empRef = doc(db, 'employees', selectedEmployee.id);
                 await updateDoc(empRef, {
                     status: action,
@@ -809,13 +833,11 @@
             editingLogId = logId;
             const dateObj = log.timestamp.toDate();
 
-            // Format YYYY-MM-DD for date input
             const year = dateObj.getFullYear();
             const month = String(dateObj.getMonth() + 1).padStart(2, '0');
             const day = String(dateObj.getDate()).padStart(2, '0');
             document.getElementById('editLogDate').value = `${year}-${month}-${day}`;
 
-            // Format HH:MM for time input
             const hours = String(dateObj.getHours()).padStart(2, '0');
             const minutes = String(dateObj.getMinutes()).padStart(2, '0');
             document.getElementById('editLogTime').value = `${hours}:${minutes}`;
@@ -836,10 +858,9 @@
             const btn = document.getElementById('saveLogBtn');
 
             try {
-                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> กำลังบันทึก...';
+                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> บันทึก...';
                 btn.disabled = true;
 
-                // Create JS Date and convert to Firestore Timestamp
                 const newDateObj = new Date(`${dateStr}T${timeStr}:00`);
                 const newTimestamp = Timestamp.fromDate(newDateObj);
 
@@ -860,13 +881,10 @@
             }
         };
 
-        // Delete Employee (Simple implementation)
+        // Delete Employee
         window.deleteEmployee = async function(empId) {
-            // Note: In real app, we might just soft-delete (mark inactive). 
-            // For simplicity in this demo, we instruct the user.
             if(confirm("ในระบบจัดการ คุณต้องการลบพนักงานนี้จริงๆ หรือไม่? (ประวัติการลงเวลาจะยังอยู่)")) {
                 try {
-                    // Requires import of deleteDoc. Added dynamic import pattern for brevity or use alternative.
                     const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
                     await deleteDoc(doc(db, 'employees', empId));
                     showToast('ลบพนักงานสำเร็จ');
@@ -893,7 +911,6 @@
                 actionClock.innerText = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
             }
 
-            // Update Date only once a day or on load
             const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('currentDateDisplay').innerText = now.toLocaleDateString('th-TH', dateOptions);
         }
@@ -902,16 +919,27 @@
 
         // View Navigation
         window.switchView = function(viewId) {
-            // Update Nav Buttons
+            // Update Desktop Nav Buttons
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-brand-50', 'text-brand-600', 'font-medium');
                 btn.classList.add('text-slate-500');
             });
             
-            const activeBtn = document.getElementById(`nav-${viewId}`);
-            if(activeBtn) {
-                activeBtn.classList.add('bg-brand-50', 'text-brand-600', 'font-medium');
-                activeBtn.classList.remove('text-slate-500');
+            const activeDesktopBtn = document.getElementById(`nav-${viewId}`);
+            if(activeDesktopBtn) {
+                activeDesktopBtn.classList.add('bg-brand-50', 'text-brand-600', 'font-medium');
+                activeDesktopBtn.classList.remove('text-slate-500');
+            }
+
+            // Update Mobile Nav Buttons
+            document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+                btn.classList.remove('text-brand-600');
+                btn.classList.add('text-slate-400');
+            });
+            const activeMobileBtn = document.getElementById(`mobile-nav-${viewId}`);
+            if(activeMobileBtn) {
+                activeMobileBtn.classList.add('text-brand-600');
+                activeMobileBtn.classList.remove('text-slate-400');
             }
 
             // Update Views
@@ -928,12 +956,9 @@
                 'logs': 'ประวัติการลงเวลา'
             };
             document.getElementById('pageTitle').innerText = titles[viewId];
-
-            // Close mobile menu if open
-            const sidebar = document.getElementById('sidebar');
-            if(window.innerWidth < 768 && !sidebar.classList.contains('-translate-y-full')) {
-                sidebar.classList.add('-translate-y-full');
-            }
+            
+            // เลื่อนจอขึ้นบนสุดเมื่อเปลี่ยนหน้า
+            document.querySelector('main').scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         // Modal Controls
@@ -963,12 +988,6 @@
                 modal.classList.add('hidden');
             }, 300);
         };
-
-        // Mobile Menu Toggle
-        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('-translate-y-full');
-        });
 
     </script>
 </body>
