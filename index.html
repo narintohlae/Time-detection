@@ -232,7 +232,7 @@
             <div id="view-salary" class="view-section hidden fade-in">
                 <div class="bg-white rounded-2xl md:rounded-3xl shadow-soft border border-slate-100 overflow-hidden">
                     <div class="p-4 md:p-6 border-b border-slate-100">
-                        <div class="flex flex-col gap-1 mb-4 md:mb-6"><h2 class="text-base md:text-lg font-semibold text-slate-800">คำนวณเงินเดือนและ OT</h2><p class="text-xs md:text-sm text-slate-500">ระบบจะนำ <u>วันลารับเงิน</u> และ <u>วันหยุดของร้าน(ที่รับเงิน)</u> มาคิดเป็นวันทำงานให้อัตโนมัติ</p></div>
+                        <div class="flex flex-col gap-1 mb-4 md:mb-6"><h2 class="text-base md:text-lg font-semibold text-slate-800">คำนวณเงินเดือนและ OT</h2><p class="text-[10px] md:text-xs text-slate-500">ระบบจะนำ <u>วันลารับเงิน</u> และ <u>วันหยุดของร้าน(ที่รับเงิน)</u> มาคิดเป็นวันทำงานให้อัตโนมัติ</p></div>
                         <div class="flex flex-col md:flex-row gap-3 items-end bg-slate-50 p-4 rounded-2xl border border-slate-100">
                             <div class="w-full md:w-auto flex-1"><label class="block text-sm font-medium text-slate-700 mb-1">ตั้งแต่วันที่</label><input type="date" id="salaryStartDate" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-white text-base"></div>
                             <div class="w-full md:w-auto flex-1"><label class="block text-sm font-medium text-slate-700 mb-1">ถึงวันที่</label><input type="date" id="salaryEndDate" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-white text-base"></div>
@@ -379,7 +379,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // Import deleteDoc statically at the top so it doesn't fail
         import { getFirestore, collection, addDoc, onSnapshot, updateDoc, doc, getDoc, Timestamp, serverTimestamp, query, where, getDocs, writeBatch, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // === FIREBASE CONFIGURATION ===
@@ -407,7 +406,7 @@
         let selectedEmployee = null;
         let editingEmployeeId = null;
         let editingLogId = null;
-        let editingHolidayId = null; // For editing holidays
+        let editingHolidayId = null; 
 
         // --- UTILITY FUNCTIONS ---
         window.showToast = function(message, type = 'success') {
@@ -429,7 +428,6 @@
         async function initAuth() {
             try { await signInAnonymously(auth); } 
             catch (error) { 
-                console.error("Auth Error", error);
                 showToast("เชื่อมต่อระบบล้มเหลว", "error"); 
                 document.getElementById('connectionStatusDesktop').innerHTML = '<span class="text-red-500">เชื่อมต่อล้มเหลว</span>'; 
             }
@@ -486,7 +484,6 @@
         }
 
         // --- RENDER FUNCTIONS ---
-        
         function renderDashboard() {
             const container = document.getElementById('employeeGrid');
             if (employeesData.length === 0) {
@@ -630,7 +627,6 @@
 
         // --- FORM HANDLERS & ACTIONS ---
 
-        // Employee
         window.openEmployeeModal = function() { editingEmployeeId = null; document.getElementById('employeeModalTitle').innerText = 'เพิ่มพนักงานใหม่'; document.getElementById('addEmployeeForm').reset(); openModal('addEmployeeModal'); };
         window.editEmployee = function(id) {
             const emp = employeesData.find(e => e.id === id); if(!emp) return;
@@ -651,7 +647,6 @@
             } catch(e){ showToast('Error', 'error'); } finally { btn.innerHTML = 'บันทึกข้อมูล'; btn.disabled = false; }
         };
 
-        // Clock In/Out Action
         window.openActionModal = function(id) {
             const emp = employeesData.find(e => e.id === id); if(!emp) return; selectedEmployee = emp;
             document.getElementById('actionName').innerText = emp.name; document.getElementById('actionPosition').innerText = emp.position; document.getElementById('actionAvatar').innerText = emp.name.substring(0,1);
@@ -675,7 +670,6 @@
             } catch(e) { showToast('Error','error'); inB.disabled=false; outB.disabled=false; }
         };
 
-        // Past Log
         window.openAddPastLogModal = function() { document.getElementById('addPastLogForm').reset(); const n = new Date(); document.getElementById('pastLogDate').value = formatDateStr(n); document.getElementById('pastLogTime').value = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; openModal('addPastLogModal'); };
         window.handleAddPastLogSubmit = async function(e) {
             e.preventDefault(); const empId = document.getElementById('pastLogEmployee').value; const act = document.querySelector('input[name="pastLogAction"]:checked')?.value; const ds = document.getElementById('pastLogDate').value; const ts = document.getElementById('pastLogTime').value;
@@ -685,7 +679,6 @@
             try { btn.disabled=true; btn.innerHTML='<i class="ph-bold ph-spinner animate-spin"></i>'; await addDoc(collection(db, 'time_logs'), { employeeId: emp.id, employeeName: emp.name, action: act, timestamp: Timestamp.fromDate(dObj) }); await updateDoc(doc(db, 'employees', emp.id), { status: act, lastActionTime: Timestamp.fromDate(dObj) }); showToast('เพิ่มประวัติสำเร็จ'); closeModal('addPastLogModal'); } catch(e){showToast('Error','error');} finally{btn.disabled=false; btn.innerHTML='บันทึก';}
         };
 
-        // Edit Log
         window.editLogTime = function(id) { const l = logsData.find(x => x.id === id); if(!l||!l.timestamp) return; editingLogId = id; const d = l.timestamp.toDate(); document.getElementById('editLogDate').value = formatDateStr(d); document.getElementById('editLogTime').value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; openModal('editLogModal'); };
         window.handleEditLogSubmit = async function(e) {
             e.preventDefault(); const ds = document.getElementById('editLogDate').value; const ts = document.getElementById('editLogTime').value; const dObj = new Date(`${ds}T${ts}:00`); if (dObj > new Date()) return showToast('ระบุเวลาอนาคตไม่ได้', 'error');
@@ -693,91 +686,164 @@
             try { btn.disabled=true; btn.innerHTML='<i class="ph-bold ph-spinner animate-spin"></i>'; await updateDoc(doc(db, 'time_logs', editingLogId), { timestamp: Timestamp.fromDate(dObj) }); showToast('แก้ไขเวลาสำเร็จ'); closeModal('editLogModal'); editingLogId=null; } catch(e){showToast('Error','error');} finally{btn.disabled=false; btn.innerHTML='บันทึก';}
         };
 
-        // Leaves & Swaps
+        // --- LEAVES SYSTEM (WITH ADVANCED VALIDATION) ---
         window.openLeaveModal = function() { document.getElementById('addLeaveForm').reset(); document.getElementById('leaveDate').value = formatDateStr(new Date()); openModal('addLeaveModal'); };
+        
         window.handleLeaveSubmit = async function(e) {
-            e.preventDefault(); const btn = document.getElementById('saveLeaveBtn'); const empId = document.getElementById('leaveEmployee').value; const emp = employeesData.find(x=>x.id===empId);
-            try { btn.disabled=true; btn.innerHTML='<i class="ph-bold ph-spinner animate-spin"></i>'; await addDoc(collection(db, 'leave_records'), { employeeId: emp.id, employeeName: emp.name, date: document.getElementById('leaveDate').value, type: document.getElementById('leaveType').value, isPaid: document.getElementById('leaveIsPaid').checked }); showToast('บันทึกวันลาสำเร็จ'); closeModal('addLeaveModal'); } catch(e){showToast('Error','error');} finally{btn.disabled=false; btn.innerHTML='บันทึกวันลา';}
-        };
-        window.openSwapModal = function() { document.getElementById('addSwapForm').reset(); openModal('addSwapModal'); };
-        window.handleSwapSubmit = async function(e) {
-            e.preventDefault(); const btn = document.getElementById('saveSwapBtn'); const empId = document.getElementById('swapEmployee').value; const emp = employeesData.find(x=>x.id===empId);
-            try { btn.disabled=true; btn.innerHTML='<i class="ph-bold ph-spinner animate-spin"></i>'; await addDoc(collection(db, 'day_off_swaps'), { employeeId: emp.id, employeeName: emp.name, originalDate: document.getElementById('swapOriginalDate').value, newDate: document.getElementById('swapNewDate').value, createdAt: serverTimestamp() }); showToast('บันทึกสลับวันหยุดสำเร็จ'); closeModal('addSwapModal'); } catch(e){showToast('Error','error');} finally{btn.disabled=false; btn.innerHTML='บันทึกสลับวัน';}
+            e.preventDefault(); const btn = document.getElementById('saveLeaveBtn'); 
+            const empId = document.getElementById('leaveEmployee').value; 
+            const leaveDateVal = document.getElementById('leaveDate').value;
+            const emp = employeesData.find(x=>x.id===empId);
+
+            if(!emp || !leaveDateVal) return showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
+
+            // 1. Validation: วันนี้เป็นวันหยุดของร้านอยู่แล้วหรือไม่
+            if (holidaysData.some(h => h.date === leaveDateVal)) {
+                return showToast('ไม่สามารถลางานในวันหยุดของร้านได้', 'error');
+            }
+
+            // 2. Validation: วันนี้เป็นวันหยุดของพนักงานอยู่แล้วหรือไม่ (วันหยุดประจำ + สลับวันหยุด)
+            const leaveDateObj = new Date(leaveDateVal);
+            const dayOfWeek = leaveDateObj.getDay().toString();
+            let isOffDay = (emp.dayOff === dayOfWeek);
+            if (swapsData.find(s => s.employeeId === empId && s.originalDate === leaveDateVal)) isOffDay = false; // สลับมาทำงาน
+            if (swapsData.find(s => s.employeeId === empId && s.newDate === leaveDateVal)) isOffDay = true; // สลับไปหยุด
+            
+            if (isOffDay) {
+                return showToast('ไม่สามารถลางานซ้ำซ้อนในวันหยุดของคุณได้', 'error');
+            }
+
+            // 3. Validation: ป้องกันการลาซ้ำ
+            if (leavesData.find(l => l.employeeId === empId && l.date === leaveDateVal)) {
+                return showToast('มีการบันทึกวันลาในวันนี้ไปแล้ว', 'error');
+            }
+
+            // 4. Validation: เช็คว่าถ้ายอมให้ลา จะเหลือคนทำงานในร้านหรือไม่? (ป้องกันร้านร้าง)
+            let staffAvailable = 0;
+            employeesData.forEach(e => {
+                if (e.id === empId) return; // ไม่นับคนที่กำลังทำเรื่องขอลา
+                
+                let eIsOff = (e.dayOff === dayOfWeek);
+                if (swapsData.find(s => s.employeeId === e.id && s.originalDate === leaveDateVal)) eIsOff = false;
+                if (swapsData.find(s => s.employeeId === e.id && s.newDate === leaveDateVal)) eIsOff = true;
+                
+                const eHasLeave = leavesData.find(l => l.employeeId === e.id && l.date === leaveDateVal);
+                
+                if (!eIsOff && !eHasLeave) {
+                    staffAvailable++;
+                }
+            });
+
+            // ถ้าพนักงานในระบบมีมากกว่า 1 คน แต่เหลือคนเข้างาน 0 คน ให้บล็อก
+            if (staffAvailable === 0 && employeesData.length > 1) {
+                return showToast('ไม่อนุญาตให้ลา เนื่องจากจะไม่มีพนักงานอยู่ในร้านเลย', 'error');
+            }
+
+            try { 
+                btn.disabled=true; btn.innerHTML='<i class="ph-bold ph-spinner animate-spin"></i>'; 
+                await addDoc(collection(db, 'leave_records'), { employeeId: emp.id, employeeName: emp.name, date: leaveDateVal, type: document.getElementById('leaveType').value, isPaid: document.getElementById('leaveIsPaid').checked }); 
+                showToast('บันทึกวันลาสำเร็จ'); closeModal('addLeaveModal'); 
+            } catch(err) { showToast('Error','error'); } finally { btn.disabled=false; btn.innerHTML='บันทึกวันลา'; }
         };
 
-        // Holidays
-        window.openHolidayModal = function() { 
-            editingHolidayId = null;
-            document.getElementById('holidayModalTitle').innerText = 'เพิ่มวันหยุดร้าน';
-            document.getElementById('addHolidayForm').reset(); 
-            openModal('addHolidayModal'); 
-        };
+        // --- SWAPS SYSTEM (WITH ADVANCED VALIDATION) ---
+        window.openSwapModal = function() { document.getElementById('addSwapForm').reset(); openModal('addSwapModal'); };
         
+        window.handleSwapSubmit = async function(e) {
+            e.preventDefault(); const btn = document.getElementById('saveSwapBtn'); 
+            const empId = document.getElementById('swapEmployee').value; 
+            const originalDateVal = document.getElementById('swapOriginalDate').value;
+            const newDateVal = document.getElementById('swapNewDate').value;
+            const emp = employeesData.find(x=>x.id===empId);
+
+            if(!emp || !originalDateVal || !newDateVal) return showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
+
+            if (originalDateVal === newDateVal) {
+                return showToast('วันหยุดเดิมและวันใหม่ต้องไม่ใช่วันเดียวกัน', 'error');
+            }
+
+            // 1. Validation: ป้องกันสลับในวันหยุดของร้าน
+            if (holidaysData.some(h => h.date === newDateVal)) {
+                return showToast('ไม่สามารถสลับไปหยุดซ้ำในวันหยุดของร้านได้', 'error');
+            }
+
+            // 2. Validation: ป้องกันการสลับวันซ้ำซ้อนในตาราง
+            const existingSwap = swapsData.find(s => s.employeeId === empId && 
+                (s.originalDate === originalDateVal || s.newDate === newDateVal || s.originalDate === newDateVal || s.newDate === originalDateVal));
+            if (existingSwap) {
+                return showToast('มีการบันทึกสลับวันหยุดที่พัวพันกับวันที่เลือกไปแล้ว', 'error');
+            }
+
+            // 3. Validation: เช็คว่าวันที่ "ขอหยุดใหม่" เป็นวันหยุดตัวเองอยู่แล้วหรือไม่
+            const newDateObj = new Date(newDateVal);
+            let isAlreadyOff = (emp.dayOff === newDateObj.getDay().toString());
+            if (isAlreadyOff) {
+                return showToast('วันที่ขอหยุดใหม่ เป็นวันหยุดของคุณอยู่แล้ว', 'error');
+            }
+
+            // 4. Validation: เช็คว่าถ้าย้ายไปหยุดวันใหม่ จะทำให้ร้านไม่มีคนหรือไม่?
+            let staffAvailableOnNewDate = 0;
+            employeesData.forEach(e => {
+                if (e.id === empId) return; // ไม่นับคนที่ขอย้ายไปหยุด
+                let eIsOff = (e.dayOff === newDateObj.getDay().toString());
+                if (swapsData.find(s => s.employeeId === e.id && s.originalDate === newDateVal)) eIsOff = false;
+                if (swapsData.find(s => s.employeeId === e.id && s.newDate === newDateVal)) eIsOff = true;
+                const eHasLeave = leavesData.find(l => l.employeeId === e.id && l.date === newDateVal);
+                
+                if (!eIsOff && !eHasLeave) staffAvailableOnNewDate++;
+            });
+
+            if (staffAvailableOnNewDate === 0 && employeesData.length > 1) {
+                return showToast('สลับไม่ได้ เนื่องจากจะทำให้วันนั้นไม่มีพนักงานในร้านเลย', 'error');
+            }
+
+            try { 
+                btn.disabled=true; btn.innerHTML='<i class="ph-bold ph-spinner animate-spin"></i>'; 
+                await addDoc(collection(db, 'day_off_swaps'), { employeeId: emp.id, employeeName: emp.name, originalDate: originalDateVal, newDate: newDateVal, createdAt: serverTimestamp() }); 
+                showToast('บันทึกสลับวันหยุดสำเร็จ'); closeModal('addSwapModal'); 
+            } catch(err) { showToast('Error','error'); } finally { btn.disabled=false; btn.innerHTML='บันทึกสลับวัน'; }
+        };
+
+        window.openHolidayModal = function() { editingHolidayId = null; document.getElementById('holidayModalTitle').innerText = 'เพิ่มวันหยุดร้าน'; document.getElementById('addHolidayForm').reset(); openModal('addHolidayModal'); };
         window.editHoliday = function(id) {
             const h = holidaysData.find(x => x.id === id); if(!h) return;
-            editingHolidayId = id;
-            document.getElementById('holidayModalTitle').innerText = 'แก้ไขวันหยุดร้าน';
-            document.getElementById('holidayDate').value = h.date;
-            document.getElementById('holidayName').value = h.name;
-            document.getElementById('holidayIsPaid').checked = h.isPaid;
+            editingHolidayId = id; document.getElementById('holidayModalTitle').innerText = 'แก้ไขวันหยุดร้าน';
+            document.getElementById('holidayDate').value = h.date; document.getElementById('holidayName').value = h.name; document.getElementById('holidayIsPaid').checked = h.isPaid;
             openModal('addHolidayModal');
         };
-
         window.handleHolidaySubmit = async function(e) {
             e.preventDefault(); const btn = document.getElementById('saveHolidayBtn');
             const data = { date: document.getElementById('holidayDate').value, name: document.getElementById('holidayName').value, isPaid: document.getElementById('holidayIsPaid').checked };
             try { 
                 btn.disabled=true; btn.innerHTML='<i class="ph-bold ph-spinner animate-spin text-lg"></i>'; 
-                if (editingHolidayId) {
-                    await updateDoc(doc(db, 'company_holidays', editingHolidayId), data);
-                    showToast('แก้ไขวันหยุดร้านสำเร็จ');
-                } else {
-                    await addDoc(collection(db, 'company_holidays'), data); 
-                    showToast('เพิ่มวันหยุดร้านสำเร็จ'); 
-                }
+                if (editingHolidayId) { await updateDoc(doc(db, 'company_holidays', editingHolidayId), data); showToast('แก้ไขวันหยุดร้านสำเร็จ'); } 
+                else { await addDoc(collection(db, 'company_holidays'), data); showToast('เพิ่มวันหยุดร้านสำเร็จ'); }
                 closeModal('addHolidayModal'); editingHolidayId = null;
             } catch(e){showToast('Error','error');} finally{btn.disabled=false; btn.innerHTML='บันทึก';}
         };
 
-        // --- STATIC DELETES (Fixes missing module issue) ---
         window.deleteRecord = async function(col, id) { 
             if(confirm("ยืนยันการลบข้อมูล? (มีผลกับการคำนวณเงินเดือน)")) { 
-                try { 
-                    await deleteDoc(doc(db, col, id)); 
-                    showToast('ลบข้อมูลสำเร็จ'); 
-                } catch(e){ console.error(e); showToast('ไม่สามารถลบข้อมูลได้', 'error'); } 
+                try { await deleteDoc(doc(db, col, id)); showToast('ลบข้อมูลสำเร็จ'); } 
+                catch(e){ console.error(e); showToast('ไม่สามารถลบข้อมูลได้', 'error'); } 
             } 
         };
 
-        // CASCADING DELETE EMPLOYEE
         window.deleteEmployee = async function(empId) {
-            if(confirm("คำเตือน: การลบพนักงานจะลบข้อมูลประวัติการลงเวลา วันลา และสลับวันหยุดของพนักงานคนนี้ทั้งหมดด้วย! คุณต้องการดำเนินการต่อหรือไม่?")) {
+            if(confirm("คำเตือน: การลบพนักงานจะลบข้อมูลประวัติทั้งหมดด้วย! ดำเนินการต่อหรือไม่?")) {
                 showToast('กำลังลบข้อมูลที่เกี่ยวข้อง...', 'success');
                 try {
-                    // Delete Employee Doc
                     await deleteDoc(doc(db, 'employees', empId));
-
-                    // Cascade Deletes
-                    const logsQuery = query(collection(db, 'time_logs'), where("employeeId", "==", empId));
-                    const logsSnap = await getDocs(logsQuery);
+                    const logsSnap = await getDocs(query(collection(db, 'time_logs'), where("employeeId", "==", empId)));
                     logsSnap.forEach(async (docSnap) => { await deleteDoc(doc(db, 'time_logs', docSnap.id)); });
-
-                    const leavesQuery = query(collection(db, 'leave_records'), where("employeeId", "==", empId));
-                    const leavesSnap = await getDocs(leavesQuery);
+                    const leavesSnap = await getDocs(query(collection(db, 'leave_records'), where("employeeId", "==", empId)));
                     leavesSnap.forEach(async (docSnap) => { await deleteDoc(doc(db, 'leave_records', docSnap.id)); });
-
-                    const swapsQuery = query(collection(db, 'day_off_swaps'), where("employeeId", "==", empId));
-                    const swapsSnap = await getDocs(swapsQuery);
+                    const swapsSnap = await getDocs(query(collection(db, 'day_off_swaps'), where("employeeId", "==", empId)));
                     swapsSnap.forEach(async (docSnap) => { await deleteDoc(doc(db, 'day_off_swaps', docSnap.id)); });
-
                     showToast('ลบพนักงานและข้อมูลทั้งหมดแล้ว');
-                } catch(e) { 
-                    console.error("Delete Employee Error:", e);
-                    showToast('เกิดข้อผิดพลาดในการลบข้อมูล', 'error'); 
-                }
+                } catch(e) { console.error("Delete Employee Error:", e); showToast('เกิดข้อผิดพลาดในการลบข้อมูล', 'error'); }
             }
         };
-
 
         // --- SALARY CALCULATION ENGINE ---
         window.calculateSalary = function() {
