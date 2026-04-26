@@ -2,424 +2,505 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ป้องกันการซูมหน้าจอ เพื่อให้ความรู้สึกเหมือนใช้แอป Native จริงๆ -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ระบบบันทึกเวลาเข้า-ออกพนักงาน (SPA)</title>
     <style>
-        /* --- ตั้งค่าสีและรูปแบบพื้นฐาน (Flat Minimal) --- */
+        /* --- ตั้งค่าสีและรูปแบบพื้นฐานสไตล์ Mobile App (iOS Inspired) --- */
         :root {
-            --primary: #000000;
-            --success: #059669;
-            --danger: #dc2626;
-            --bg-color: #fcfcfc;
-            --card-bg: #ffffff;
-            --text-main: #111827;
-            --text-muted: #6b7280;
-            --border: #e5e7eb;
+            --primary: #007AFF; /* สีฟ้าน้ำทะเลแบบ iOS */
+            --success: #34C759; /* สีเขียว */
+            --danger: #FF3B30;  /* สีแดง */
+            --bg-body: #000000; /* พื้นหลังสุดสำหรับ Desktop */
+            --bg-app: #F2F2F7;  /* สีพื้นหลังระบบแอป */
+            --card-bg: #FFFFFF;
+            --text-main: #000000;
+            --text-muted: #8E8E93;
+            --border: #E5E5EA;
+            --tab-bar-bg: rgba(255, 255, 255, 0.85);
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--bg-color);
+            background-color: var(--bg-body);
             color: var(--text-main);
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
         }
 
-        /* --- แถบเมนูด้านบน --- */
+        /* --- กรอบจำลองมือถือ --- */
+        #app-container {
+            width: 100%;
+            max-width: 414px; /* ขนาดกว้างเทียบเท่า iPhone Max */
+            height: 100vh;
+            max-height: 896px;
+            background-color: var(--bg-app);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+
+        /* เมื่อหน้าจอเล็กกว่าหรือเท่ากับมือถือ ให้แสดงผลเต็ม 100% ไร้ขอบ */
+        @media (max-width: 414px) {
+            #app-container {
+                max-height: 100vh;
+                box-shadow: none;
+            }
+        }
+
+        /* --- App Bar ด้านบน --- */
         header {
             background-color: var(--card-bg);
+            padding: 1rem;
+            text-align: center;
             border-bottom: 1px solid var(--border);
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            position: relative;
+            z-index: 10;
         }
 
         .logo {
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: var(--primary);
-            text-transform: uppercase;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: var(--text-main);
         }
 
-        nav {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-link {
-            text-decoration: none;
-            color: var(--text-muted);
-            font-weight: 500;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 0.5rem 0;
-            border-bottom: 2px solid transparent;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .nav-link:hover {
-            color: var(--primary);
-        }
-
-        .nav-link.active {
-            color: var(--primary);
-            border-bottom: 2px solid var(--primary);
-        }
-
-        /* --- พื้นที่แสดงผลหลัก --- */
+        /* --- พื้นที่แสดงผลหลัก (เลื่อน Scroll ได้) --- */
         main {
             flex: 1;
-            max-width: 600px;
-            margin: 3rem auto;
-            width: 100%;
-            padding: 0 1rem;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* ให้เลื่อนลื่นบน iOS */
+            padding: 1rem;
+            padding-bottom: 90px; /* เว้นที่ว่างให้ Tab Bar ด้านล่าง */
             box-sizing: border-box;
         }
 
-        .card {
-            background: var(--card-bg);
-            padding: 3rem 2rem;
-            border: 1px solid var(--border);
-            border-radius: 0;
-            text-align: center;
-            animation: fadeIn 0.3s ease;
+        /* --- Bottom Tab Bar (เมนูด้านล่าง) --- */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            background-color: var(--tab-bar-bg);
+            backdrop-filter: blur(10px); /* เอฟเฟกต์เบลอพื้นหลัง */
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            padding-bottom: env(safe-area-inset-bottom); /* รองรับพื้นที่ขอบจอ iPhone รุ่นใหม่ */
+            z-index: 10;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 0;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            stroke-width: 2px;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        /* --- การ์ดและ UI Components --- */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            text-align: center;
+            margin-bottom: 1rem;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- ดีไซน์ส่วน Dashboard --- */
-        .live-clock {
-            font-size: 4rem;
-            font-weight: 300;
-            color: var(--text-main);
-            margin: 1rem 0 0.5rem 0;
-            font-variant-numeric: tabular-nums;
-            letter-spacing: -2px;
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-align: left;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            padding-left: 0.5rem;
         }
 
-        .live-date {
-            color: var(--text-muted);
-            margin-bottom: 2.5rem;
+        /* --- ฟอร์มแบบ Native --- */
+        .native-select, .native-input {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background-color: var(--card-bg);
             font-size: 1rem;
-            font-weight: 400;
+            font-family: inherit;
+            color: var(--text-main);
+            outline: none;
+            box-sizing: border-box;
+            appearance: none; /* ซ่อนลูกศร select ดั้งเดิม */
+            -webkit-appearance: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            transition: border-color 0.2s;
+        }
+        
+        .native-select:focus, .native-input:focus {
+            border-color: var(--primary);
         }
 
-        .status-badge {
-            display: inline-block;
-            padding: 0.35rem 1.25rem;
-            border: 1px solid;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        /* ใส่ไอคอนลูกศรจำลองให้ select */
+        .select-wrapper {
+            position: relative;
             margin-bottom: 1.5rem;
         }
-
-        .status-in { border-color: var(--success); color: var(--success); background: transparent; }
-        .status-out { border-color: var(--border); color: var(--text-muted); background: transparent; }
-
-        .action-btn {
-            border: 1px solid transparent;
-            padding: 1rem 3rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            border-radius: 0;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-            max-width: 300px;
+        .select-wrapper::after {
+            content: "▼";
+            font-size: 0.8rem;
+            position: absolute;
+            right: 1.2rem;
+            top: 1.2rem;
+            color: var(--text-muted);
+            pointer-events: none;
         }
 
-        .action-btn:active { opacity: 0.7; }
-        
-        .btn-in { background-color: var(--primary); color: white; }
-        .btn-in:hover { background-color: #333; }
-
-        .btn-out { background-color: white; color: var(--primary); border-color: var(--primary); }
-        .btn-out:hover { background-color: #f9fafb; }
-
-        /* --- ดีไซน์ส่วน History --- */
-        .history-table {
+        /* --- ปุ่มกดขนาดใหญ่ (Pill Shape) --- */
+        .btn {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-            text-align: left;
-        }
-
-        .history-table th, .history-table td {
+            border: none;
             padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn:active { transform: scale(0.97); opacity: 0.9; }
+        
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; }
+        .btn-outline { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); }
+
+        /* --- Dashboard เฉพาะ --- */
+        .live-clock {
+            font-size: 3.5rem;
+            font-weight: 200;
+            color: var(--text-main);
+            margin: 1.5rem 0 0.5rem 0;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -1px;
+        }
+        .live-date {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-in { background-color: rgba(52, 199, 89, 0.15); color: var(--success); }
+        .status-out { background-color: rgba(142, 142, 147, 0.15); color: var(--text-muted); }
+
+        /* --- List View (ประวัติพนักงานและบันทึก) --- */
+        .list-group {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            margin-bottom: 1rem;
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
             border-bottom: 1px solid var(--border);
         }
-
-        .history-table th { 
-            background-color: transparent; 
-            color: var(--primary); 
-            font-weight: 600;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 2px solid var(--primary);
-        }
+        .list-item:last-child { border-bottom: none; }
         
-        .type-badge {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border: 1px solid;
-        }
-
-        .empty-state {
-            color: var(--text-muted);
-            padding: 3rem 1rem;
-            font-style: normal;
-            text-align: center;
-        }
-
-        .clear-btn {
-            margin-top: 2rem;
-            background: transparent;
-            color: var(--text-muted);
-            border: 1px solid var(--border);
-            padding: 0.75rem 1.5rem;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .clear-btn:hover { border-color: var(--danger); color: var(--danger); }
-
-        /* --- การปรับแก้สำหรับมือถือ (Responsive) --- */
-        @media (max-width: 600px) {
-            header {
-                flex-direction: column;
-                padding: 1.5rem 1rem;
-            }
-            
-            nav {
-                width: 100%;
-                justify-content: center;
-                gap: 1rem;
-            }
-
-            .nav-link {
-                padding: 0.5rem;
-                font-size: 0.8rem;
-            }
-
-            main {
-                margin: 1.5rem auto;
-            }
-
-            .card {
-                padding: 2rem 1rem;
-                border-left: none;
-                border-right: none;
-            }
-
-            .live-clock {
-                font-size: 3rem;
-            }
-
-            .action-btn {
-                padding: 1rem 2rem;
-            }
-
-            .table-responsive {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                margin-top: 1rem;
-            }
-
-            .history-table th, .history-table td {
-                padding: 1rem 0.5rem;
-                font-size: 0.85rem;
-                white-space: nowrap;
-            }
-        }
+        .item-main { display: flex; flex-direction: column; text-align: left; }
+        .item-title { font-weight: 600; font-size: 1rem; color: var(--text-main); margin-bottom: 4px; }
+        .item-subtitle { font-size: 0.8rem; color: var(--text-muted); }
+        
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">TIME TRACK</div>
-        <nav>
-            <a class="nav-link active" onclick="navigateTo('dashboard')" id="nav-dashboard">หน้าจอหลัก</a>
-            <a class="nav-link" onclick="navigateTo('history')" id="nav-history">ประวัติ</a>
-        </nav>
-    </header>
+    <div id="app-container">
+        <!-- App Bar ด้านบน -->
+        <header>
+            <div class="logo">TimeTrack App</div>
+        </header>
 
-    <main>
-        <!-- เนื้อหาจะถูกแทรกที่นี่โดย JavaScript -->
-        <div id="app-content"></div>
-    </main>
+        <!-- พื้นที่แสดงเนื้อหาหลัก -->
+        <main>
+            <div id="app-content"></div>
+        </main>
+
+        <!-- Bottom Navigation Bar แบบมือถือ -->
+        <nav class="bottom-nav">
+            <a class="nav-item active" onclick="navigateTo('dashboard')" id="nav-dashboard">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                หน้าแรก
+            </a>
+            <a class="nav-item" onclick="navigateTo('employees')" id="nav-employees">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                พนักงาน
+            </a>
+            <a class="nav-item" onclick="navigateTo('history')" id="nav-history">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                ประวัติ
+            </a>
+        </nav>
+    </div>
 
     <script>
         /* =========================================
            ส่วนที่ 1: การจัดการข้อมูล (State Management)
            ========================================= */
         
-        // ดึงข้อมูลจาก LocalStorage ถ้าไม่มีให้เป็น Array ว่าง
         let records = JSON.parse(localStorage.getItem('timeRecords')) || [];
+        let employees = JSON.parse(localStorage.getItem('employees')) || [];
+        let currentSelectedEmpId = '';
 
-        // เช็คสถานะปัจจุบัน (ดึงจาก record ล่าสุด)
-        function getCurrentStatus() {
-            if (records.length === 0) return 'OUT';
-            return records[records.length - 1].type;
+        function getEmployeeStatus(empId) {
+            const empRecords = records.filter(r => r.empId === empId);
+            if (empRecords.length === 0) return 'OUT';
+            return empRecords[empRecords.length - 1].type;
         }
 
-        // ฟังก์ชันบันทึกเวลา
         function recordTime(type) {
+            if (!currentSelectedEmpId) {
+                alert('กรุณาเลือกพนักงานก่อนบันทึกเวลา');
+                return;
+            }
+            const emp = employees.find(e => e.id === currentSelectedEmpId);
+            if (!emp) return;
+
             const now = new Date();
             const newRecord = {
                 id: Date.now(),
-                type: type, // 'IN' หรือ 'OUT'
+                empId: emp.id,
+                empName: emp.name,
+                type: type,
                 timestamp: now.toISOString(),
                 timeString: now.toLocaleTimeString('th-TH'),
-                dateString: now.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })
+                dateString: now.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })
             };
 
-            // เพิ่มข้อมูลใหม่ลงใน Array
             records.push(newRecord);
-            
-            // บันทึกลง LocalStorage
             localStorage.setItem('timeRecords', JSON.stringify(records));
-
-            // รีเฟรชหน้าจอ Dashboard ทันที
             renderDashboard();
-            
-            // แจ้งเตือน
-            alert(`บันทึกเวลา${type === 'IN' ? 'เข้า' : 'ออก'}งานสำเร็จ! (${newRecord.timeString})`);
         }
 
-        // ล้างข้อมูลทั้งหมด
         function clearHistory() {
-            if(confirm('คุณแน่ใจหรือไม่ว่าต้องการลบประวัติทั้งหมด?')) {
+            if(confirm('ต้องการลบประวัติการบันทึกเวลาทั้งหมดใช่หรือไม่?')) {
                 records = [];
                 localStorage.removeItem('timeRecords');
                 renderHistory();
             }
         }
 
-
         /* =========================================
            ส่วนที่ 2: การสร้างหน้าจอ (View Rendering)
            ========================================= */
         
         const contentDiv = document.getElementById('app-content');
-        let clockInterval; // ตัวแปรสำหรับหยุดนาฬิกาเวลาเปลี่ยนหน้า
+        let clockInterval;
 
-        // 2.1 หน้า Dashboard
+        // --- หน้า Dashboard ---
         function renderDashboard() {
-            const status = getCurrentStatus();
-            const isClockedIn = status === 'IN';
+            if (employees.length === 0) {
+                contentDiv.innerHTML = `
+                    <div class="card" style="margin-top: 2rem;">
+                        <svg style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        <h3 style="margin-top:0;">ยังไม่มีข้อมูลพนักงาน</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">กรุณาเพิ่มรายชื่อพนักงานก่อนเริ่มต้นใช้งาน</p>
+                        <button class="btn btn-primary" style="margin-top: 1rem;" onclick="navigateTo('employees')">ตั้งค่าพนักงาน</button>
+                    </div>
+                `;
+                return;
+            }
+
+            let options = '<option value="" disabled selected>แตะเพื่อเลือกชื่อของคุณ...</option>';
+            employees.forEach(emp => {
+                let selected = emp.id === currentSelectedEmpId ? 'selected' : '';
+                options += `<option value="${emp.id}" ${selected}>${emp.name}</option>`;
+            });
 
             let buttonHTML = '';
             let statusHTML = '';
 
-            if (isClockedIn) {
-                statusHTML = `<div class="status-badge status-in">สถานะ: กำลังทำงาน</div>`;
-                buttonHTML = `<button class="action-btn btn-out" onclick="recordTime('OUT')">เลิกงาน (Clock Out)</button>`;
+            if (currentSelectedEmpId) {
+                const status = getEmployeeStatus(currentSelectedEmpId);
+                const isClockedIn = status === 'IN';
+
+                if (isClockedIn) {
+                    statusHTML = `<div class="status-badge status-in"><div style="width:8px;height:8px;border-radius:50%;background:currentColor;"></div> กำลังทำงาน</div>`;
+                    buttonHTML = `<button class="btn btn-danger" onclick="recordTime('OUT')">ลงเวลาออก (Clock Out)</button>`;
+                } else {
+                    statusHTML = `<div class="status-badge status-out"><div style="width:8px;height:8px;border-radius:50%;background:currentColor;"></div> ยังไม่เข้างาน</div>`;
+                    buttonHTML = `<button class="btn btn-success" onclick="recordTime('IN')">ลงเวลาเข้า (Clock In)</button>`;
+                }
             } else {
-                statusHTML = `<div class="status-badge status-out">สถานะ: ยังไม่เข้างาน</div>`;
-                buttonHTML = `<button class="action-btn btn-in" onclick="recordTime('IN')">เข้างาน (Clock In)</button>`;
+                statusHTML = `<div class="status-badge status-out" style="visibility: hidden;">-</div>`;
+                buttonHTML = ``;
             }
 
             contentDiv.innerHTML = `
-                <div class="card">
-                    <h2 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-top: 0; margin-bottom: 2rem;">บันทึกเวลาพนักงาน</h2>
+                <div class="card" style="padding-top: 2rem;">
+                    <div class="select-wrapper">
+                        <select class="native-select" id="empSelect" onchange="currentSelectedEmpId = this.value; renderDashboard();">
+                            ${options}
+                        </select>
+                    </div>
+
                     ${statusHTML}
                     <div class="live-clock" id="clockDisplay">00:00:00</div>
-                    <div class="live-date" id="dateDisplay">กำลังโหลดวันเวลา...</div>
+                    <div class="live-date" id="dateDisplay">--</div>
+                    
                     <div style="margin-top: 2rem;">
                         ${buttonHTML}
                     </div>
                 </div>
             `;
-
-            // เริ่มทำงานนาฬิกา Real-time
             startClock();
         }
 
-        // ฟังก์ชันควบคุมนาฬิกา Real-time
         function startClock() {
-            clearInterval(clockInterval); // เคลียร์ของเก่าก่อน
-            
+            clearInterval(clockInterval);
             const tick = () => {
                 const now = new Date();
                 const clockEl = document.getElementById('clockDisplay');
                 const dateEl = document.getElementById('dateDisplay');
-                
                 if(clockEl && dateEl) {
-                    clockEl.textContent = now.toLocaleTimeString('th-TH');
-                    dateEl.textContent = now.toLocaleDateString('th-TH', { 
-                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-                    });
+                    clockEl.textContent = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    dateEl.textContent = now.toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                 }
             };
-            
-            tick(); // รันทันที 1 ครั้ง
-            clockInterval = setInterval(tick, 1000); // รันทุก 1 วินาที
+            tick();
+            clockInterval = setInterval(tick, 1000);
         }
 
-        // 2.2 หน้าประวัติ (History)
+        // --- หน้า History ---
         function renderHistory() {
-            clearInterval(clockInterval); // หยุดนาฬิกาเมื่อไม่ได้อยู่หน้า Dashboard
-
-            let tableRows = '';
+            clearInterval(clockInterval);
+            let listHTML = '';
             
             if (records.length === 0) {
-                tableRows = `<tr><td colspan="3" class="empty-state">ยังไม่มีประวัติการบันทึกเวลา</td></tr>`;
+                listHTML = `<div class="empty-state">ยังไม่มีประวัติการบันทึกเวลา</div>`;
             } else {
-                // เรียงจากใหม่ไปเก่า
                 const reversedRecords = [...records].reverse();
-                
+                listHTML = `<div class="list-group">`;
                 reversedRecords.forEach(rec => {
-                    const badgeClass = rec.type === 'IN' ? 'status-in' : 'status-out';
-                    const badgeText = rec.type === 'IN' ? 'เข้างาน' : 'ออกงาน';
+                    const isTypeIn = rec.type === 'IN';
+                    const badgeColor = isTypeIn ? 'var(--success)' : 'var(--text-muted)';
+                    const badgeText = isTypeIn ? 'เข้างาน' : 'ออกงาน';
                     
-                    tableRows += `
-                        <tr>
-                            <td>${rec.dateString}</td>
-                            <td>${rec.timeString}</td>
-                            <td><span class="type-badge ${badgeClass}">${badgeText}</span></td>
-                        </tr>
+                    listHTML += `
+                        <div class="list-item">
+                            <div class="item-main">
+                                <span class="item-title">${rec.empName || 'ไม่ระบุ'}</span>
+                                <span class="item-subtitle">${rec.dateString} • เวลา ${rec.timeString}</span>
+                            </div>
+                            <div style="font-size: 0.85rem; font-weight: 600; color: ${badgeColor}; text-align: right;">
+                                ${badgeText}
+                            </div>
+                        </div>
                     `;
                 });
+                listHTML += `</div>`;
+            }
+
+            let clearBtnHTML = records.length > 0 ? `<button class="btn btn-outline" style="margin-top:1rem;" onclick="clearHistory()">ล้างประวัติทั้งหมด</button>` : '';
+
+            contentDiv.innerHTML = `
+                <div class="section-title">ประวัติล่าสุด</div>
+                ${listHTML}
+                ${clearBtnHTML}
+            `;
+        }
+
+        // --- หน้า Employees ---
+        function renderEmployees() {
+            clearInterval(clockInterval);
+            let listHTML = '';
+
+            if (employees.length === 0) {
+                listHTML = `<div class="empty-state">ยังไม่ได้เพิ่มรายชื่อพนักงาน</div>`;
+            } else {
+                listHTML = `<div class="list-group">`;
+                employees.forEach(emp => {
+                    listHTML += `
+                        <div class="list-item">
+                            <span class="item-title" style="margin:0;">${emp.name}</span>
+                            <button class="btn" style="width: auto; padding: 0.5rem 1rem; font-size: 0.8rem; background: rgba(255, 59, 48, 0.1); color: var(--danger); border-radius: 8px;" onclick="handleDeleteEmployee('${emp.id}')">ลบ</button>
+                        </div>
+                    `;
+                });
+                listHTML += `</div>`;
             }
 
             contentDiv.innerHTML = `
-                <div class="card" style="text-align: left;">
-                    <h2 style="margin-top: 0; font-size: 1.25rem; font-weight: 600; letter-spacing: -0.5px;">ประวัติการบันทึกเวลา</h2>
-                    <div class="table-responsive">
-                        <table class="history-table">
-                            <thead>
-                                <tr>
-                                    <th>วันที่</th>
-                                    <th>เวลา</th>
-                                    <th>ประเภท</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${tableRows}
-                            </tbody>
-                        </table>
-                    </div>
-                    ${records.length > 0 ? `<button class="clear-btn" onclick="clearHistory()">ล้างประวัติทั้งหมด</button>` : ''}
+                <div class="section-title">เพิ่มพนักงานใหม่</div>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem;">
+                    <input type="text" id="newEmpName" class="native-input" placeholder="ระบุชื่อ - นามสกุล" style="flex:1;" onkeypress="if(event.key === 'Enter') handleAddEmployee()">
+                    <button class="btn btn-primary" style="width: auto; padding: 0 1.5rem;" onclick="handleAddEmployee()">เพิ่ม</button>
                 </div>
+                <div class="section-title">รายชื่อพนักงาน</div>
+                ${listHTML}
             `;
+        }
+
+        function handleAddEmployee() {
+            const input = document.getElementById('newEmpName');
+            const name = input.value.trim();
+            if (name) {
+                employees.push({ id: Date.now().toString(), name: name });
+                localStorage.setItem('employees', JSON.stringify(employees));
+                renderEmployees();
+            }
+        }
+
+        function handleDeleteEmployee(id) {
+            if (confirm('ยืนยันการลบพนักงานรายนี้?')) {
+                employees = employees.filter(e => e.id !== id);
+                localStorage.setItem('employees', JSON.stringify(employees));
+                if (currentSelectedEmpId === id) currentSelectedEmpId = '';
+                renderEmployees();
+            }
         }
 
         /* =========================================
@@ -427,28 +508,25 @@
            ========================================= */
 
         function navigateTo(page) {
-            // 1. เปลี่ยนหน้าตา UI ของปุ่มเมนู
-            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            // อัปเดต UI เมนูด้านล่าง
+            document.querySelectorAll('.nav-item').forEach(link => link.classList.remove('active'));
             document.getElementById('nav-' + page).classList.add('active');
 
-            // 2. อัปเดต URL Hash
             window.location.hash = page;
 
-            // 3. เรียกฟังก์ชันแสดงผลเนื้อหาตามที่เลือก
-            if (page === 'dashboard') {
-                renderDashboard();
-            } else if (page === 'history') {
-                renderHistory();
-            }
+            // เลื่อนจอขึ้นบนสุดเวลากดเปลี่ยนหน้า (เหมือนพฤติกรรมของแอป)
+            document.querySelector('main').scrollTop = 0;
+
+            if (page === 'dashboard') renderDashboard();
+            else if (page === 'history') renderHistory();
+            else if (page === 'employees') renderEmployees();
         }
 
-        // จัดการเมื่อเปิดเว็บครั้งแรก (อ่านจาก URL Hash)
         window.addEventListener('load', () => {
             const page = window.location.hash.replace('#', '') || 'dashboard';
             navigateTo(page);
         });
 
-        // จัดการเมื่อกดปุ่ม Back/Forward ของเบราว์เซอร์
         window.addEventListener('hashchange', () => {
             const page = window.location.hash.replace('#', '') || 'dashboard';
             navigateTo(page);
