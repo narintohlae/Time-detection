@@ -20,6 +20,14 @@
         }
         .animate-blob { animation: blob 10s infinite; }
         .animation-delay-2000 { animation-delay: 2s; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+        .animate-shake { animation: shake 0.4s ease-in-out; }
         
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -238,10 +246,63 @@
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">ชื่อ - นามสกุล</label>
                             <input type="text" id="modal-emp-name" placeholder="ชื่อพนักงาน" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium">
                         </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">รหัส PIN (4 หลัก)</label>
+                            <input type="text" id="modal-emp-pin" placeholder="0000" maxlength="4" pattern="[0-9]*" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium tabular-nums tracking-[0.5em]">
+                        </div>
                         <button id="btn-save-employee" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md shadow-blue-600/20 transition-all flex justify-center items-center gap-2 mt-4">
                             <i data-lucide="save" class="w-5 h-5"></i> บันทึกข้อมูล
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- PIN PAD OVERLAY -->
+            <!-- ========================================== -->
+            <div id="pin-overlay" class="absolute inset-0 z-[60] bg-slate-900/40 backdrop-blur-md flex flex-col items-center justify-end sm:justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+                <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden p-6 flex flex-col items-center transform translate-y-full sm:translate-y-0 sm:scale-95 transition-all duration-300" id="pin-modal-content">
+                    
+                    <div class="w-full flex justify-between items-center mb-6">
+                        <button id="btn-close-pin" class="text-slate-400 hover:text-slate-600 transition-colors w-10 h-10 flex items-center justify-center rounded-full bg-slate-50">
+                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                        </button>
+                        <h3 class="font-bold text-slate-800 text-center flex-1 pr-10">กรอกรหัส PIN</h3>
+                    </div>
+
+                    <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-slate-100 shadow-sm mb-3">
+                        <img id="pin-avatar" src="" alt="Profile" />
+                    </div>
+                    <p id="pin-emp-name" class="font-bold text-slate-800 text-lg mb-6">...</p>
+
+                    <!-- PIN Dots -->
+                    <div id="pin-dots-container" class="flex gap-4 mb-8">
+                        <div class="pin-dot w-4 h-4 rounded-full border-2 border-slate-300 transition-colors"></div>
+                        <div class="pin-dot w-4 h-4 rounded-full border-2 border-slate-300 transition-colors"></div>
+                        <div class="pin-dot w-4 h-4 rounded-full border-2 border-slate-300 transition-colors"></div>
+                        <div class="pin-dot w-4 h-4 rounded-full border-2 border-slate-300 transition-colors"></div>
+                    </div>
+
+                    <p id="pin-error-msg" class="text-rose-500 text-sm font-bold h-5 mb-4 opacity-0 transition-opacity">รหัส PIN ไม่ถูกต้อง</p>
+
+                    <!-- Numpad -->
+                    <div class="grid grid-cols-3 gap-3 w-full max-w-[260px] pb-4">
+                        <button onclick="handlePinInput('1')" class="h-14 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-xl transition-colors">1</button>
+                        <button onclick="handlePinInput('2')" class="h-14 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-xl transition-colors">2</button>
+                        <button onclick="handlePinInput('3')" class="h-14 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-xl transition-colors">3</button>
+                        <button onclick="handlePinInput('4')" class="h-14 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-xl transition-colors">4</button>
+                        <button onclick="handlePinInput('5')" class="h-14 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-xl transition-colors">5</button>
+                        <button onclick="handlePinInput('6')" class="h-14 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-xl transition-colors">6</button>
+                        <button onclick="handlePinInput('7')" class="h-14 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-xl transition-colors">7</button>
+                        <button onclick="handlePinInput('8')" class="h-14 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-xl transition-colors">8</button>
+                        <button onclick="handlePinInput('9')" class="h-14 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-xl transition-colors">9</button>
+                        <div></div> <!-- Empty cell -->
+                        <button onclick="handlePinInput('0')" class="h-14 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-xl transition-colors">0</button>
+                        <button onclick="deletePinChar()" class="h-14 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors">
+                            <i data-lucide="delete" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+
                 </div>
             </div>
 
@@ -284,6 +345,13 @@
         let currentEmpId = null;   // ID ปัจจุบันที่ล็อกอินอยู่
         let currentEmpName = null;
         
+        // PIN Auth State
+        let pinMode = 'employee'; // ใช้แยกโหมด 'employee' หรือ 'owner'
+        let pendingEmpId = null;
+        let pendingEmpName = null;
+        let expectedPin = "0000";
+        let currentEnteredPin = "";
+
         let holdProgress = 0;
         let isHolding = false;
         let showSuccess = false;
@@ -346,6 +414,17 @@
         const modalDocId = document.getElementById('modal-doc-id');
         const modalEmpId = document.getElementById('modal-emp-id');
         const modalEmpName = document.getElementById('modal-emp-name');
+        const modalEmpPin = document.getElementById('modal-emp-pin');
+
+        // PIN Elements
+        const pinOverlay = document.getElementById('pin-overlay');
+        const pinModalContent = document.getElementById('pin-modal-content');
+        const pinEmpName = document.getElementById('pin-emp-name');
+        const pinAvatar = document.getElementById('pin-avatar');
+        const pinDots = document.querySelectorAll('.pin-dot');
+        const pinErrorMsg = document.getElementById('pin-error-msg');
+        const pinDotsContainer = document.getElementById('pin-dots-container');
+        const btnClosePin = document.getElementById('btn-close-pin');
 
         lucide.createIcons();
 
@@ -366,8 +445,8 @@
             }
         }
 
-        btnGoOwner.addEventListener('click', openOwnerView);
-        btnGoOwnerFromLogin.addEventListener('click', openOwnerView);
+        btnGoOwner.addEventListener('click', () => promptOwnerPin());
+        btnGoOwnerFromLogin.addEventListener('click', () => promptOwnerPin());
         btnBackEmployee.addEventListener('click', closeOwnerView);
 
         tabOverview.addEventListener('click', () => {
@@ -427,8 +506,9 @@
 
             let html = '';
             allEmployees.forEach(emp => {
+                const pin = emp.empPin || '0000'; // Default
                 html += `
-                <button onclick="loginAs('${emp.empId}', '${emp.empName}')" class="w-full flex items-center p-3.5 bg-white border border-slate-100 shadow-sm rounded-2xl hover:border-blue-300 hover:shadow-md hover:-translate-y-0.5 transition-all group">
+                <button onclick="promptPin('${emp.empId}', '${emp.empName}', '${pin}')" class="w-full flex items-center p-3.5 bg-white border border-slate-100 shadow-sm rounded-2xl hover:border-blue-300 hover:shadow-md hover:-translate-y-0.5 transition-all group">
                     <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center mr-4 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
                         <i data-lucide="user" class="w-5 h-5"></i>
                     </div>
@@ -444,12 +524,113 @@
             lucide.createIcons();
         }
 
+        // --- PIN Logic ---
+
+        window.promptPin = (empId, empName, pin) => {
+            pinMode = 'employee';
+            pendingEmpId = empId;
+            pendingEmpName = empName;
+            expectedPin = pin || '0000';
+            currentEnteredPin = '';
+            
+            pinEmpName.textContent = empName;
+            pinAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(empName)}&background=eff6ff&color=2563eb&bold=true`;
+            pinErrorMsg.classList.remove('opacity-100');
+            updatePinDotsUI();
+
+            pinOverlay.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                pinModalContent.classList.remove('translate-y-full', 'sm:scale-95');
+            }, 10);
+        };
+
+        window.promptOwnerPin = () => {
+            pinMode = 'owner';
+            expectedPin = '9999'; // ตั้งค่ารหัสผ่านเจ้าของร้านตรงนี้
+            currentEnteredPin = '';
+            
+            pinEmpName.textContent = 'ผู้ดูแลระบบ (Owner)';
+            pinAvatar.src = `https://ui-avatars.com/api/?name=Owner&background=f59e0b&color=fff&bold=true`;
+            pinErrorMsg.classList.remove('opacity-100');
+            updatePinDotsUI();
+
+            pinOverlay.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                pinModalContent.classList.remove('translate-y-full', 'sm:scale-95');
+            }, 10);
+        };
+
+        function closePinOverlay() {
+            pinModalContent.classList.add('translate-y-full', 'sm:scale-95');
+            setTimeout(() => {
+                pinOverlay.classList.add('opacity-0', 'pointer-events-none');
+                pendingEmpId = null;
+            }, 300);
+        }
+
+        btnClosePin.addEventListener('click', closePinOverlay);
+
+        window.handlePinInput = (num) => {
+            if (currentEnteredPin.length < 4) {
+                currentEnteredPin += num;
+                updatePinDotsUI();
+                pinErrorMsg.classList.remove('opacity-100');
+                
+                if (currentEnteredPin.length === 4) {
+                    setTimeout(verifyPin, 150); // slight delay to show the 4th dot
+                }
+            }
+        };
+
+        window.deletePinChar = () => {
+            if (currentEnteredPin.length > 0) {
+                currentEnteredPin = currentEnteredPin.slice(0, -1);
+                updatePinDotsUI();
+            }
+        };
+
+        function updatePinDotsUI() {
+            pinDots.forEach((dot, index) => {
+                if (index < currentEnteredPin.length) {
+                    dot.className = 'pin-dot w-4 h-4 rounded-full border-2 border-blue-500 bg-blue-500 transition-colors';
+                } else {
+                    dot.className = 'pin-dot w-4 h-4 rounded-full border-2 border-slate-300 bg-transparent transition-colors';
+                }
+            });
+        }
+
+        function verifyPin() {
+            if (currentEnteredPin === expectedPin) {
+                // Success
+                if (pinMode === 'employee') {
+                    loginAs(pendingEmpId, pendingEmpName);
+                } else if (pinMode === 'owner') {
+                    openOwnerView();
+                }
+                closePinOverlay();
+            } else {
+                // Fail
+                pinErrorMsg.classList.add('opacity-100');
+                pinDotsContainer.classList.remove('animate-shake');
+                void pinDotsContainer.offsetWidth; // trigger reflow
+                pinDotsContainer.classList.add('animate-shake');
+                
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Error vibration
+                
+                setTimeout(() => {
+                    currentEnteredPin = '';
+                    updatePinDotsUI();
+                }, 400);
+            }
+        }
+
         // --- Employee CRUD (Owner Mode) ---
 
-        function openModal(docId = null, empId = '', empName = '') {
+        function openModal(docId = null, empId = '', empName = '', empPin = '') {
             modalDocId.value = docId || '';
             modalEmpId.value = empId;
             modalEmpName.value = empName;
+            modalEmpPin.value = empPin;
             
             modalTitle.textContent = docId ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่';
             
@@ -471,8 +652,8 @@
         btnAddEmployee.addEventListener('click', () => openModal());
         btnCloseModal.addEventListener('click', closeModal);
 
-        window.editEmployee = (docId, empId, empName) => {
-            openModal(docId, empId, empName);
+        window.editEmployee = (docId, empId, empName, empPin) => {
+            openModal(docId, empId, empName, empPin || '0000');
         };
 
         window.deleteEmployee = async (docId) => {
@@ -489,9 +670,10 @@
             const docId = modalDocId.value;
             const empId = modalEmpId.value.trim();
             const empName = modalEmpName.value.trim();
+            const empPin = modalEmpPin.value.trim() || '0000';
 
-            if (!empId || !empName) {
-                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+            if (!empId || !empName || empPin.length !== 4) {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วน และกำหนด PIN จำนวน 4 หลัก');
                 return;
             }
 
@@ -506,13 +688,15 @@
                     // Update existing
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'employees', docId), {
                         empId: empId,
-                        empName: empName
+                        empName: empName,
+                        empPin: empPin
                     });
                 } else {
                     // Add new
                     await addDoc(empRef, {
                         empId: empId,
                         empName: empName,
+                        empPin: empPin,
                         createdAt: serverTimestamp()
                     });
                 }
@@ -556,11 +740,11 @@
                         </div>
                         <div class="truncate">
                             <p class="font-bold text-slate-800 text-sm truncate">${emp.empName}</p>
-                            <p class="text-[11px] text-slate-500 font-medium">${emp.empId}</p>
+                            <p class="text-[11px] text-slate-500 font-medium">${emp.empId} <span class="text-slate-300 mx-1">|</span> PIN: ${emp.empPin || '0000'}</p>
                         </div>
                     </div>
                     <div class="flex gap-1.5 shrink-0">
-                        <button onclick="editEmployee('${emp.id}', '${emp.empId}', '${emp.empName}')" class="w-8 h-8 flex items-center justify-center text-blue-500 bg-blue-50 rounded-lg hover:bg-blue-500 hover:text-white transition-colors">
+                        <button onclick="editEmployee('${emp.id}', '${emp.empId}', '${emp.empName}', '${emp.empPin || '0000'}')" class="w-8 h-8 flex items-center justify-center text-blue-500 bg-blue-50 rounded-lg hover:bg-blue-500 hover:text-white transition-colors">
                             <i data-lucide="edit-2" class="w-4 h-4"></i>
                         </button>
                         <button onclick="deleteEmployee('${emp.id}')" class="w-8 h-8 flex items-center justify-center text-rose-500 bg-rose-50 rounded-lg hover:bg-rose-500 hover:text-white transition-colors">
