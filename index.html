@@ -7,37 +7,78 @@
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     
     <style>
-        /* ... (ใส่ CSS เดิมจากเวอร์ชันก่อนหน้าได้เลยครับ เพื่อไม่ให้โค้ดยาวเกินไปผมขอละไว้) ... */
-        :root { --primary-color: #00B900; --bg-color: #f4f7f6; --text-color: #333; --card-bg: #ffffff; }
-        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 15px; }
+        :root {
+            --primary-color: #00B900;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 15px;
+        }
+
         .container { max-width: 500px; margin: 0 auto; }
-        .card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+
         h2, h3 { margin-top: 0; text-align: center; }
-        .btn { display: block; width: 100%; padding: 15px; margin-bottom: 10px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+
+        /* ปุ่มกด */
+        .btn {
+            display: block; width: 100%; padding: 15px; margin-bottom: 10px;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: bold;
+            cursor: pointer; transition: 0.3s;
+        }
         .btn-primary { background-color: var(--primary-color); color: white; }
         .btn-danger { background-color: #ff4d4d; color: white; }
         .btn-outline { background-color: transparent; border: 2px solid var(--primary-color); color: var(--primary-color); }
         .btn-admin { background-color: #3b5998; color: white; }
         .btn-secondary { background-color: #ccc; color: #333; }
+
+        /* ฟอร์ม Input */
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ddd;
+            border-radius: 6px; box-sizing: border-box; font-family: inherit;
+        }
+
         .hidden { display: none !important; }
-        .time-display { text-align: center; font-size: 24px; font-weight: bold; margin: 20px 0; color: var(--primary-color); }
+
+        .time-display {
+            text-align: center; font-size: 24px; font-weight: bold;
+            margin: 20px 0; color: var(--primary-color);
+        }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <div id="loading-view" class="card"><h2>กำลังโหลดข้อมูล...</h2></div>
+        <div id="loading-view" class="card">
+            <h2>กำลังโหลดข้อมูล...</h2>
+        </div>
 
         <div id="employee-view" class="hidden app-view">
             <div class="card">
                 <h3>สวัสดี, <span id="emp-name">พนักงาน</span></h3>
                 <p style="text-align: center; margin:0;">รหัส: <span id="emp-id">EMP-001</span></p>
                 <div class="time-display" id="current-time">00:00:00</div>
+                
                 <button class="btn btn-primary" onclick="window.clockIn()">📍 เข้างาน</button>
                 <button class="btn btn-danger" onclick="window.clockOut()">🏠 ออกงาน</button>
             </div>
+            
             <div class="card">
                 <h3>เมนูอื่นๆ</h3>
                 <button class="btn btn-outline" onclick="window.showView('leave-form-view')">📝 ขอลางาน</button>
@@ -47,13 +88,27 @@
         <div id="leave-form-view" class="hidden app-view">
             <div class="card">
                 <h3>📝 แบบฟอร์มขอลางาน</h3>
-                <div class="form-group"><label>ประเภท:</label><select id="leave-type"><option value="ป่วย">ลาป่วย</option><option value="กิจ">ลากิจ</option></select></div>
-                <div class="form-group"><label>วันที่เริ่ม:</label><input type="date" id="leave-start"></div>
-                <div class="form-group"><label>เหตุผล:</label><textarea id="leave-reason" rows="3"></textarea></div>
+                <div class="form-group">
+                    <label>ประเภทการลา:</label>
+                    <select id="leave-type">
+                        <option value="ป่วย">ลาป่วย</option>
+                        <option value="กิจ">ลากิจ</option>
+                        <option value="พักร้อน">ลาพักร้อน</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>วันที่เริ่มลา:</label>
+                    <input type="date" id="leave-start">
+                </div>
+                <div class="form-group">
+                    <label>เหตุผล:</label>
+                    <textarea id="leave-reason" rows="3"></textarea>
+                </div>
                 <button class="btn btn-primary" onclick="window.submitLeave()">ส่งคำขอ</button>
                 <button class="btn btn-secondary" onclick="window.goBack()">ย้อนกลับ</button>
             </div>
         </div>
+
     </div>
 
     <script type="module">
@@ -74,8 +129,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // URL สำหรับ Backup ไป Google Sheets (ทำตามขั้นตอนด้านล่าง)
-        const BACKUP_SHEET_URL = "https://script.google.com/macros/s/AKfycbwBKqMvEiBJzbFj8mv5Wbg2kLtJ33_CIVSSOxhDtOp7XE0uFGPjfnls-nydjA_aRkYedQ/exec"; 
+        // URL สำหรับ Backup ไป Google Sheets
+        const BACKUP_SHEET_URL = "ใส่_WEB_APP_URL_ของ_GOOGLE_SHEETS_ตรงนี้"; 
 
         // จัดการเรื่องเวลาบนหน้าจอ
         setInterval(() => {
@@ -114,15 +169,38 @@
                 alert("บันทึกเวลาเข้างานสำเร็จ!");
             } catch (e) {
                 console.error("Error adding document: ", e);
-                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูลเข้างาน");
             }
         };
 
+        // ฟังก์ชัน บันทึกเวลาออกงาน (เพิ่มให้แล้ว)
         window.clockOut = async function() {
-            // โค้ดจะคล้ายกับ clockIn แต่เปลี่ยน type เป็น "OUT"
-            alert("บันทึกเวลาออกงานเรียบร้อย");
+            const empId = document.getElementById('emp-id').innerText;
+            const empName = document.getElementById('emp-name').innerText;
+            
+            const data = {
+                empId: empId,
+                name: empName,
+                type: "OUT", 
+                timestamp: serverTimestamp(),
+                dateText: new Date().toLocaleString('th-TH')
+            };
+
+            try {
+                // 1. บันทึกลง Firestore
+                await addDoc(collection(db, "attendance"), data);
+                
+                // 2. ส่ง Backup ไป Google Sheets
+                backupToSheets("Attendance", data);
+                
+                alert("บันทึกเวลาออกงานสำเร็จ!");
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูลออกงาน");
+            }
         };
 
+        // ฟังก์ชัน ส่งคำขอลางาน
         window.submitLeave = async function() {
             const data = {
                 empId: document.getElementById('emp-id').innerText,
@@ -139,7 +217,7 @@
                 alert("ส่งคำขอลางานสำเร็จ!");
                 window.goBack();
             } catch (e) {
-                alert("เกิดข้อผิดพลาด");
+                alert("เกิดข้อผิดพลาดในการส่งคำขอ");
             }
         };
 
@@ -161,6 +239,7 @@
             document.getElementById('loading-view').classList.add('hidden');
             window.showView('employee-view');
         }, 1000);
+
     </script>
 </body>
 </html>
