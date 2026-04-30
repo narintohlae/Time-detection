@@ -18,7 +18,7 @@
             -webkit-text-size-adjust: 100%;
         }
 
-        input[type="text"], input[type="number"], input[type="date"], input[type="time"], select, textarea {
+        input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="datetime-local"], select, textarea {
             font-size: 16px !important;
         }
 
@@ -45,13 +45,15 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
         input[type="date"]::-webkit-calendar-picker-indicator,
-        input[type="time"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; transition: 0.2s; }
+        input[type="time"]::-webkit-calendar-picker-indicator,
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; transition: 0.2s; }
         input[type="date"]::-webkit-calendar-picker-indicator:hover,
-        input[type="time"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+        input[type="time"]::-webkit-calendar-picker-indicator:hover,
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 
-        /* แก้ไขปัญหา SVG วงกลมให้แสดงผลพอดี */
+        /* SVG วงกลมแบบคงที่ */
         .progress-circle {
-            stroke-dasharray: 440; /* 2 * PI * R (ประมาณ 2 * 3.14159 * 70) */
+            stroke-dasharray: 440;
             stroke-dashoffset: 440;
             transition: stroke-dashoffset 0.1s linear, stroke 0.3s ease;
         }
@@ -131,9 +133,7 @@
                             <div id="elapsed-time" class="text-3xl sm:text-4xl font-black text-slate-800 mt-1 sm:mt-2 tabular-nums drop-shadow-sm">00:00:00</div>
                         </div>
                     </div>
-                    
                     <div class="py-2 sm:py-4 flex justify-center items-center shrink-0">
-                        <!-- แก้ไขขนาดวงกลมเป็นค่าคงที่ (160px) และรัศมี (70) เพื่อให้คำนวณง่าย -->
                         <div id="hold-area" class="relative w-[160px] h-[160px] flex items-center justify-center cursor-pointer" style="-webkit-tap-highlight-color: transparent;">
                             <svg class="absolute inset-0 w-[160px] h-[160px] -rotate-90 pointer-events-none drop-shadow-md">
                                 <circle cx="80" cy="80" r="70" class="text-slate-200/80 backdrop-blur-sm" stroke-width="8" fill="none" stroke="currentColor" />
@@ -146,7 +146,6 @@
                             </div>
                         </div>
                     </div>
-                    
                     <div class="bg-white/90 backdrop-blur-xl px-4 sm:px-6 pt-4 pb-4 rounded-t-[30px] sm:rounded-t-[40px] shadow-[0_-20px_50px_rgba(0,0,0,0.05)] h-[25vh] overflow-hidden flex flex-col relative shrink-0">
                         <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3 shrink-0"></div>
                         <h3 class="font-bold text-slate-800 flex items-center gap-2 mb-2 text-xs sm:text-sm uppercase tracking-wider shrink-0"><i data-lucide="history" class="w-4 h-4 text-slate-400"></i> ประวัติวันนี้</h3>
@@ -250,6 +249,7 @@
                         <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100 flex justify-between items-center shadow-sm z-10 shrink-0">
                             <h3 class="font-bold text-slate-800 flex items-center gap-2 text-xs sm:text-sm uppercase tracking-wider"><i data-lucide="activity" class="w-4 h-4 text-slate-400"></i> ความเคลื่อนไหวทั้งหมด</h3>
                         </div>
+                        <!-- รายการลงเวลาจะถูกเรนเดอร์ที่นี่ พร้อมปุ่มแก้ไข -->
                         <div id="owner-history-list" class="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4 space-y-2 sm:space-y-3 custom-scrollbar pb-6"></div>
                     </div>
                 </div>
@@ -307,7 +307,7 @@
             <!-- ========================================== -->
             <!-- EMPLOYEE MODAL (ADD / EDIT) -->
             <!-- ========================================== -->
-            <div id="employee-modal" class="absolute inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+            <div id="employee-modal" class="absolute inset-0 z-[55] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
                 <div class="bg-white w-full max-w-[calc(100vw-2rem)] sm:max-w-sm rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]" id="employee-modal-content">
                     <div class="p-4 sm:p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
                         <h3 id="modal-title" class="font-bold text-base sm:text-lg text-slate-800">เพิ่มพนักงานใหม่</h3>
@@ -347,6 +347,35 @@
                     </div>
                     <div class="p-4 sm:p-5 border-t border-slate-100 bg-white shrink-0">
                         <button id="btn-save-employee" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm sm:text-base font-bold shadow-md shadow-blue-600/20 transition-all flex justify-center items-center gap-2"><i data-lucide="save" class="w-4 h-4 sm:w-5 sm:h-5"></i> บันทึกข้อมูลพนักงาน</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- LOG EDIT MODAL (NEW) -->
+            <!-- ========================================== -->
+            <div id="log-modal" class="absolute inset-0 z-[56] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+                <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col" id="log-modal-content">
+                    <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
+                        <h3 class="font-bold text-base text-slate-800 flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-blue-500"></i> แก้ไขการลงเวลา</h3>
+                        <button onclick="window.closeLogModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <input type="hidden" id="modal-log-id">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">สถานะ</label>
+                            <select id="modal-log-type" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/50 outline-none text-sm font-medium">
+                                <option value="IN">เข้างาน (Clock In)</option>
+                                <option value="OUT">เลิกงาน (Clock Out)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">วันและเวลา <span class="text-rose-500">*</span></label>
+                            <input type="datetime-local" id="modal-log-time" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-sm tabular-nums">
+                        </div>
+                    </div>
+                    <div class="p-4 border-t border-slate-100 bg-white shrink-0">
+                        <button id="btn-save-log" onclick="window.saveLogEdit()" class="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-sm font-bold shadow-md transition-all flex justify-center items-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> บันทึกการเปลี่ยนแปลง</button>
                     </div>
                 </div>
             </div>
@@ -433,17 +462,12 @@
                 currentEnteredPin += num;
                 updatePinDotsUI();
                 document.getElementById('pin-error-msg').classList.remove('opacity-100');
-                if (currentEnteredPin.length === 4) {
-                    setTimeout(window.verifyPin, 150);
-                }
+                if (currentEnteredPin.length === 4) { setTimeout(window.verifyPin, 150); }
             }
         };
 
         window.deletePinChar = function() {
-            if (currentEnteredPin.length > 0) {
-                currentEnteredPin = currentEnteredPin.slice(0, -1);
-                updatePinDotsUI();
-            }
+            if (currentEnteredPin.length > 0) { currentEnteredPin = currentEnteredPin.slice(0, -1); updatePinDotsUI(); }
         };
 
         function updatePinDotsUI() {
@@ -490,7 +514,7 @@
                     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                     setTimeout(() => { currentEnteredPin = ''; updatePinDotsUI(); }, 400);
                 }
-            } catch (err) { console.error(err); window.closePinOverlay(); }
+            } catch (err) { console.error('Verification error:', err); window.closePinOverlay(); }
         };
 
         window.loginAs = function(id, name) {
@@ -498,14 +522,10 @@
                 currentEmpId = id; currentEmpName = name;
                 document.getElementById('current-emp-name').textContent = name;
                 document.getElementById('current-emp-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=eff6ff&color=2563eb&bold=true`;
-                
                 const lo = document.getElementById('login-overlay');
                 lo.classList.remove('opacity-100'); lo.classList.add('opacity-0', 'pointer-events-none');
-                
-                document.getElementById('emp-tab-clock').click();
-                refreshCurrentUserState();
-                renderEmployeeRequests();
-            } catch (err) { console.error(err); }
+                document.getElementById('emp-tab-clock').click(); refreshCurrentUserState(); renderEmployeeRequests();
+            } catch (err) { console.error('Login error:', err); }
         };
 
         window.openOwnerView = function() {
@@ -517,8 +537,7 @@
         };
 
         window.toggleModalOffDay = function(dayIndex) {
-            currentModalOffDays[dayIndex] = !currentModalOffDays[dayIndex];
-            renderModalOffDays();
+            currentModalOffDays[dayIndex] = !currentModalOffDays[dayIndex]; renderModalOffDays();
         };
 
         window.addHoliday = function() {
@@ -544,6 +563,63 @@
                 btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> สำเร็จ'; lucide.createIcons();
                 setTimeout(()=>{ btn.className = 'w-full py-3.5 sm:py-4 bg-slate-800 hover:bg-slate-900 text-white rounded-xl sm:rounded-2xl text-sm sm:text-base font-bold shadow-lg shadow-slate-800/20 transition-all flex justify-center items-center gap-2'; btn.innerHTML='<i data-lucide="save" class="w-4 h-4 sm:w-5 sm:h-5"></i> บันทึกการตั้งค่าร้าน'; btn.disabled=false; lucide.createIcons(); }, 1500);
             } catch(e){ alert('เกิดข้อผิดพลาด'); btn.disabled=false; }
+        };
+
+        // --- EDIT LOG FEATURE ---
+        window.openLogModal = function(docId, type, timeMs) {
+            document.getElementById('modal-log-id').value = docId;
+            document.getElementById('modal-log-type').value = type;
+
+            const d = new Date(timeMs);
+            const pad = n => n.toString().padStart(2, '0');
+            // format: YYYY-MM-DDTHH:mm
+            const dtStr = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            document.getElementById('modal-log-time').value = dtStr;
+
+            const m = document.getElementById('log-modal'), c = document.getElementById('log-modal-content');
+            m.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => { c.classList.remove('scale-95'); c.classList.add('scale-100'); }, 10);
+        };
+
+        window.closeLogModal = function() {
+            const m = document.getElementById('log-modal'), c = document.getElementById('log-modal-content');
+            c.classList.remove('scale-100'); c.classList.add('scale-95');
+            setTimeout(() => { m.classList.add('opacity-0', 'pointer-events-none'); }, 200);
+        };
+
+        window.saveLogEdit = async function() {
+            if(!user) return;
+            const docId = document.getElementById('modal-log-id').value;
+            const type = document.getElementById('modal-log-type').value;
+            const timeStr = document.getElementById('modal-log-time').value;
+
+            if(!timeStr) return alert('กรุณาระบุเวลา');
+
+            const btn = document.getElementById('btn-save-log');
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> บันทึก...';
+            btn.disabled = true;
+
+            try {
+                // Save string as JS Date, Firestore SDK converts it to Firebase Timestamp automatically
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance_logs', docId), {
+                    type: type,
+                    timestamp: new Date(timeStr)
+                });
+                window.closeLogModal();
+            } catch(e) {
+                console.error(e);
+                alert('เกิดข้อผิดพลาดในการบันทึก');
+            } finally {
+                btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> บันทึกการเปลี่ยนแปลง';
+                btn.disabled = false;
+                lucide.createIcons();
+            }
+        };
+
+        window.deleteLog = async function(docId) {
+            if(confirm('คุณต้องการลบรายการลงเวลานี้ใช่หรือไม่?')) {
+                if(user) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance_logs', docId));
+            }
         };
 
         window.openModal = function(docId = '', empId = '', empName = '', empPin = '0000', wage = '', otRate = '', offDaysStr = null) {
@@ -585,6 +661,7 @@
 
         window.updateRequestStatus = async function(id, s) { if(user) await updateDoc(doc(db,'artifacts',appId,'public','data','requests',id), {status:s, updatedAt:serverTimestamp()}); };
         window.deleteRequest = async function(id) { if(user&&confirm('ลบคำขอนี้?')) await deleteDoc(doc(db,'artifacts',appId,'public','data','requests',id)); };
+
 
         // ----------------------------------------------------
         // DOM BINDINGS & LOGIC
@@ -734,8 +811,6 @@
                 btnT.className = 'font-bold text-slate-800 text-base sm:text-lg tracking-wide'; btnSub.textContent = isHolding ? 'Recording...' : 'Hold Me'; btnSub.className = `text-[9px] sm:text-[10px] font-bold uppercase tracking-wider ${isHolding ? 'text-blue-500 animate-pulse' : 'text-slate-400'}`;
             }
             document.getElementById('btn-inner').className = bc; lucide.createIcons(); 
-            
-            // Update Dash Offset (440 is full circle)
             document.getElementById('progress-ring').style.strokeDashoffset = 440 - (440 * holdProgress / 100);
         }
 
@@ -786,7 +861,24 @@
             });
             document.getElementById('owner-active-count').textContent = aEmps.size;
             document.getElementById('owner-today-count').textContent = tCount;
-            document.getElementById('owner-history-list').innerHTML = allLogs.slice(0,20).map(l => `<div class="flex items-center justify-between p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-slate-100 shadow-sm"><div class="flex items-center gap-2 sm:gap-3"><div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${l.type==='IN'?'bg-blue-50 text-blue-600':'bg-rose-50 text-rose-500'}"><i data-lucide="${l.type==='IN'?'log-in':'log-out'}" class="w-4 h-4"></i></div><div><p class="font-bold text-slate-800 text-xs sm:text-sm">${l.employeeName||l.employeeId}</p><p class="text-[9px] sm:text-[11px] font-medium mt-0.5 ${l.type==='IN'?'text-blue-500':'text-rose-500'}">${l.type==='IN'?'เข้างาน':'เลิกงาน'} • <span class="text-slate-400">${l.location}</span></p></div></div><div class="text-right"><div class="font-bold text-slate-800 text-xs sm:text-sm tabular-nums">${l.time.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}</div><div class="text-[9px] sm:text-[10px] text-slate-400">${l.time.toLocaleDateString('th-TH',{month:'short',day:'numeric'})}</div></div></div>`).join('') || '<p class="text-center text-xs py-5">ไม่มีข้อมูล</p>';
+            
+            const hl = document.getElementById('owner-history-list'); hl.innerHTML = '';
+            if(allLogs.length === 0) hl.innerHTML = '<p class="text-center text-xs py-5">ไม่มีข้อมูล</p>';
+            else {
+                allLogs.slice(0, 20).forEach(l => {
+                    const div = document.createElement('div'); div.className = "flex items-center justify-between p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-slate-100 shadow-sm";
+                    div.innerHTML = `<div class="flex items-center gap-2 sm:gap-3"><div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${l.type==='IN'?'bg-blue-50 text-blue-600':'bg-rose-50 text-rose-500'}"><i data-lucide="${l.type==='IN'?'log-in':'log-out'}" class="w-4 h-4"></i></div><div><p class="font-bold text-slate-800 text-xs sm:text-sm">${l.employeeName||l.employeeId}</p><p class="text-[9px] sm:text-[11px] font-medium mt-0.5 ${l.type==='IN'?'text-blue-500':'text-rose-500'}">${l.type==='IN'?'เข้างาน':'เลิกงาน'} • <span class="text-slate-400">${l.location}</span></p></div></div>`;
+                    const rDiv = document.createElement('div'); rDiv.className = "flex items-center gap-2 sm:gap-3";
+                    rDiv.innerHTML = `<div class="text-right"><div class="font-bold text-slate-800 text-xs sm:text-sm tabular-nums">${l.time.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}</div><div class="text-[9px] sm:text-[10px] text-slate-400">${l.time.toLocaleDateString('th-TH',{month:'short',day:'numeric'})}</div></div>`;
+                    
+                    const actionDiv = document.createElement('div'); actionDiv.className = "flex flex-col sm:flex-row gap-1 border-l border-slate-100 pl-2 sm:pl-3";
+                    actionDiv.innerHTML = `<button onclick="window.openLogModal('${l.id}','${l.type}',${l.time.getTime()})" class="text-blue-400 hover:text-blue-600 p-1"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button><button onclick="window.deleteLog('${l.id}')" class="text-rose-400 hover:text-rose-600 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>`;
+                    
+                    rDiv.appendChild(actionDiv);
+                    div.appendChild(rDiv);
+                    hl.appendChild(div);
+                });
+            }
             
             lucide.createIcons();
             refreshCurrentUserState();
@@ -848,7 +940,7 @@
         onAuthStateChanged(auth, (u) => {
             user = u; updateUIState();
             if(u) {
-                unsubscribeLogs = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs'), (s) => { allLogs = s.docs.map(d=>({id:d.id,...d.data(),time:d.data().timestamp?d.data().timestamp.toDate():new Date()})).sort((a,b)=>b.time-a.time); refreshCurrentUserState(); renderOwnerDashboard(); });
+                unsubscribeLogs = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs'), (s) => { allLogs = s.docs.map(d=>({id:d.id,...d.data(),time:d.data().timestamp?d.data().timestamp.toDate():new Date()})).sort((a,b)=>b.time-a.time); renderLists(); });
                 unsubscribeEmps = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'employees'), (s) => { 
                     allEmployees = s.docs.map(d=>({id:d.id,...d.data()})); 
                     if(allEmployees.length===0 && !s.metadata.hasPendingWrites) { addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'employees'), {empId:'EMP-001',empName:'สมชาย ใจดี',empPin:'0000',wage:500,otRate:50,offDays:{0:true,1:false,2:false,3:false,4:false,5:false,6:false},createdAt:serverTimestamp()}); return; }
