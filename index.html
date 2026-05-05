@@ -17,10 +17,10 @@
             overflow: hidden; 
         }
         html { height: -webkit-fill-available; }
-        
         h1, h2, h3, .font-heading { font-family: 'Prompt', sans-serif; }
         
         .spinner { border: 3px solid rgba(0,0,0,0.1); border-left-color: currentColor; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite; display: inline-block; }
+        .spinner-small { border: 2px solid rgba(59, 130, 246, 0.2); border-left-color: #3b82f6; border-radius: 50%; width: 14px; height: 14px; animation: spin 0.8s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .custom-scroll::-webkit-scrollbar { width: 4px; }
@@ -43,7 +43,14 @@
         <header class="flex-none pt-8 pb-3 px-6 flex justify-between items-center bg-[#f4f5f9] z-10 shrink-0">
             <div>
                 <p class="text-xs font-medium text-slate-500 mb-0.5">ยินดีต้อนรับ 👋</p>
-                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">ภาพรวมรายจ่าย</h1>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">ภาพรวมรายจ่าย</h1>
+                    <!-- ไอคอนโหลดเบื้องหลัง (แบบแอปมืออาชีพ) -->
+                    <div id="bgSyncIndicator" class="hidden flex items-center justify-center bg-blue-50 px-2 py-1 rounded-full gap-1.5 transition-opacity">
+                        <div class="spinner-small"></div>
+                        <span class="text-[10px] font-bold text-blue-600 tracking-wide">กำลังซิงค์...</span>
+                    </div>
+                </div>
             </div>
             <div class="text-right flex flex-col items-end">
                 <span id="lastUpdated" class="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-200/60 px-3 py-1 rounded-full mb-1">รอการซิงค์</span>
@@ -82,7 +89,7 @@
 
             <!-- Buttons -->
             <div class="flex-none grid grid-cols-2 gap-3 shrink-0">
-                <button onclick="fetchFromCloud()" id="btnSync" class="bg-blue-600 hover:bg-blue-700 active:scale-[0.97] transition-all duration-300 text-white py-3.5 px-3 rounded-2xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2.5">
+                <button onclick="fetchFromCloud(false)" id="btnSync" class="bg-blue-600 hover:bg-blue-700 active:scale-[0.97] transition-all duration-300 text-white py-3.5 px-3 rounded-2xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2.5">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     <span class="font-heading font-semibold text-sm">ดึงข้อมูลจาก Cloud</span>
                 </button>
@@ -161,7 +168,6 @@
             </div>
             
             <div class="p-4 overflow-y-auto custom-scroll bg-slate-50 flex-1 relative">
-                <!-- เปลี่ยน div เป็น textarea ให้พิมพ์แก้ไขได้ -->
                 <textarea id="textContent" class="w-full h-full bg-transparent font-mono text-sm text-slate-700 resize-none outline-none leading-relaxed" spellcheck="false" placeholder="พิมพ์ข้อมูลรายจ่ายที่นี่..."></textarea>
             </div>
 
@@ -184,17 +190,26 @@
     </div>
 
     <script>
-        // ใส่ URL ของ Web App ตรงนี้เหมือนเดิมครับ
+        // ใส่ URL ของ Web App ตรงนี้
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5wog2rJaNIqPplRKoIzvm-EWolvtSGkEZ8Owrav1sxlkqKdshENQUdPLoSGoH9M_Y/exec";
+        const CACHE_KEY = "expense_app_cache_v1"; // กุญแจสำหรับระบบ Cache
 
-        let appData = {
-            allTime: { total: 0, count: 0 },
-            periods: [], 
-            groupedData: {} 
-        };
+        let appData = { allTime: { total: 0, count: 0 }, periods: [], groupedData: {} };
         let currentPeriodIndex = 0;
-        
         const thaiMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+
+        // 🌟 เริ่มต้นระบบแบบ Cache-First (โหลดปุ๊บ ติดปั๊บ)
+        window.onload = () => {
+            // 1. ดึงของเก่าจากในเครื่องมาแสดงให้ดูก่อนทันที (ไวมาก)
+            const cachedData = localStorage.getItem(CACHE_KEY);
+            if (cachedData) {
+                const data = JSON.parse(cachedData);
+                // หลอกหน้าจอว่าอัปเดตเมื่อกี้ แต่จริงๆ คือของเก่า
+                processData(data.content, "รอการซิงค์ข้อมูลล่าสุด..."); 
+            }
+            // 2. แอบไปดึงข้อมูลใหม่จาก Google แบบเงียบๆ
+            fetchFromCloud(true);
+        };
 
         function toggleModal(modalId) {
             const modal = document.getElementById(modalId);
@@ -207,24 +222,42 @@
             }
         }
 
-        async function fetchFromCloud() {
+        // ฟังก์ชันดึงข้อมูล (isBackground = true คือการแอบดึงเบื้องหลัง)
+        async function fetchFromCloud(isBackground = false) {
             const btn = document.getElementById('btnSync');
             const originalHTML = btn.innerHTML;
+            const bgSyncIcon = document.getElementById('bgSyncIndicator');
+
             try {
-                btn.innerHTML = `<div class="spinner text-white"></div><span class="font-heading font-semibold text-sm">กำลังดึง...</span>`;
-                btn.style.pointerEvents = 'none';
+                if (isBackground) {
+                    bgSyncIcon.classList.remove('hidden'); // โชว์ป้าย "กำลังซิงค์..." ด้านบน
+                } else {
+                    btn.innerHTML = `<div class="spinner text-white"></div><span class="font-heading font-semibold text-sm">กำลังดึง...</span>`;
+                    btn.style.pointerEvents = 'none';
+                }
 
                 const response = await fetch(SCRIPT_URL, { redirect: 'follow' });
                 if (!response.ok) throw new Error('Network error');
                 
                 const data = await response.json();
+                
+                // 💾 เซฟข้อมูลใหม่ลง Cache ในเครื่องมือถือ/คอม
+                localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+                
+                // อัปเดตหน้าจอด้วยข้อมูลใหม่ล่าสุด
                 processData(data.content, data.updateTime);
-                showToast('ดึงข้อมูลสำเร็จ', 'success');
+                
+                if (!isBackground) showToast('ดึงข้อมูลสำเร็จ', 'success');
             } catch (e) {
-                showToast('ไม่สามารถดึงข้อมูลได้', 'error');
+                if (!isBackground) showToast('ไม่สามารถดึงข้อมูลได้', 'error');
+                console.error(e);
             } finally {
-                btn.innerHTML = originalHTML;
-                btn.style.pointerEvents = 'auto';
+                if (isBackground) {
+                    bgSyncIcon.classList.add('hidden'); // ซ่อนป้าย
+                } else {
+                    btn.innerHTML = originalHTML;
+                    btn.style.pointerEvents = 'auto';
+                }
             }
         }
 
@@ -233,42 +266,48 @@
             if (!file) return;
             const reader = new FileReader();
             reader.onload = e => {
-                processData(e.target.result, `อัปเดตเมื่อ ${new Date().toLocaleTimeString("th-TH")}`);
+                const content = e.target.result;
+                const time = `อัปเดตเมื่อ ${new Date().toLocaleTimeString("th-TH")}`;
+                processData(content, time);
+                // เซฟลง Cache ด้วย
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ content: content, updateTime: time }));
                 showToast('อ่านไฟล์สำเร็จ', 'success');
             };
             reader.readAsText(file, 'UTF-8');
-        event.target.value = '';
-    }
-
-    // ฟังก์ชันใหม่: ส่งข้อมูลที่แก้ไขกลับไปเซฟบน Google แบบเนียนๆ
-    async function saveToCloud() {
-        const newText = document.getElementById('textContent').value;
-        
-        // 1. นำข้อมูลที่แก้ไปคำนวณบนหน้าเว็บใหม่ทันที
-        processData(newText, `แก้ไขล่าสุดเมื่อ ${new Date().toLocaleTimeString("th-TH")} (รอซิงค์ลงคอม)`);
-        
-        try {
-            // 2. โยนข้อมูลกลับไปเก็บที่ Google Apps Script 
-            const formData = new URLSearchParams();
-            formData.append('textData', newText);
-
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', // หลบหลีกการบล็อก CORS ของเบราว์เซอร์
-                body: formData
-            });
-            
-            showToast('บันทึกขึ้นระบบแล้ว! กด F11 ที่คอมเพื่อดึงลงไฟล์', 'success');
-        } catch (error) {
-            console.error(error);
-            showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
+            event.target.value = '';
         }
 
-        toggleModal('rawModal');
-    }
+        async function saveToCloud() {
+            const newText = document.getElementById('textContent').value;
+            const nowTime = `แก้ไขล่าสุดเมื่อ ${new Date().toLocaleTimeString("th-TH")} (รอซิงค์ลงคอม)`;
+            
+            // 1. อัปเดตหน้าจอทันที
+            processData(newText, nowTime);
+            
+            // 2. เซฟลง Cache ทันที (เผื่อผู้ใช้ปิดแอปไปก่อน)
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ content: newText, updateTime: nowTime }));
+            
+            try {
+                const formData = new URLSearchParams();
+                formData.append('textData', newText);
 
-    function processData(text, updateTime) {
-        document.getElementById('textContent').value = text;
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: formData
+                });
+                
+                showToast('บันทึกขึ้นระบบแล้ว! ระบบ AHK จะดึงไปลงไฟล์ให้อัตโนมัติ', 'success');
+            } catch (error) {
+                console.error(error);
+                showToast('บันทึกไม่สำเร็จ', 'error');
+            }
+
+            toggleModal('rawModal');
+        }
+
+        function processData(text, updateTime) {
+            document.getElementById('textContent').value = text;
             document.getElementById('lastUpdated').textContent = updateTime;
 
             appData = { allTime: { total: 0, count: 0 }, periods: [], groupedData: {} };
@@ -336,7 +375,9 @@
                 appData.periods.push("all");
             }
 
-            currentPeriodIndex = 0; 
+            // ถ้ารอบปัจจุบันหายไปแล้ว (เช่น ถูกลบข้อมูลหมด) ให้กลับไปเดือนแรกสุด
+            if (currentPeriodIndex >= appData.periods.length) currentPeriodIndex = 0; 
+            
             renderDashboard();
         }
 
@@ -349,7 +390,17 @@
         }
 
         function renderDashboard() {
-            if (appData.periods.length === 0) return;
+            if (appData.periods.length === 0) {
+                document.getElementById('heroLabel').textContent = "รวมทั้งหมด";
+                document.getElementById('totalExpense').textContent = "0";
+                document.getElementById('totalItems').textContent = "0 รายการ";
+                document.getElementById('dailySummaryContainer').innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-slate-400 opacity-50">
+                        <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        <p class="text-xs font-medium">ไม่พบรายการรายจ่าย</p>
+                    </div>`;
+                return;
+            }
             
             const pKey = appData.periods[currentPeriodIndex];
             const isAllTime = pKey === "all";
@@ -463,8 +514,6 @@
                 toast.classList.remove('toast-enter');
             }, 2500);
         }
-
-        window.onload = fetchFromCloud;
     </script>
 </body>
 </html>
